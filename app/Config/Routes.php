@@ -6,16 +6,19 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 $routes->get('/', 'Home::index');
-$routes->get('/Agen', 'AgenController::index');
-$routes->get('/Pabrik', 'PabrikController::index', ['filter' => 'role:Pabrik']);
-$routes->get('/Distributor', 'DistributorController::index', ['filter' => 'role:Distributor']);
-
+$routes->get('/Agen', 'DashboardController::agen');
+$routes->get('/Pabrik', 'DashboardController::pabrik');
+$routes->get('/Distributor', 'DashboardController::distributor');
 
 $routes->get('login', 'Auth::login');
 $routes->post('login', 'Auth::loginPost');
+$routes->post('loginPost', 'Auth::loginPost');
+
+
 $routes->get('register', 'Auth::register');
 $routes->post('register', 'Auth::registerPost');
-$routes->post('registerPost', 'AuthController::registerPost');
+$routes->post('registerPost', 'Auth::registerPost');
+
 
 $routes->get('logout', 'Auth::logout');
 

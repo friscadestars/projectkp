@@ -36,10 +36,18 @@ class CreateUsersTable extends Migration
                 'constraint' => ['agen', 'distributor', 'pabrik'],
                 'default'    => 'agen',
                 'null'       => false
-            ]
+            ],
+            'created_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
+            'updated_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
         ]);
 
-        $this->forge->addPrimaryKey('id');
+        $this->forge->addKey('id', true);
         $this->forge->createTable('users');
     }
 
