@@ -54,18 +54,5 @@
         Butuh Bantuan? <a href="#" class="font-semibold underline">Hubungi Kami</a>
       </div>
 
-      <!-- Menu register -->
-      <div class="text-center text-sm text-white mt-2">
-        Belum punya akun? <a href="/register" class="font-semibold underline">Daftar Sekarang</a>
-      </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="bg-blue-900 text-white text-center py-6">
-    <div class="text-lg font-semibold mb-1">Nama Aplikasi</div>
-    <div class="text-sm">Deskripsi singkat aplikasi</div>
-    <div class="text-xs mt-2">&copy;2025 PT Imersa Solusi Teknologi. All rights reserved</div>
-  </footer>
 </body>
 </html>
