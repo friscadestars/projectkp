@@ -1,4 +1,4 @@
-<h2>Daftar Pesanan</h2>
+<h2>menu order</h2>
 <a href="/orders/create">Tambah Pesanan</a>
 <ul>
     <?php foreach ($orders as $order): ?>

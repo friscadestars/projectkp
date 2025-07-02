@@ -17,7 +17,7 @@
     <nav class="flex-1 p-4 space-y-3">
       <a href="/dashboard" class="block py-2 px-3 rounded bg-blue-700 font-semibold">Dashboard</a>
       <a href="/orders" class="block py-2 px-3 rounded hover:bg-blue-800">Daftar Order</a>
-      <a href="/update-shipment" class="block py-2 px-3 rounded hover:bg-blue-800">Update Status Pengiriman</a>
+      <a href="/shipments" class="block py-2 px-3 rounded hover:bg-blue-800">Update Status Pengiriman</a>
       <a href="/history" class="block py-2 px-3 rounded hover:bg-blue-800">Riwayat Order & Tagihan</a>
       <a href="/logout" class="block py-2 px-3 rounded hover:bg-blue-800">Logout</a>
     </nav>

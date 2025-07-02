@@ -1,11 +1,10 @@
 <?php
 
-
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class CreateUsersTable extends Migration
+class CreateProductPricesTable extends Migration
 {
     public function up()
     {
@@ -16,41 +15,25 @@ class CreateUsersTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true
             ],
-            'name' => [
+            'nama_produk' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 100,
                 'null'       => false
             ],
-            'email' => [
+            'kode_produk' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => false,
-                'unique'     => true
+                'constraint' => 50,
+                'null'       => false
             ],
-            'password' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 255,
+            'harga' => [
+                'type'       => 'DECIMAL',
+                'constraint' => '15,2',
                 'null'       => false
             ],
             'role' => [
                 'type'       => 'ENUM',
-                'constraint' => ['agen', 'distributor', 'pabrik'],
-                'default'    => 'agen',
+                'constraint' => ['pabrik', 'distributor'],
                 'null'       => false
-            ],
-            'alamat' => [
-                'type'       => 'TEXT',
-                'null'       => true
-            ],
-            'nama_rekening' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 100,
-                'null'       => true
-            ],
-            'rekening' => [
-                'type'       => 'VARCHAR',
-                'constraint' => 50,
-                'null'       => true
             ],
             'created_at' => [
                 'type' => 'DATETIME',
@@ -59,15 +42,15 @@ class CreateUsersTable extends Migration
             'updated_at' => [
                 'type' => 'DATETIME',
                 'null' => true
-            ],
+            ]
         ]);
 
         $this->forge->addKey('id', true);
-        $this->forge->createTable('users');
+        $this->forge->createTable('product_prices');
     }
 
     public function down()
     {
-        $this->forge->dropTable('users', true);
+        $this->forge->dropTable('product_prices', true);
     }
 }

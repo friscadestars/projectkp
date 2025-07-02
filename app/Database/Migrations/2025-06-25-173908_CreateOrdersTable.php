@@ -35,7 +35,7 @@ class CreateOrdersTable extends Migration
             ],
             'status' => [
                 'type'       => 'ENUM',
-                'constraint' => ['pending', 'processing', 'shipped', 'delivered', 'cancelled'],
+                'constraint' => ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'approved'],
                 'default'    => 'pending',
                 'null'       => false
             ],
@@ -46,7 +46,13 @@ class CreateOrdersTable extends Migration
             'delivery_date' => [
                 'type' => 'DATETIME',
                 'null' => true
-            ]
+            ],
+            'resi' => [
+            'type' => 'VARCHAR',
+            'constraint' => 50,
+            'null' => true
+],
+
         ]);
 
         $this->forge->addPrimaryKey('id');

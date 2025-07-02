@@ -65,3 +65,10 @@ $routes->post('shipments/store', 'ShipmentController::store');
 $routes->get('shipments/edit/(:num)', 'ShipmentController::edit/$1');
 $routes->post('shipments/update/(:num)', 'ShipmentController::update/$1');
 $routes->get('shipments/delete/(:num)', 'ShipmentController::delete/$1');
+
+
+
+$routes->get('daftar-harga', 'ProductPriceController::index');
+$routes->post('daftar-harga/tambah', 'ProductPriceController::store');
+$routes->post('daftar-harga/update/(:num)', 'ProductPriceController::update/$1');
+$routes->get('daftar-harga/hapus/(:num)', 'ProductPriceController::delete/$1');

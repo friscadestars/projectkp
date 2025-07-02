@@ -6,5 +6,5 @@ class OrderModel extends Model
 {
     protected $table = 'orders';
     protected $primaryKey = 'id';
-    protected $allowedFields = ['user_id', 'order_date'];
+    protected $allowedFields = ['agen_id', 'distributor_id', 'pabrik_id', 'status', 'order_date', 'delivery_date'];
 }

@@ -6,53 +6,25 @@ use CodeIgniter\Controller;
 
 class OrderController extends Controller
 {
-    public function index()
+   public function index()
     {
-        $orderModel = new OrderModel();
-        $data['orders'] = $orderModel->findAll();
+        $model = new OrderModel();
+        $data['orders'] = $model->findAll();
+
         return view('orders/index', $data);
     }
 
-    public function create()
+    public function detail($id)
     {
-        $userModel = new UserModel();
-        $data['users'] = $userModel->findAll();
-        return view('orders/create', $data);
+        // ambil data order dan tampilkan
+        echo "Detail untuk order ID: $id";
     }
 
-    public function store()
+    public function terima($id)
     {
         $model = new OrderModel();
-        $model->save([
-            'user_id' => $this->request->getPost('user_id'),
-            'order_date' => $this->request->getPost('order_date'),
-        ]);
-        return redirect()->to('/orders');
-    }
+        $model->update($id, ['status' => 'delivered']);
 
-    public function edit($id)
-    {
-        $orderModel = new OrderModel();
-        $userModel = new UserModel();
-        $data['order'] = $orderModel->find($id);
-        $data['users'] = $userModel->findAll();
-        return view('orders/edit', $data);
-    }
-
-    public function update($id)
-    {
-        $model = new OrderModel();
-        $model->update($id, [
-            'user_id' => $this->request->getPost('user_id'),
-            'order_date' => $this->request->getPost('order_date'),
-        ]);
-        return redirect()->to('/orders');
-    }
-
-    public function delete($id)
-    {
-        $model = new OrderModel();
-        $model->delete($id);
-        return redirect()->to('/orders');
+        return redirect()->to('/orders')->with('success', 'Order diterima.');
     }
 }
