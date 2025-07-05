@@ -1,22 +1,22 @@
 <?php
 
-// app/Controllers/Dashboard.php
 namespace App\Controllers;
 
 class DashboardController extends BaseController
 {
-    public function agen()
+    public function index()
     {
-        return view('agen');
-    }
+        $role = session('role'); // atau bisa dari token jika pakai auth
 
-    public function pabrik()
-    {
-        return view('pabrik');
-    }
-
-    public function distributor()
-    {
-        return view('distributor');
+        switch ($role) {
+            case 'agen':
+                return view('dashboard/agen');
+            case 'distributor':
+                return view('dashboard/distributor');
+            case 'pabrik':
+                return view('dashboard/pabrik');
+            default:
+                return redirect()->to('/');
+        }
     }
 }

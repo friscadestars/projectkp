@@ -48,11 +48,18 @@ class CreateOrdersTable extends Migration
                 'null' => true
             ],
             'resi' => [
-            'type' => 'VARCHAR',
-            'constraint' => 50,
-            'null' => true
-],
-
+                'type' => 'VARCHAR',
+                'constraint' => 50,
+                'null' => true
+            ],
+            'accepted_at' => [
+                'type' => 'DATETIME',
+                'null' => true
+            ],
+            'note' => [
+                'type' => 'TEXT',
+                'null' => true
+            ]
         ]);
 
         $this->forge->addPrimaryKey('id');

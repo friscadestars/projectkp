@@ -2,39 +2,39 @@
 
 namespace App\Controllers;
 
-use App\Models\ProductPriceModel;
+use App\Models\RiwayatOrderModel;
 use CodeIgniter\RESTful\ResourceController;
 
-class ProductPriceController extends ResourceController
+class RiwayatOrderController extends ResourceController
 {
-    protected $modelName = ProductPriceModel::class;
-    protected $format    = 'json';
+    protected $modelName = RiwayatOrderModel::class;
+    protected $format = 'json';
 
-    // GET /api/prices
+    // GET: /api/riwayat
     public function index()
     {
         $data = $this->model->findAll();
         return $this->respond($data);
     }
 
-    // POST /api/prices
+    // POST: /api/riwayat
     public function create()
     {
         $data = $this->request->getJSON(true);
         if ($this->model->insert($data)) {
-            return $this->respondCreated(['message' => 'Harga produk berhasil ditambahkan']);
+            return $this->respondCreated(['message' => 'Riwayat order berhasil ditambahkan']);
         }
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // GET /api/prices/{id}
+    // GET: /api/riwayat/{id}
     public function show($id = null)
     {
         $data = $this->model->find($id);
         return $data ? $this->respond($data) : $this->failNotFound('Data tidak ditemukan');
     }
 
-    // PUT /api/prices/{id}
+    // PUT: /api/riwayat/{id}
     public function update($id = null)
     {
         $data = $this->request->getJSON(true);
@@ -44,7 +44,7 @@ class ProductPriceController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // DELETE /api/prices/{id}
+    // DELETE: /api/riwayat/{id}
     public function delete($id = null)
     {
         if ($this->model->delete($id)) {

@@ -36,7 +36,11 @@ class CreateSimpleOrderItemsTable extends Migration
                 'type'       => 'DECIMAL',
                 'constraint' => '12,2',
                 'null'       => false,
-            ]
+            ],
+            'address' => [
+                'type'       => 'TEXT',
+                'null'       => false,
+            ],
         ]);
 
         $this->forge->addPrimaryKey('id');

@@ -1,60 +1,58 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Models\ShipmentModel;
-use App\Models\OrderModel;
-use CodeIgniter\Controller;
+use CodeIgniter\RESTful\ResourceController;
 
-class ShipmentController extends Controller
+class ShipmentController extends ResourceController
 {
+    protected $modelName = 'App\Models\ShipmentModel';
+    protected $format    = 'json';
+
     public function index()
     {
-        $shipmentModel = new ShipmentModel();
-        $data['shipments'] = $shipmentModel->findAll();
-        return view('shipments/index', $data);
+        return $this->respond($this->model->findAll());
+    }
+
+    public function show($id = null)
+    {
+        $data = $this->model->find($id);
+        return $data
+            ? $this->respond($data)
+            : $this->failNotFound("Pengiriman dengan ID $id tidak ditemukan.");
     }
 
     public function create()
     {
-        $orderModel = new OrderModel();
-        $data['orders'] = $orderModel->findAll();
-        return view('shipments/create', $data);
-    }
+        $data = $this->request->getJSON(true);
+        if (!$this->model->insert($data)) {
+            return $this->failValidationErrors($this->model->errors());
+        }
 
-    public function store()
-    {
-        $model = new ShipmentModel();
-        $model->save([
-            'order_id'     => $this->request->getPost('order_id'),
-            'shipped_date' => $this->request->getPost('shipped_date'),
-            'status'       => $this->request->getPost('status'),
+        return $this->respondCreated([
+            'message' => 'Data pengiriman berhasil ditambahkan',
+            'id'      => $this->model->getInsertID()
         ]);
-        return redirect()->to('/shipments');
     }
 
-    public function edit($id)
+    public function update($id = null)
     {
-        $shipmentModel = new ShipmentModel();
-        $orderModel = new OrderModel();
-        $data['shipment'] = $shipmentModel->find($id);
-        $data['orders'] = $orderModel->findAll();
-        return view('shipments/edit', $data);
+        $data = $this->request->getJSON(true);
+        if (!$this->model->update($id, $data)) {
+            return $this->failValidationErrors($this->model->errors());
+        }
+
+        return $this->respond(['message' => 'Data pengiriman berhasil diperbarui']);
     }
 
-    public function update($id)
+    public function delete($id = null)
     {
-        $model = new ShipmentModel();
-        $model->update($id, [
-            'order_id'     => $this->request->getPost('order_id'),
-            'shipped_date' => $this->request->getPost('shipped_date'),
-            'status'       => $this->request->getPost('status'),
-        ]);
-        return redirect()->to('/shipments');
-    }
+        if (!$this->model->find($id)) {
+            return $this->failNotFound("Pengiriman tidak ditemukan.");
+        }
 
-    public function delete($id)
-    {
-        $model = new ShipmentModel();
-        $model->delete($id);
-        return redirect()->to('/shipments');
+        $this->model->delete($id);
+        return $this->respondDeleted(['message' => 'Pengiriman berhasil dihapus']);
     }
 }

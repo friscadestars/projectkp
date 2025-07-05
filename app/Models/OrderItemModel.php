@@ -6,11 +6,12 @@ use CodeIgniter\Model;
 
 class OrderItemModel extends Model
 {
-    protected $table            = 'order_items';
-    protected $primaryKey       = 'id';
-    protected $allowedFields    = [
-        'order_id', 'product_name', 'quantity', 'unit_price',
-        'created_at', 'updated_at'
+    protected $table      = 'order_items';
+    protected $primaryKey = 'id';
+
+    protected $allowedFields = [
+        'order_id', 'product_name', 'quantity', 'unit_price', 'address'
     ];
-    protected $useTimestamps = true;
+
+    protected $useTimestamps = false;
 }

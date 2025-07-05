@@ -1,60 +1,62 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Models\InvoiceModel;
-use App\Models\OrderModel;
-use CodeIgniter\Controller;
+use CodeIgniter\RESTful\ResourceController;
 
-class InvoiceController extends Controller
+class InvoiceController extends ResourceController
 {
+    protected $modelName = 'App\Models\InvoiceModel';
+    protected $format    = 'json';
+
     public function index()
     {
-        $invoiceModel = new InvoiceModel();
-        $data['invoices'] = $invoiceModel->findAll();
-        return view('invoices/index', $data);
+        return $this->respond($this->model->findAll());
+    }
+
+    public function show($id = null)
+    {
+        $invoice = $this->model->find($id);
+        if (!$invoice) {
+            return $this->failNotFound('Invoice tidak ditemukan');
+        }
+        return $this->respond($invoice);
     }
 
     public function create()
     {
-        $orderModel = new OrderModel();
-        $data['orders'] = $orderModel->findAll();
-        return view('invoices/create', $data);
-    }
+        $data = $this->request->getJSON(true);
 
-    public function store()
-    {
-        $model = new InvoiceModel();
-        $model->save([
-            'order_id'     => $this->request->getPost('order_id'),
-            'total_amount' => $this->request->getPost('total_amount'),
-            'invoice_date' => $this->request->getPost('invoice_date'),
+        if (!$this->model->insert($data)) {
+            return $this->failValidationErrors($this->model->errors());
+        }
+
+        return $this->respondCreated([
+            'message' => 'Invoice berhasil dibuat',
+            'id' => $this->model->getInsertID()
         ]);
-        return redirect()->to('/invoices');
     }
 
-    public function edit($id)
+    public function update($id = null)
     {
-        $invoiceModel = new InvoiceModel();
-        $orderModel = new OrderModel();
-        $data['invoice'] = $invoiceModel->find($id);
-        $data['orders'] = $orderModel->findAll();
-        return view('invoices/edit', $data);
-    }
+        $data = $this->request->getJSON(true);
+        if (!$this->model->update($id, $data)) {
+            return $this->failValidationErrors($this->model->errors());
+        }
 
-    public function update($id)
-    {
-        $model = new InvoiceModel();
-        $model->update($id, [
-            'order_id'     => $this->request->getPost('order_id'),
-            'total_amount' => $this->request->getPost('total_amount'),
-            'invoice_date' => $this->request->getPost('invoice_date'),
+        return $this->respond([
+            'message' => 'Invoice berhasil diperbarui'
         ]);
-        return redirect()->to('/invoices');
     }
 
-    public function delete($id)
+    public function delete($id = null)
     {
-        $model = new InvoiceModel();
-        $model->delete($id);
-        return redirect()->to('/invoices');
+        if (!$this->model->find($id)) {
+            return $this->failNotFound('Invoice tidak ditemukan');
+        }
+
+        $this->model->delete($id);
+        return $this->respondDeleted(['message' => 'Invoice berhasil dihapus']);
     }
 }
