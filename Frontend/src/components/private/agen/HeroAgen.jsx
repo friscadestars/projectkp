@@ -1,6 +1,5 @@
 import React from "react";
-import heroImg from "../../../assets/beranda/hero.png";
-import { Link } from "react-router-dom";
+import heroAgen from "../../../assets/private/hero_agen.png";
 
 const HeroAgen = () => {
   return (
@@ -18,7 +17,7 @@ const HeroAgen = () => {
       {/* Right Side - Image */}
       <div className="mt-10 md:mt-0">
         <img
-          src={heroImg}
+          src={heroAgen}
           alt="Delivery Illustration"
           className="w-full max-w-md"
         />

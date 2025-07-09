@@ -13,6 +13,9 @@ export default function MasukForm() {
     console.log("Email:", email);
     console.log("Password:", password);
 
+    // Simpan role ke localStorage
+    localStorage.setItem("role", selectedRole);
+
     // Cek role & redirect
     if (selectedRole === "Agen") {
       navigate("/berandaAgen"); // Redirect ke halaman beranda Agen
