@@ -1,0 +1,169 @@
+// src/Context/OrderContext.jsx
+import React, { createContext, useState, useContext } from "react";
+
+const OrderContext = createContext();
+
+const sortOrders = (orders) => {
+    const parseDate = (dateStr) => {
+        const [day, month, year] = dateStr.split('/').map(Number);
+        return new Date(year, month - 1, day);
+    };
+
+    return [...orders].sort((a, b) => {
+        const dateA = parseDate(a.orderDate);
+        const dateB = parseDate(b.orderDate);
+
+        if (dateB.getTime() !== dateA.getTime()) {
+            return dateB - dateA;
+        }
+
+        const idA = parseInt(a.orderId.split('-')[1]);
+        const idB = parseInt(b.orderId.split('-')[1]);
+        return idB - idA;
+    });
+};
+
+export const OrderProvider = ({ children }) => {
+    const [orders, setOrders] = useState(() =>
+        sortOrders([
+            {
+                id: 1,
+                orderId: 'ORD-005',
+                distributor: 'PT. Maju Jaya',
+                agentId: 'AGN-001',
+                factoryId: 'FCT-001',
+                orderDate: '18/06/2025',
+                shippingDate: '-',
+                deliveryEstimate: '-',
+                noResi: '-',
+                status: 'Tertunda',
+                products: [
+                    { name: 'Produk A', quantity: 2, unitPrice: 0, requestedPrice: 15000 },
+                    { name: 'Produk B', quantity: 1, unitPrice: 0, requestedPrice: 25000 }
+                ]
+            },
+            {
+                id: 2,
+                orderId: 'ORD-004',
+                distributor: 'PT. Maju Jaya',
+                agentId: 'AGN-002',
+                factoryId: 'FCT-002',
+                orderDate: '17/06/2025',
+                shippingDate: '18/06/2025',
+                deliveryEstimate: '-',
+                noResi: '-',
+                status: 'Disetujui',
+                products: [
+                    { name: 'Produk A', quantity: 2, unitPrice: 16000, requestedPrice: 15000 },
+                    { name: 'Produk B', quantity: 1, unitPrice: 27000, requestedPrice: 25000 }
+                ]
+            },
+            {
+                id: 3,
+                orderId: 'ORD-003',
+                distributor: 'PT. Maju Jaya',
+                agentId: 'AGN-003',
+                factoryId: 'FCT-001',
+                orderDate: '16/06/2025',
+                shippingDate: '17/06/2025',
+                deliveryEstimate: '-',
+                noResi: '-',
+                status: 'Diproses',
+                products: [
+                    { name: 'Produk C', quantity: 3, unitPrice: 12000, requestedPrice: 12000 }
+                ]
+            },
+            {
+                id: 4,
+                orderId: 'ORD-002',
+                distributor: '-',
+                agentId: 'AGN-004',
+                factoryId: 'FCT-002',
+                orderDate: '15/06/2025',
+                shippingDate: '-',
+                deliveryEstimate: '-',
+                noResi: '-',
+                status: 'Ditolak',
+                products: [
+                    { name: 'Produk D', quantity: 2, unitPrice: 0, requestedPrice: 18000 }
+                ]
+            },
+            {
+                id: 5,
+                orderId: 'ORD-001',
+                distributor: 'PT. Maju Jaya',
+                agentId: 'AGN-005',
+                factoryId: 'FCT-003',
+                orderDate: '15/06/2025',
+                shippingDate: '16/06/2025',
+                deliveryEstimate: '21/06/2025',
+                noResi: 'SHP123456',
+                status: 'Dikirim',
+                products: [
+                    { name: 'Produk A', quantity: 2, unitPrice: 16000, requestedPrice: 15000 }
+                ]
+            },
+            {
+                id: 6,
+                orderId: 'ORD-006',
+                distributor: 'PT. Maju Jaya',
+                agentId: 'AGN-006',
+                factoryId: 'FCT-001',
+                orderDate: '18/06/2025',
+                shippingDate: '-',
+                deliveryEstimate: '-',
+                noResi: '-',
+                status: 'Tertunda',
+                products: [
+                    { name: 'Produk Z', quantity: 1, unitPrice: 0, requestedPrice: 10000 }
+                ]
+            }
+        ])
+    );
+
+    const markAsCompleted = (orderId) => {
+        setOrders(prev =>
+            sortOrders(
+                prev.map(order =>
+                    order.orderId === orderId
+                        ? { ...order, status: 'Selesai', receivedDate: new Date().toLocaleDateString('id-ID') }
+                        : order
+                )
+            )
+        );
+    };
+
+    const updateProductPrice = (orderId, productName, newUnitPrice) => {
+        setOrders(prev =>
+            sortOrders(
+                prev.map(order => {
+                    if (order.orderId !== orderId) return order;
+                    return {
+                        ...order,
+                        products: order.products.map(p =>
+                            p.name === productName ? { ...p, unitPrice: newUnitPrice } : p
+                        )
+                    };
+                })
+            )
+        );
+    };
+
+    const deleteOrder = (orderId) => {
+        setOrders(prev => sortOrders(prev.filter(order => order.orderId !== orderId)));
+    };
+
+    return (
+        <OrderContext.Provider value={{
+            orders,
+            setOrders,
+            markAsCompleted,
+            updateProductPrice,
+            deleteOrder
+        }}>
+            {children}
+        </OrderContext.Provider>
+    );
+};
+
+export const useOrder = () => useContext(OrderContext);
