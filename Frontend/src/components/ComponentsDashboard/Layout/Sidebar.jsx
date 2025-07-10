@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import iconDropdown from '../../assets/IconSidebar/Dropdown.png'; // pastikan path-nya sesuai struktur proyekmu
+import iconDropdown from '../../../assets/IconSidebar/Dropdown.png'; // pastikan path-nya sesuai struktur proyekmu
 
 const Sidebar = ({ menuItems, activeLabel, onNavigate }) => {
     const [openMenus, setOpenMenus] = useState({});

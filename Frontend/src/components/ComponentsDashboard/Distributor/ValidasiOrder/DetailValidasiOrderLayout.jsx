@@ -1,7 +1,7 @@
 import React from 'react';
-import OrderInfoTable from './OrderInfoTable';
-import ProdukDetailTable from './ProdukDetailTable';
-import ValidasiActions from './ValidasiActions';
+import OrderInfoTable from '../OrderInfoTable';
+import ProdukDetailTable from '../ProdukDetailTable';
+import ValidasiActions from '../ValidasiActions';
 
 const DetailValidasiOrderLayout = ({
     order,

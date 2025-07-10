@@ -1,14 +1,14 @@
 // src/Components/Constants/menuItems.js
 
-import dashboardIcon from '../../assets/IconSidebar/Dashboard.png';
-import ringkasanIcon from '../../assets/IconSidebar/RingkasanOrder.png';
-import permintaanIcon from '../../assets/IconSidebar/PermintaanOrder.png';
-import riwayatIcon from '../../assets/IconSidebar/RiwayatOrder.png';
-import tagihanIcon from '../../assets/IconSidebar/Tagihan.png';
-import logoutIcon from '../../assets/IconSidebar/Logout.png';
-import monitoringIcon from '../../assets/IconSidebar/Monitoring.png';
-import validasiIcon from '../../assets/IconSidebar/ValidasiOrder.png';
-import daftarHargaIcon from '../../assets/IconSidebar/DaftarHarga.png';
+import dashboardIcon from '../../../assets/IconSidebar/Dashboard.png';
+import ringkasanIcon from '../../../assets/IconSidebar/RingkasanOrder.png';
+import permintaanIcon from '../../../assets/IconSidebar/PermintaanOrder.png';
+import riwayatIcon from '../../../assets/IconSidebar/RiwayatOrder.png';
+import tagihanIcon from '../../../assets/IconSidebar/Tagihan.png';
+import logoutIcon from '../../../assets/IconSidebar/Logout.png';
+import monitoringIcon from '../../../assets/IconSidebar/Monitoring.png';
+import validasiIcon from '../../../assets/IconSidebar/ValidasiOrder.png';
+import daftarHargaIcon from '../../../assets/IconSidebar/DaftarHarga.png';
 
 // Menu khusus Agen
 export const agenMenuItems = [

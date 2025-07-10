@@ -1,6 +1,6 @@
 import React from 'react';
-import bellIcon from '../../assets/IconHeader/IconNotif.png';
-import userIcon from '../../assets/IconHeader/IconProfile.png';
+import bellIcon from '../../../assets/IconHeader/IconNotif.png';
+import userIcon from '../../../assets/IconHeader/IconProfile.png';
 
 const Header = ({ showDropdown, toggleDropdown }) => (
     <header className="bg-white shadow-md border-b border-gray-200 text-gray-700 p-4 flex justify-between items-center">
@@ -20,7 +20,7 @@ const Header = ({ showDropdown, toggleDropdown }) => (
                     </svg>
                 </button>
                 {showDropdown && (
-                    <div className="absolute right-0 mt-2 bg-white border rounded shadow px-10 py-3 text-sm z-50 text-gray-700">
+                    <div className="absolute right-0 mt-2 bg-white border border-gray-300 rounded shadow px-10 py-3 text-sm z-50 text-gray-700">
                         Beranda
                     </div>
                 )}

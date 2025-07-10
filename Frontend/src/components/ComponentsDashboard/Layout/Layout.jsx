@@ -8,7 +8,7 @@ const AgenLayout = ({ children, menuItems, activeLabel, onNavigate, showDropdown
             <Header showDropdown={showDropdown} toggleDropdown={toggleDropdown} />
             <div className="flex flex-grow">
                 <Sidebar menuItems={menuItems} activeLabel={activeLabel} onNavigate={onNavigate} />
-                <main className="flex-1 bg-gray-50 p-8">
+                <main className="flex-1 bg-gray-50 p-8 relative z-0">
                     {children}
                 </main>
             </div>

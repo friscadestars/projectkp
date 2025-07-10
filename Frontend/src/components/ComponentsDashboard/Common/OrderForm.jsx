@@ -6,16 +6,16 @@ const OrderForm = ({
     setProduk, setJumlah, setHarga, setAlamat,
     handleAddProduk, handleDeleteProduk,
     orderId, agentId, distributorName, orderDate,
-    children // ✅ Tambahkan children agar bisa render button submit di dalam kotak
+    children
 }) => {
     return (
-        <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6 space-y-6">
+        <div className="bg-white border border-gray-300 shadow-md rounded-lg p-6 space-y-6">
             {/* Informasi Agen, Distributor, Tanggal, Alamat */}
             <div className="grid grid-cols-4 gap-4">
-                <input type="text" value={orderId} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={agentId} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={orderDate} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={distributorName} readOnly className="border px-3 py-2 rounded text-sm" />
+                <input type="text" value={orderId} readOnly className="border border-gray-300 px-3 py-2 rounded text-sm" />
+                <input type="text" value={agentId} readOnly className="border border-gray-300 px-3 py-2 rounded text-sm" />
+                <input type="text" value={orderDate} readOnly className="border border-gray-300 px-3 py-2 rounded text-sm" />
+                <input type="text" value={distributorName} readOnly className="border border-gray-300 px-3 py-2 rounded text-sm" />
             </div>
 
             {/* Alamat Pengiriman */}
@@ -24,7 +24,7 @@ const OrderForm = ({
                 placeholder="Alamat Pengiriman"
                 value={alamat}
                 onChange={(e) => setAlamat(e.target.value)}
-                className="border px-3 py-2 rounded w-full text-sm"
+                className="border border-gray-300 px-3 py-2 rounded w-full text-sm"
             />
 
             {/* Tambah Produk */}
@@ -34,21 +34,21 @@ const OrderForm = ({
                     placeholder="Nama Produk"
                     value={produk}
                     onChange={(e) => setProduk(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-300 px-3 py-2 rounded text-sm"
                 />
                 <input
                     type="number"
                     placeholder="Jumlah"
                     value={jumlah}
                     onChange={(e) => setJumlah(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-300 px-3 py-2 rounded text-sm"
                 />
                 <input
                     type="number"
                     placeholder="Harga Request"
                     value={harga}
                     onChange={(e) => setHarga(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-300 px-3 py-2 rounded text-sm"
                 />
                 <button
                     onClick={handleAddProduk}
@@ -60,18 +60,18 @@ const OrderForm = ({
 
             {/* Tabel Produk */}
             <div className="overflow-x-auto mt-6">
-                <table className="min-w-full text-sm text-center border">
+                <table className="min-w-full text-sm text-center border border-gray-300 border-collapse rounded-md">
                     <thead>
                         <tr className="bg-blue-900 text-white">
-                            <th className="px-4 py-2">Nama Produk</th>
-                            <th className="px-4 py-2">Jumlah</th>
-                            <th className="px-4 py-2">Harga Request</th>
-                            <th className="px-4 py-2">Aksi</th>
+                            <th className="px-4 py-2 border-b border-gray-300">Nama Produk</th>
+                            <th className="px-4 py-2 border-b border-gray-300">Jumlah</th>
+                            <th className="px-4 py-2 border-b border-gray-300">Harga Request</th>
+                            <th className="px-4 py-2 border-b border-gray-300">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         {produkList.map((item, index) => (
-                            <tr key={index} className="border-b">
+                            <tr key={index} className="border-b border-gray-300 hover:bg-gray-50">
                                 <td className="px-4 py-2">{item.nama}</td>
                                 <td className="px-4 py-2">{item.jumlah}</td>
                                 <td className="px-4 py-2">Rp {item.harga.toLocaleString("id-ID")}</td>
@@ -96,7 +96,7 @@ const OrderForm = ({
                 </table>
             </div>
 
-            {/* ✅ Slot untuk tombol submit */}
+            {/* Tombol Submit */}
             <div className="pt-4 text-right">
                 {children}
             </div>

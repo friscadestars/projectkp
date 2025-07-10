@@ -1,6 +1,6 @@
 import React from 'react';
-import OrderInfoTable from './OrderInfoTable';
-import ProductDetailTable from './ProductDetailTable';
+import OrderInfoTable from '../OrderInfoTable';
+import ProductDetailTable from '../ProductDetailTable';
 
 const DetailRiwayatOrderLayout = ({ order, products }) => {
     return (

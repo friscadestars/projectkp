@@ -5,7 +5,7 @@ import { useDashboardData } from '../../hooks/Distributor/useDashboardData';
 import { useNavigation } from '../../hooks/useNavigation';
 import DashboardWelcomeHeader from '../../Components/ComponentsDashboard/Common/PageHeader';
 import DashboardSummary from '../../Components/ComponentsDashboard/Card/DashboardSummary';
-import ShippingStatusTable from '../../Components/ComponentsDashboard/Agen/Table/ShippingStatusTable';
+import ShippingStatusTable from '../../components/ComponentsDashboard/Distributor/Dashboard/ShippingStatusTable';
 import IconWelcome from '../../assets/IconHeader/IconWelcome.png';
 
 const DashboardDistributor = () => {

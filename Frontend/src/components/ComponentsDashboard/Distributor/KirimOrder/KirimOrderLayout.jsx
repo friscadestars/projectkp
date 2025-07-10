@@ -1,7 +1,7 @@
 import React from 'react';
-import OrderInfoTable from './OrderDetailTable';
-import ProductDetailTable from './ProductDetailTable';
-import SendOrderButton from '../../Button/SendOrderButton';
+import OrderInfoTable from '../OrderDetailTable';
+import ProductDetailTable from '../ProductDetailTable';
+import SendOrderButton from '../../../Button/SendOrderButton';
 
 const KirimOrderLayout = ({ order }) => {
     return (

@@ -1,6 +1,5 @@
-// src/components/distributor/pabrikpricelist/PriceListForm.jsx
 import React from 'react';
-import iconTambah from '../../../assets/IconHeader/IconTambah.png';
+import iconTambah from '../../../../assets/IconHeader/IconTambah.png';
 
 const PriceListForm = ({ form, setForm, handleAdd, hargaLabel = "Harga Pabrik" }) => (
     <>
@@ -23,13 +22,19 @@ const PriceListForm = ({ form, setForm, handleAdd, hargaLabel = "Harga Pabrik" }
                 onChange={(e) => setForm({ ...form, kode: e.target.value })}
                 className="border border-gray-300 rounded-md px-3 py-2 text-sm w-1/4"
             />
-            <input
-                type="text"
-                placeholder={hargaLabel}
-                value={form.harga}
-                onChange={(e) => setForm({ ...form, harga: e.target.value })}
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm w-1/4"
-            />
+
+            {/* Harga input dengan prefix Rp */}
+            <div className="relative w-1/4">
+                <span className="absolute left-3 top-2.5 text-sm text-gray-500">Rp</span>
+                <input
+                    type="text"
+                    placeholder={hargaLabel}
+                    value={form.harga}
+                    onChange={(e) => setForm({ ...form, harga: e.target.value })}
+                    className="border border-gray-300 rounded-md pl-8 pr-3 py-2 text-sm w-full"
+                />
+            </div>
+
             <button
                 onClick={handleAdd}
                 className="bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 font-bold"

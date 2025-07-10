@@ -18,20 +18,20 @@ const DistributorKirimOrderTable = ({ orders }) => {
             <table className="min-w-full border-collapse text-sm text-center">
                 <thead>
                     <tr className="bg-blue-900 text-white">
-                        <th className="px-4 py-2 border-b">No</th>
-                        <th className="px-4 py-2 border-b">Order ID</th>
-                        <th className="px-4 py-2 border-b">Agen ID</th>
-                        <th className="px-4 py-2 border-b">Alamat</th>
-                        <th className="px-4 py-2 border-b">Tanggal Order</th>
-                        <th className="px-4 py-2 border-b">Jumlah Produk</th>
-                        <th className="px-4 py-2 border-b">Status Order</th>
-                        <th className="px-4 py-2 border-b">Aksi</th>
+                        <th className="px-4 py-2 border-b border-gray-300">No</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Order ID</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Agen ID</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Alamat</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Tanggal Order</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Jumlah Produk</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Status Order</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     {orders.length > 0 ? (
                         orders.map((order, index) => (
-                            <tr key={order.orderId} className="border-b hover:bg-gray-50">
+                            <tr key={order.orderId} className="border-b border-gray-300 hover:bg-gray-50">
                                 <td className="px-4 py-2">{index + 1}</td>
                                 <td className="px-4 py-2">{order.orderId || '-'}</td>
                                 <td className="px-4 py-2">{order.agenId || 'AG-001'}</td>
@@ -49,7 +49,7 @@ const DistributorKirimOrderTable = ({ orders }) => {
                                     <button
                                         onClick={() => handleDetailClick(order.orderId)}
                                         className="bg-blue-900 text-white px-3 py-1 rounded text-xs hover:opacity-90"
-                                        style={{ position: 'relative', zIndex: 10 }} // ✅ antisipasi tertimpa
+                                        style={{ position: 'relative', zIndex: 10 }}
                                     >
                                         Detail
                                     </button>
@@ -58,7 +58,7 @@ const DistributorKirimOrderTable = ({ orders }) => {
                         ))
                     ) : (
                         <tr>
-                            <td colSpan="8" className="py-4 text-gray-500 italic">
+                            <td colSpan="8" className="py-4 text-gray-500 italic border-b border-gray-300">
                                 Tidak ada order yang disetujui.
                             </td>
                         </tr>

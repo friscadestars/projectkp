@@ -1,5 +1,5 @@
 import React from 'react';
-import ConfirmPaymentModal from './ConfirmPaymentModal';
+import ConfirmPaymentModal from '../ConfirmPaymentModal';
 
 const PaymentConfirmation = ({ showModal, setShowModal, onConfirm }) => (
     <>

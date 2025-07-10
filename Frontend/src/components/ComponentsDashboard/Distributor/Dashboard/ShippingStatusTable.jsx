@@ -2,7 +2,7 @@ import React from 'react';
 
 const ShippingStatusTable = ({ orders }) => (
     <div className="overflow-x-auto">
-        <table className="min-w-full text-sm text-center border">
+        <table className="min-w-full text-sm text-center">
             <thead>
                 <tr className="bg-blue-900 text-white">
                     <th className="px-4 py-2">No</th>
@@ -18,7 +18,7 @@ const ShippingStatusTable = ({ orders }) => (
             <tbody>
                 {orders.length > 0 ? (
                     orders.map((order, index) => (
-                        <tr key={index} className="border-b">
+                        <tr key={index} className="border-b border-gray-300">
                             <td className="px-4 py-2">{index + 1}</td>
                             <td className="px-4 py-2">{order.orderId}</td>
                             <td className="px-4 py-2">{order.distributor}</td>
@@ -28,10 +28,10 @@ const ShippingStatusTable = ({ orders }) => (
                             <td className="px-4 py-2">{order.noResi || '-'}</td>
                             <td className="px-4 py-2">
                                 <span className={`px-3 py-1 rounded text-sm font-bold 
-                  ${order.status === 'Dikirim' ? 'bg-cyan-500 text-white' : ''}
-                  ${order.status === 'Diterima' ? 'bg-green-500 text-white' : ''}
-                  ${order.status === 'Selesai' ? 'bg-blue-500 text-white' : ''}
-                `}>
+                                    ${order.status === 'Dikirim' ? 'bg-cyan-500 text-white' : ''}
+                                    ${order.status === 'Diterima' ? 'bg-green-500 text-white' : ''}
+                                    ${order.status === 'Selesai' ? 'bg-blue-500 text-white' : ''}
+                                `}>
                                     {order.status}
                                 </span>
                             </td>

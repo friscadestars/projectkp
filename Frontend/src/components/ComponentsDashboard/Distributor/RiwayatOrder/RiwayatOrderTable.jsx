@@ -9,21 +9,21 @@ const RiwayatOrderTable = ({ orders, onDelete }) => {
             <table className="min-w-full border-collapse text-sm text-center">
                 <thead>
                     <tr className="bg-blue-900 text-white">
-                        <th className="px-4 py-2 border-b">No</th>
-                        <th className="px-4 py-2 border-b">Order ID</th>
-                        <th className="px-4 py-2 border-b">Agen ID</th>
-                        <th className="px-4 py-2 border-b">Tanggal Order</th>
-                        <th className="px-4 py-2 border-b">Tanggal Terima</th>
-                        <th className="px-4 py-2 border-b">Subtotal Harga Pabrik</th>
-                        <th className="px-4 py-2 border-b">Subtotal Harga Jual</th>
-                        <th className="px-4 py-2 border-b">Status Pembayaran</th>
-                        <th className="px-4 py-2 border-b">Status Order</th>
-                        <th className="px-4 py-2 border-b">Aksi</th>
+                        <th className="px-4 py-2 border-b border-gray-300">No</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Order ID</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Agen ID</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Tanggal Order</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Tanggal Terima</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Subtotal Harga Pabrik</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Subtotal Harga Jual</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Status Pembayaran</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Status Order</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     {orders.map((order, index) => (
-                        <tr key={order.id} className="border-b hover:bg-gray-50">
+                        <tr key={order.id} className="border-b border-gray-300 hover:bg-gray-50">
                             <td className="px-4 py-2">{index + 1}</td>
                             <td className="px-4 py-2">{order.id}</td>
                             <td className="px-4 py-2">{order.agenId}</td>
@@ -32,7 +32,10 @@ const RiwayatOrderTable = ({ orders, onDelete }) => {
                             <td className="px-4 py-2">{order.hargaPabrik}</td>
                             <td className="px-4 py-2">{order.hargaJual}</td>
                             <td className="px-4 py-2">
-                                <span className={`text-white text-sm px-2 py-1 rounded font-bold ${order.statusPembayaran === 'Lunas' ? 'bg-green-600' : 'bg-red-600 font-bold'}`}>
+                                <span className={`text-white text-sm px-2 py-1 rounded font-bold ${order.statusPembayaran === 'Lunas'
+                                        ? 'bg-green-600'
+                                        : 'bg-red-600'
+                                    }`}>
                                     {order.statusPembayaran}
                                 </span>
                             </td>

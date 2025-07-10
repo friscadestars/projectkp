@@ -6,21 +6,21 @@ const AgenTable = ({ agenList, toggleAktif }) => {
             <table className="min-w-full border-collapse text-sm text-center">
                 <thead>
                     <tr className="bg-blue-900 text-white">
-                        <th className="px-4 py-2 border-b">No</th>
-                        <th className="px-4 py-2 border-b">Nama Agen</th>
-                        <th className="px-4 py-2 border-b">Email</th>
-                        <th className="px-4 py-2 border-b">No.Rek</th>
-                        <th className="px-4 py-2 border-b">Nama Rekening</th>
-                        <th className="px-4 py-2 border-b">Nama Bank</th>
-                        <th className="px-4 py-2 border-b">Alamat</th>
-                        <th className="px-4 py-2 border-b">Terakhir Order</th>
-                        <th className="px-4 py-2 border-b">Status Keaktifan</th>
-                        <th className="px-4 py-2 border-b">Aksi</th>
+                        <th className="px-4 py-2 border-b border-gray-300">No</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Nama Agen</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Email</th>
+                        <th className="px-4 py-2 border-b border-gray-300">No.Rek</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Nama Rekening</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Nama Bank</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Alamat</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Terakhir Order</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Status Keaktifan</th>
+                        <th className="px-4 py-2 border-b border-gray-300">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     {agenList.map((agen, index) => (
-                        <tr key={agen.id} className="border-b hover:bg-gray-50">
+                        <tr key={agen.id} className="border-b border-gray-300 hover:bg-gray-50">
                             <td className="px-4 py-2">{index + 1}</td>
                             <td className="px-4 py-2">{agen.name}</td>
                             <td className="px-4 py-2">{agen.email}</td>
@@ -41,7 +41,7 @@ const AgenTable = ({ agenList, toggleAktif }) => {
                                         ${agen.aktif ? 'bg-red-600 hover:opacity-90' : 'bg-green-600 hover:opacity-90'}`}
                                     onClick={() => toggleAktif(agen.id)}
                                 >
-                                    {agen.aktif ? 'Hentikan' : 'Aktifkan '}
+                                    {agen.aktif ? 'Hentikan' : 'Aktifkan'}
                                 </button>
                             </td>
                         </tr>

@@ -4,9 +4,9 @@ import { useLocation } from 'react-router-dom';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import truckIcon from '../../assets/IconHeader/IconTruck.png';
 import iconRiwayat from '../../assets/IconHeader/IconRiwayat.png';
-import { agenMenuItems } from '../../Components/ComponentsComponentsDashboard/Constants/menuItems';
-import DetailOrderInfo from '../../Components/ComponentsComponentsDashboard/Agen/Table/DetailOrderInfo';
-import RincianProdukTable from '../../Components/ComponentsComponentsDashboard/Agen/Table/RincianProdukTable';
+import { agenMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import DetailOrderInfo from '../../Components/ComponentsDashboard/Agen/Table/DetailOrderInfo';
+import RincianProdukTable from '../../Components/ComponentsDashboard/Agen/Table/RincianProdukTable';
 import { useNavigation } from '../../hooks/useNavigation';
 
 const DetailOrder = () => {

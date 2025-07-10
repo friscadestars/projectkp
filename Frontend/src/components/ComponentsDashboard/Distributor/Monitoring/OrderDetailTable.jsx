@@ -4,19 +4,19 @@ const OrderDetailTable = ({ order }) => {
     return (
         <>
             <h2 className="font-semibold text-md mb-2">Detail Order</h2>
-            <table className="w-full text-sm mb-6">
+            <table className="w-full text-sm mb-6 border-collapse">
                 <thead>
                     <tr className="bg-blue-900 text-white text-center">
-                        <th className="py-2 px-4">Order ID</th>
-                        <th className="py-2 px-4">Agen ID</th>
-                        <th className="py-2 px-4">Pabrik ID</th>
-                        <th className="py-2 px-4">Tanggal Order</th>
-                        <th className="py-2 px-4">Estimasi Sampai</th>
-                        <th className="py-2 px-4">Status Order</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Order ID</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Agen ID</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Pabrik ID</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Tanggal Order</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Estimasi Sampai</th>
+                        <th className="py-2 px-4 border-b border-gray-300">Status Order</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr className="text-center border">
+                    <tr className="text-center border-b border-gray-300">
                         <td className="py-2 px-4">{order.orderId}</td>
                         <td className="py-2 px-4">AG-001</td>
                         <td className="py-2 px-4">PB-001</td>
