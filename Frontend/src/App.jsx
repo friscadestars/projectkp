@@ -18,29 +18,29 @@ import BerandaPabrik from './pages/beranda/BerandaPabrik.jsx';
 import BerandaDistributor from './pages/beranda/BerandaDistributor.jsx';
 
 // Agen Pages
-import DashboardAgen from './pages/Agen/DashboardAgen';
-import RingkasanOrder from './pages/Agen/RingkasanOrder';
-import FormPermintaanOrder from './pages/Agen/FormPermintaanOrder';
-import RiwayatOrder from './pages/Agen/RiwayatOrder';
-import DetailOrder from './pages/Agen/DetailOrder';
-import TagihanOrder from './pages/Agen/Tagihan';
-import InvoiceTagihan from './pages/Agen/InvoiceTagihan';
+import DashboardAgen from './Pages/Agen/DashboardAgen';
+import RingkasanOrder from './Pages/Agen/RingkasanOrder';
+import FormPermintaanOrder from './Pages/Agen/FormPermintaanOrder';
+import RiwayatOrder from './Pages/Agen/RiwayatOrder';
+import DetailOrder from './Pages/Agen/DetailOrder';
+import TagihanOrder from './Pages/Agen/Tagihan';
+import InvoiceTagihan from './Pages/Agen/InvoiceTagihan';
 
 // Distributor Pages
-import DashboardDistributor from './pages/Distributor/DashboardDistributor';
-import ValidasiOrder from './pages/Distributor/ValidasiOrder';
-import DetailValidasiOrder from './pages/Distributor/DetailValidasiOrder';
-import KirimOrderKePabrik from './pages/Distributor/KirimOrderKePabrik';
-import DetailKirimOrderKePabrik from './pages/Distributor/DetailKirimOrderKePabrik';
-import MonitoringOrder from './pages/Distributor/MonitoringOrder';
-import DetailMonitoringOrder from './pages/Distributor/DetailMonitoringOrder';
-import MonitoringAgen from './pages/Distributor/MonitoringAgen';
-import DaftarHargaPabrik from './pages/Distributor/PabrikPriceList';
-import DaftarHargaDistributor from './pages/Distributor/DistributorPriceList';
-import RiwayatOrderDistributor from './pages/Distributor/RiwayatOrderDistributor';
-import DetailRiwayatOrder from './pages/Distributor/DetailRiwayatOrder';
-import TagihanDistributor from './pages/Distributor/TagihanDistributor';
-import InvoiceTagihanDistributor from './pages/Distributor/InvoiceTagihanDistributor';
+import DashboardDistributor from './Pages/Distributor/DashboardDistributor';
+import ValidasiOrder from './Pages/Distributor/ValidasiOrder';
+import DetailValidasiOrder from './Pages/Distributor/DetailValidasiOrder';
+import KirimOrderKePabrik from './Pages/Distributor/KirimOrderKePabrik';
+import DetailKirimOrderKePabrik from './Pages/Distributor/DetailKirimOrderKePabrik';
+import MonitoringOrder from './Pages/Distributor/MonitoringOrder';
+import DetailMonitoringOrder from './Pages/Distributor/DetailMonitoringOrder';
+import MonitoringAgen from './Pages/Distributor/MonitoringAgen';
+import DaftarHargaPabrik from './Pages/Distributor/PabrikPriceList';
+import DaftarHargaDistributor from './Pages/Distributor/DistributorPriceList';
+import RiwayatOrderDistributor from './Pages/Distributor/RiwayatOrderDistributor';
+import DetailRiwayatOrder from './Pages/Distributor/DetailRiwayatOrder';
+import TagihanDistributor from './Pages/Distributor/TagihanDistributor';
+import InvoiceTagihanDistributor from './Pages/Distributor/InvoiceTagihanDistributor';
 
 function App() {
   return (
