@@ -8,8 +8,8 @@ const FilterBarRiwayat = ({ entries, onEntriesChange }) => {
                 <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
                 <span>-</span>
                 <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
-                <button className="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold">Filter</button>
-                <button className="bg-blue-900 text-white px-3 py-1 rounded text-sm font-bold">Export Excel</button>
+                <button className="bg-btn-success text-white px-3 py-1 rounded text-sm font-bold">Filter</button>
+                <button className="bg-btn-dark text-white px-3 py-1 rounded text-sm font-bold">Export Excel</button>
             </div>
 
             {/* Show entries */}

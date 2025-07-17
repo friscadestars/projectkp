@@ -1,7 +1,7 @@
 import React from 'react';
 import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
 import OrderHistoryTable from '../../Components/ComponentsDashboard/Agen/Table/OrderHistoryTable';
-import FilterBarRiwayat from '../../Components/ComponentsDashboard/Distributor/RiwayatOrder/FilterBarRiwayat';
+import FilterBarRiwayat from '../../components/ComponentsDashboard/Distributor/RiwayatOrder/FilterBarRiwayat';
 import PageHeaderWithIcon from '../../Components/ComponentsDashboard/Common/PageHeader';
 import useRiwayatOrder from '../../hooks/Agen/useRiwayatOrder';
 import { agenMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';

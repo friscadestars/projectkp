@@ -11,6 +11,9 @@ import FAQPage from './pages/FAQPage.jsx';
 import MasukPage from './pages/MasukPage.jsx';
 import RegistrasiPage from './pages/RegistrasiPage.jsx';
 
+// Context
+import { OrderProvider } from './Context/OrderContext.jsx';
+
 // Beranda Pages
 import BerandaAgen from './pages/beranda/BerandaAgen.jsx';
 import BerandaPabrik from './pages/beranda/BerandaPabrik.jsx';
@@ -40,6 +43,17 @@ import RiwayatOrderDistributor from './pages/Distributor/RiwayatOrderDistributor
 import DetailRiwayatOrder from './pages/Distributor/DetailRiwayatOrder.jsx';
 import TagihanDistributor from './pages/Distributor/TagihanDistributor.jsx';
 import InvoiceTagihanDistributor from './pages/Distributor/InvoiceTagihanDistributor.jsx';
+
+// Pabrik Pages
+import DashboardPabrik from './pages/Pabrik/1_DashboardPabrik.jsx';
+import DaftarOrderMasuk from './pages/Pabrik/2_DaftarOrderMasuk.jsx';
+import DetailOrderMasuk from './pages/Pabrik/3_DetailOrderMasuk.jsx'; 
+import ProduksiPengiriman from './pages/Pabrik/4_ProduksiPengiriman.jsx';
+import SedangDiproduksi from './pages/Pabrik/5_SedangProduksi.jsx';
+import Riwayat from './pages/Pabrik/6_Riwayat.jsx';
+import DetailRiwayat from './pages/Pabrik/7_DetailRiwayat.jsx';
+import MonitoringDistributor from './pages/Pabrik/8_MonitoringDistributor.jsx';
+import DaftarHarga from './pages/Pabrik/9_DaftarHarga.jsx';
 
 function App() {
   return (
@@ -83,6 +97,18 @@ function App() {
       <Route path="/distributor/riwayat-order/detail/:orderId" element={<DetailRiwayatOrder />} />
       <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
       <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
+
+      {/* Pabrik Routes */}
+      <Route path="/pabrik/dashboard-pabrik" element={<DashboardPabrik />} />
+      <Route path="/pabrik/daftar-order-masuk" element={<DaftarOrderMasuk />} />
+      <Route path="/pabrik/detail-order" element={<DetailOrderMasuk />} />
+      <Route path="/pabrik/produksi-pengiriman" element={<ProduksiPengiriman />} />
+      <Route path="/pabrik/detail-produksi/sedang-produksi" element={<SedangDiproduksi />} />
+      <Route path="/pabrik/riwayat-pengiriman" element={<Riwayat />} />
+      <Route path="/pabrik/detail-riwayat" element={<DetailRiwayat />} />
+      <Route path="/pabrik/monitoring-distributor" element={<MonitoringDistributor />} />
+      <Route path="/pabrik/daftar-harga" element={<DaftarHarga />} />
+
     </Routes>
   );
 }
