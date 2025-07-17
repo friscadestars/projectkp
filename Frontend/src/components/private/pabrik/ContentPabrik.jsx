@@ -18,7 +18,7 @@ export default function ContentPabrik() {
             monitoring aktivitas distributor, dan pengelolaan daftar harga di menu <b>Dashboard</b>
           </p>
           <Link
-            to="/dashboard"
+            to="/pabrik/dashboard-pabrik"
             className="inline-block bg-primary-dark hover:bg-blue-800 text-white font-medium text-sm px-5 py-2 rounded-lg transition duration-200"
           >
             Ke Dashboard
