@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import { useOrder } from '../../Context/OrderContext.jsx';
 import iconValidasi from '../../assets/IconHeader/ValidasiIcon.png';
 import ValidasiOrderSection from '../../Components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderSection';
-import PageHeaderWithIcon from '../../Components/ComponentsDashboard/Common/PageHeader';
+import PageHeaderWithIcon from '../../components/ComponentsDashboard/Common/PageHeader';
 import { useNavigation } from '../../hooks/useNavigation';
 
 const ValidasiOrder = () => {
@@ -21,6 +21,7 @@ const ValidasiOrder = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
+            role="distributor" 
         >
             <PageHeaderWithIcon icon={iconValidasi} title="Validasi Order" />
             <ValidasiOrderSection

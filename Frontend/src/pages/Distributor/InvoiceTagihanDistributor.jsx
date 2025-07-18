@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
+import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import InvoiceTagihanDistributorContent from '../../components/ComponentsDashboard/Invoice/InvoiceTagihanDistributorContent';
 import { useInvoiceTagihanDistributorPage } from '../../hooks/Distributor/Invoice/useInvoiceTagihanDistributorPage';
 
@@ -18,13 +18,14 @@ const InvoiceTagihanDistributor = () => {
     }
 
     return (
-        <AgenLayout
+        <Layout
             {...props.layoutProps}
             showDropdown={showDropdown}
             toggleDropdown={toggleDropdown}
+            role="distributor" 
         >
             <InvoiceTagihanDistributorContent {...props} />
-        </AgenLayout>
+        </Layout>
     );
 };
 

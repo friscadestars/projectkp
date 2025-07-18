@@ -3,7 +3,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { FaBars } from 'react-icons/fa';
 
-const AgenLayout = ({ children, menuItems, activeLabel, onNavigate, showDropdown, toggleDropdown }) => {
+const Layout = ({ children, menuItems, activeLabel, onNavigate, showDropdown, toggleDropdown, role }) => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
@@ -11,9 +11,12 @@ const AgenLayout = ({ children, menuItems, activeLabel, onNavigate, showDropdown
     return (
         <div className="flex flex-col min-h-screen">
             {/* Header */}
-            <Header showDropdown={showDropdown} toggleDropdown={toggleDropdown} />
+            <Header
+                showDropdown={showDropdown}
+                toggleDropdown={toggleDropdown}
+                role={role} 
+            />
 
-            {/* Burger Button (visible only on mobile) */}
             <button
                 onClick={toggleSidebar}
                 className="md:hidden p-3 m-3 text-white bg-primary-dark rounded z-50 absolute top-0 left-0"
@@ -28,7 +31,7 @@ const AgenLayout = ({ children, menuItems, activeLabel, onNavigate, showDropdown
                     activeLabel={activeLabel}
                     onNavigate={onNavigate}
                     isSidebarOpen={isSidebarOpen}
-                    setIsSidebarOpen={setIsSidebarOpen} 
+                    setIsSidebarOpen={setIsSidebarOpen}
                 />
 
                 {/* Main Content */}
@@ -40,4 +43,4 @@ const AgenLayout = ({ children, menuItems, activeLabel, onNavigate, showDropdown
     );
 };
 
-export default AgenLayout;
+export default Layout;

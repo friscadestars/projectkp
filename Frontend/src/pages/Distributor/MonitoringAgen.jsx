@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../hooks/useNavigation';
 import MonitoringAgenContent from '../../components/ComponentsDashboard/Distributor/Monitoring/MonitoringAgen/MonitoringAgenContent';
 import { useMonitoringAgenPage } from '../../hooks/Distributor/Monitoring/useMonitoringAgenPage';
@@ -11,12 +11,13 @@ const MonitoringAgen = () => {
     const page = useMonitoringAgenPage();
 
     return (
-        <AgenLayout
+        <Layout
             menuItems={distributorMenuItems}
             activeLabel="Monitoring Agen"
             onNavigate={navigation.handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
+            role="distributor" 
         >
             <MonitoringAgenContent
                 searchTerm={page.searchTerm}
@@ -24,7 +25,7 @@ const MonitoringAgen = () => {
                 filteredAgenList={page.filteredAgenList}
                 toggleAktif={page.toggleAktif}
             />
-        </AgenLayout>
+        </Layout>
     );
 };
 

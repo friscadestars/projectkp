@@ -1,5 +1,5 @@
 import React from 'react';
-import AgenLayout from '../../components/ComponentsDashboard/Layout/Layout';
+import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
 import HeaderSection from '../../components/ComponentsDashboard/Common/PageHeader';
 import InvoiceLayout from '../../components/ComponentsDashboard/Invoice/InvoiceLayout';
 import { useInvoiceTagihanPage } from '../../hooks/Agen/Invoice/useInvoiceTagihanPage';
@@ -16,7 +16,9 @@ const InvoiceTagihan = () => {
     }
 
     return (
-        <AgenLayout {...props.layoutProps}>
+        <AgenLayout {...props.layoutProps}
+        role="agen" 
+        >
             <HeaderSection {...props.pageTitleProps} />
             <InvoiceLayout {...props.invoiceProps} />
         </AgenLayout>

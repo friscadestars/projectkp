@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
+import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import { useKirimOrderPage } from '../../hooks/Distributor/KirimOrder/useKirimOrderPage';
 import KirimOrderKePabrikContent from '../../components/ComponentsDashboard/Distributor/KirimOrder/KirimOrderKePabrikContent';
 
@@ -10,13 +10,14 @@ const KirimOrderKePabrik = () => {
     const props = useKirimOrderPage();
 
     return (
-        <AgenLayout
+        <Layout
             {...props.layoutProps}
             showDropdown={showDropdown}
             toggleDropdown={toggleDropdown}
+            role="distributor" 
         >
             <KirimOrderKePabrikContent {...props} />
-        </AgenLayout>
+        </Layout>
     );
 };
 

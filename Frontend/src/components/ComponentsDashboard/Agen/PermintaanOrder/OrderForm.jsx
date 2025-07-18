@@ -12,10 +12,30 @@ const OrderForm = ({
         <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6 space-y-6">
             {/* Informasi Agen, Distributor, Tanggal, Alamat */}
             <div className="grid grid-cols-4 gap-4">
-                <input type="text" value={orderId} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={agentId} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={orderDate} readOnly className="border px-3 py-2 rounded text-sm" />
-                <input type="text" value={distributorName} readOnly className="border px-3 py-2 rounded text-sm" />
+                <input
+                    type="text"
+                    value={orderId}
+                    readOnly
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                />
+                <input
+                    type="text"
+                    value={agentId}
+                    readOnly
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                />
+                <input
+                    type="text"
+                    value={orderDate}
+                    readOnly
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                />
+                <input
+                    type="text"
+                    value={distributorName}
+                    readOnly
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                />
             </div>
 
             {/* Alamat Pengiriman */}
@@ -24,31 +44,31 @@ const OrderForm = ({
                 placeholder="Alamat Pengiriman"
                 value={alamat}
                 onChange={(e) => setAlamat(e.target.value)}
-                className="border px-3 py-2 rounded w-full text-sm"
+                className="border border-gray-400 px-3 py-2 rounded w-full text-sm text-gray-400"
             />
 
             {/* Tambah Produk */}
-            <div className="grid grid-cols-4 gap-4 items-center">
+            <div className="grid grid-cols-4 gap-4 items-center border-gray-300">
                 <input
                     type="text"
                     placeholder="Nama Produk"
                     value={produk}
                     onChange={(e) => setProduk(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <input
                     type="number"
                     placeholder="Jumlah"
                     value={jumlah}
                     onChange={(e) => setJumlah(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <input
                     type="number"
-                    placeholder="Harga Request"
+                    placeholder="Harga Satuan Request"
                     value={harga}
                     onChange={(e) => setHarga(e.target.value)}
-                    className="border px-3 py-2 rounded text-sm"
+                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <button
                     onClick={handleAddProduk}
@@ -96,7 +116,7 @@ const OrderForm = ({
                 </table>
             </div>
 
-            {/* ✅ Slot untuk tombol submit */}
+            {/* tombol submit */}
             <div className="pt-4 text-center">
                 {children}
             </div>

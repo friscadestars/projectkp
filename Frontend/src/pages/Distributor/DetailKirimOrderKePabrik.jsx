@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import FormTitle from '../../Components/ComponentsDashboard/Common/PageHeader';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import FormTitle from '../../components/ComponentsDashboard/Common/PageHeader';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import { useKirimOrderDetail } from '../../hooks/Distributor/KirimOrder/useKirimOrderDetail';
 import iconKirimOrder from '../../assets/IconHeader/KirimOrderIcon.png';
 import OrderAndProductLayout from '../../Components/ComponentsDashboard/Common/OrderAndProductLayout';
@@ -24,6 +24,7 @@ const DetailKirimOrderKePabrik = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
+            role="distributor" 
         >
             <FormTitle icon={iconKirimOrder} title="Kirim Orderan ke Pabrik" />
 

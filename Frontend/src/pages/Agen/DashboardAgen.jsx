@@ -7,7 +7,9 @@ const DashboardAgenPage = () => {
     const { layoutProps } = useDashboardAgenPage();
 
     return (
-        <AgenLayout {...layoutProps}>
+        <AgenLayout {...layoutProps}
+        role="agen" 
+        >
             <DashboardAgenContent />
         </AgenLayout>
     );

@@ -1,7 +1,7 @@
 import React from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import FormTitle from '../../Components/ComponentsDashboard/Common/PageHeader';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import FormTitle from '../../components/ComponentsDashboard/Common/PageHeader';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import iconRiwayat from '../../assets/IconHeader/IconRiwayat.png';
 import DetailRiwayatOrderLayout from '../../components/ComponentsDashboard/Distributor/RiwayatOrder/DetailRiwayatOrderLayout';
 import { useNavigation } from '../../hooks/useNavigation';
@@ -28,6 +28,7 @@ const DetailRiwayatOrder = () => {
             menuItems={distributorMenuItems}
             activeLabel="Riwayat Order"
             onNavigate={handleNavigation}
+            role="distributor" 
         >
             <FormTitle icon={iconRiwayat} title="Riwayat Order" />
             <DetailRiwayatOrderLayout

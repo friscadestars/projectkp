@@ -13,6 +13,7 @@ const DetailOrder = () => {
             onNavigate={props.handleNavigation}
             showDropdown={props.showDropdown}
             toggleDropdown={props.toggleDropdown}
+            role="agen" 
         >
             <DetailOrderContent
                 order={props.order}

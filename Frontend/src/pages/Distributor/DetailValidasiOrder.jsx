@@ -18,6 +18,7 @@ const DetailValidasiOrder = () => {
             {...props.layoutProps}
             showDropdown={showDropdown}
             toggleDropdown={toggleDropdown}
+            role="distributor" 
         >
             <ValidasiOrderContent {...props} />
         </Layout>

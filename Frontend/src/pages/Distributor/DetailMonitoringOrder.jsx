@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import DetailOrderContent from '../../components/ComponentsDashboard/Distributor/Monitoring/MonitoringOrder/DetailOrderContent';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import { useOrderDetail } from '../../hooks/Distributor/DetailOrder/useOrderDetail';
 import { useNavigation } from '../../hooks/useNavigation';
 import iconMonitoring from '../../assets/IconHeader/MonitoringIcon.png';
@@ -20,6 +20,7 @@ const DetailMonitoringOrder = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(!showDropdown)}
+            role="distributor" 
         >
             <DetailOrderContent
                 order={order}
