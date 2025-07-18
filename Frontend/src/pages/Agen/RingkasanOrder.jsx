@@ -1,53 +1,20 @@
-// src/Pages/Agen/RingkasanOrder.jsx
 import React from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import OrderTableRingkasan from '../../Components/ComponentsDashboard/Agen/Table/OrderTableRingkasan';
-import ConfirmationModal from '../../Components/ComponentsDashboard/Agen/Modal/ConfirmationModal';
 import PageHeaderWithIcon from '../../Components/ComponentsDashboard/Common/PageHeader';
 import SearchInput from '../../Components/ComponentsDashboard/Common/SearchInput';
-import truckIcon from '../../assets/IconHeader/IconTruck.png';
-import { agenMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
-import useRingkasanOrder from '../../hooks/Agen/useRingkasanOrder';
+import OrderTableRingkasan from '../../components/ComponentsDashboard/Agen/RingkasanOrder/OrderTableRingkasan';
+import { useRingkasanOrderPage } from '../../hooks/Agen/RingkasanOrder/useRingkasanOrderPage';
 
 const RingkasanOrder = () => {
-    const {
-        searchTerm, setSearchTerm,
-        showDropdown, setShowDropdown,
-        showModal, filteredOrders,
-        handleNavigation, handleDetail,
-        handleConfirm, confirmReceipt,
-        cancelReceipt, getStatusClasses,
-        getEstimatedDate
-    } = useRingkasanOrder();
+    const props = useRingkasanOrderPage();
 
     return (
-        <Layout
-            menuItems={agenMenuItems}
-            activeLabel="Ringkasan Order"
-            onNavigate={handleNavigation}
-            showDropdown={showDropdown}
-            toggleDropdown={() => setShowDropdown(!showDropdown)}
-        >
-            <PageHeaderWithIcon icon={truckIcon} title="Ringkasan Order" />
-
+        <Layout {...props.layoutProps}>
+            <PageHeaderWithIcon {...props.pageHeaderProps} />
             <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6">
-                <SearchInput
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                />
-
-                <OrderTableRingkasan
-                    orders={filteredOrders}
-                    onDetail={handleDetail}
-                    onConfirm={handleConfirm}
-                    getStatusClasses={getStatusClasses}
-                    getEstimatedDate={getEstimatedDate}
-                />
+                <SearchInput {...props.searchInputProps} />
+                <OrderTableRingkasan {...props.orderTableProps} />
             </div>
-
-            {showModal && (
-                <ConfirmationModal onConfirm={confirmReceipt} onCancel={cancelReceipt} />
-            )}
         </Layout>
     );
 };

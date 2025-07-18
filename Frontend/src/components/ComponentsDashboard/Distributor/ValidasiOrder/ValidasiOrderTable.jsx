@@ -1,63 +1,75 @@
+// src/Components/Table/ValidasiOrderTable.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
 
 const ValidasiOrderTable = ({ orders }) => {
     const navigate = useNavigate();
 
+    const columns = [
+        {
+            header: 'No',
+            key: 'no',
+            render: (_, __, index) => index + 1,
+        },
+        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Agen ID',
+            key: 'agentId',
+            render: (val) => val || 'AG-001',
+        },
+        {
+            header: 'Alamat',
+            key: 'address',
+            render: (val) => val || 'Jl. Melati no.20 Jakarta',
+        },
+        { header: 'Tanggal Order', key: 'orderDate' },
+        {
+            header: 'Jumlah Produk',
+            key: 'products',
+            render: (products) =>
+                Array.isArray(products)
+                    ? products.reduce((sum, p) => sum + p.quantity, 0)
+                    : 0,
+        },
+        {
+            header: 'Status Order',
+            key: 'status',
+            render: (val) => (
+                <span className="bg-yellow-400 text-white px-2 py-1 rounded text-sm font-bold">
+                    {val}
+                </span>
+            ),
+        },
+        {
+            header: 'Aksi',
+            key: 'aksi',
+            render: (_, row) => (
+                <button
+                    onClick={() => navigate(`/distributor/detail-validasi/${row.orderId}`)}
+                    className="bg-blue-900 text-white px-3 py-1 rounded text-sm hover:opacity-90 font-bold"
+                >
+                    Detail
+                </button>
+            ),
+        },
+    ];
+
     return (
-        <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-center">
-                <thead>
-                    <tr className="bg-blue-900 text-white">
-                        <th className="px-4 py-2">No</th>
-                        <th className="px-4 py-2">Order ID</th>
-                        <th className="px-4 py-2">Agen ID</th>
-                        <th className="px-4 py-2">Alamat</th>
-                        <th className="px-4 py-2">Tanggal Order</th>
-                        <th className="px-4 py-2">Jumlah Produk</th>
-                        <th className="px-4 py-2">Status Order</th>
-                        <th className="px-4 py-2">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {orders.length > 0 ? (
-                        orders.map((order, index) => (
-                            <tr key={order.orderId} className="border-b border-gray-300 hover:bg-gray-50">
-                                <td className="px-4 py-2">{index + 1}</td>
-                                <td className="px-4 py-2">{order.orderId}</td>
-                                <td className="px-4 py-2">{order.agentId || 'AG-001'}</td>
-                                <td className="px-4 py-2">{order.address || 'Jl. Melati no.20 Jakarta'}</td>
-                                <td className="px-4 py-2">{order.orderDate}</td>
-                                <td className="px-4 py-2">
-                                    {order.products.reduce((sum, p) => sum + p.quantity, 0)}
-                                </td>
-                                <td className="px-4 py-2">
-                                    <span className="bg-yellow-300 text-white px-2 py-1 rounded text-sm font-bold">
-                                        {order.status}
-                                    </span>
-                                </td>
-                                <td className="px-4 py-2">
-                                    <button
-                                        onClick={() =>
-                                            navigate(`/distributor/detail-validasi/${order.orderId}`)
-                                        }
-                                        className="bg-blue-900 text-white px-3 py-1 rounded text-sm hover:opacity-90 font-bold"
-                                    >
-                                        Detail
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    ) : (
-                        <tr>
-                            <td colSpan="8" className="py-4 text-gray-500 italic">
-                                Tidak ada order tertunda.
-                            </td>
-                        </tr>
-                    )}
-                </tbody>
-            </table>
-        </div>
+        <ReusableTable
+            columns={columns}
+            data={orders}
+            footer={
+                <tr>
+                    <td
+                        colSpan={columns.length}
+                        className="px-4 py-3 text-right text-gray-600 font-medium"
+                    >
+                        Total Order Tertunda: {orders.length}
+                    </td>
+                </tr>
+            }
+        />
     );
 };
 

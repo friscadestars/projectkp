@@ -8,7 +8,8 @@ const TabelRiwayatDetail = ({ order }) => {
         <h2 className="text-lg font-semibold mb-2">Detail Order</h2>
         <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
           <table className="min-w-full text-sm text-center">
-            <thead className="bg-primary-dark text-white">
+            {/* ✅ Header biru gelap */}
+            <thead className="bg-blue-900 text-white">
               <tr>
                 <th className="px-4 py-2">Order ID</th>
                 <th className="px-4 py-2">Agen ID</th>
@@ -57,7 +58,8 @@ const TabelRiwayatDetail = ({ order }) => {
         <h2 className="text-lg font-semibold mb-2">Rincian Produk</h2>
         <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
           <table className="min-w-full text-sm text-center">
-            <thead className="bg-primary-dark text-white">
+            {/* ✅ Header biru gelap */}
+            <thead className="bg-blue-900 text-white">
               <tr>
                 <th className="px-4 py-2">Nama Produk</th>
                 <th className="px-4 py-2">Jumlah</th>

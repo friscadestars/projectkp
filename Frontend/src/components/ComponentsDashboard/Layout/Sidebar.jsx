@@ -35,7 +35,7 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
 
             {/* Sidebar */}
             <aside
-                className={`fixed md:static z-40 bg-blue-900 text-white min-h-screen w-64 px-4 py-6 transform transition-transform duration-300
+                className={`fixed md:static z-40 bg-blue-900 text-white min-h-screen w-64 px-4 py-3 transform transition-transform duration-300
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0`}
             >
@@ -69,7 +69,7 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                     }}
                                 >
                                     <div className="flex items-center">
-                                        <img src={item.icon} alt={item.label} className="w-13 h-15" />
+                                        <img src={item.icon} alt={item.label} className="w-16 h-19" />
                                         <span className="font-semibold">{item.label}</span>
                                     </div>
 
@@ -89,7 +89,7 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                         {item.subItems.map((subItem, subIndex) => (
                                             <li
                                                 key={subIndex}
-                                                className={`cursor-pointer px-3 py-1 rounded hover:bg-blue-700 text-sm ${subItem.label === activeLabel
+                                                className={`cursor-pointer px-9 py-1 rounded hover:bg-blue-700 text-sm ${subItem.label === activeLabel
                                                     ? 'bg-blue-700 font-semibold'
                                                     : ''
                                                     }`}

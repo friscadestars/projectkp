@@ -2,12 +2,12 @@ import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import FormTitle from '../../Components/ComponentsDashboard/Common/PageHeader';
 import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
-import { useKirimOrderDetail } from '../../hooks/Distributor/useKirimOrderDetail';
+import { useKirimOrderDetail } from '../../hooks/Distributor/KirimOrder/useKirimOrderDetail';
 import iconKirimOrder from '../../assets/IconHeader/KirimOrderIcon.png';
 import OrderAndProductLayout from '../../Components/ComponentsDashboard/Common/OrderAndProductLayout';
 import OrderInfoTable from '../../Components/ComponentsDashboard/Distributor/KirimOrder/OrderDetailTable';
 import ProductDetailTable from '../../Components/ComponentsDashboard/Distributor/KirimOrder/ProductDetailTable';
-import SendOrderButton from '../../Components/ComponentsDashboard/Button/SendOrderButton';
+import SendOrderButton from '../../Components/ComponentsDashboard/Common/SendOrderButton';
 
 const DetailKirimOrderKePabrik = () => {
     const [showDropdown, setShowDropdown] = useState(false);

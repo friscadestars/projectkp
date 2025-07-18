@@ -1,31 +1,27 @@
 import React from 'react';
+import ReusableTable from '../../Common/ReusableTable';
 
 const TabelRincianProduk = ({ products = [] }) => {
     if (products.length === 0) {
         return <p className="text-gray-500 italic">Tidak ada produk.</p>;
     }
 
+    const columns = [
+        { label: 'Nama Produk', key: 'name' },
+        { label: 'Jumlah', key: 'quantity' },
+    ];
+
     return (
         <div>
             <h2 className="text-lg font-semibold mb-1.5">Rincian Produk</h2>
-            {/* Wrapper tabel dengan rounded */}
+
+            {/* Table wrapper */}
             <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
-                <table className="min-w-full text-sm text-center whitespace-nowrap">
-                    <thead className="bg-primary-dark text-white">
-                        <tr>
-                            <th className="px-4 py-2 border border-gray-300">Nama Produk</th>
-                            <th className="px-4 py-2 border border-gray-300">Jumlah</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {products.map((p, i) => (
-                            <tr key={i} className="hover:bg-gray-50">
-                                <td className="px-4 py-2 border border-gray-300">{p.name}</td>
-                                <td className="px-4 py-2 border border-gray-300">{p.quantity}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                <ReusableTable
+                    columns={columns}
+                    data={products}
+                    className="min-w-full text-sm text-center whitespace-nowrap"
+                />
             </div>
 
             <div className="mt-4 flex justify-end">
@@ -36,6 +32,5 @@ const TabelRincianProduk = ({ products = [] }) => {
         </div>
     );
 };
-
 
 export default TabelRincianProduk;

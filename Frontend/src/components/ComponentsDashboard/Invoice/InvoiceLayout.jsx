@@ -2,7 +2,7 @@ import React from 'react';
 import InvoiceDetails from './InvoiceDetails';
 import InvoiceTable from './InvoiceTable';
 import PaymentInstructions from './PaymentInstructions';
-import ConfirmPaymentModal from './ConfirmPaymentModal';
+import PaymentConfirmation from './PaymentConfirmation'; // ✅ Ganti ini
 
 const InvoiceLayout = ({
     invoiceData,
@@ -51,8 +51,7 @@ const InvoiceLayout = ({
             )}
 
             {showModal && (
-                <ConfirmPaymentModal
-                    onCancel={onCloseModal}
+                <PaymentConfirmation
                     onConfirm={onConfirmPayment}
                 />
             )}

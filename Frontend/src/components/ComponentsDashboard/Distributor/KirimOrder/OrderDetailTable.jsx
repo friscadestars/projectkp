@@ -1,35 +1,58 @@
-// Folder: src/Components/Distributor/KirimOrder/OrderDetailTable.jsx
 import React from 'react';
-import StatusBadge from '../ValidasiOrder/StatusBadge';
+import StatusBadge from '../../Common/StatusBadge';
+import ReusableTable from '../../Common/ReusableTable'; // Pastikan path ini sesuai
 
-const OrderDetailTable = ({ order }) => (
-    <>
-        <h2 className="font-semibold text-md mb-2">Detail Order</h2>
-        <table className="w-full text-sm mb-6 border-collapse">
-            <thead>
-                <tr className="bg-blue-900 text-white">
-                    <th className="py-2 px-4 border-b border-gray-300">Order ID</th>
-                    <th className="py-2 px-4 border-b border-gray-300">Agen ID</th>
-                    <th className="py-2 px-4 border-b border-gray-300">Alamat</th>
-                    <th className="py-2 px-4 border-b border-gray-300">Tanggal Order</th>
-                    <th className="py-2 px-4 border-b border-gray-300">Jumlah Produk</th>
-                    <th className="py-2 px-4 border-b border-gray-300">Status Order</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr className="text-center border-b border-gray-300">
-                    <td className="py-2 px-4">{order.orderId}</td>
-                    <td className="py-2 px-4">{order.agenId || 'AG-001'}</td>
-                    <td className="py-2 px-4">{order.alamat || 'Jl. Melati no.20 Jakarta'}</td>
-                    <td className="py-2 px-4">{order.orderDate}</td>
-                    <td className="py-2 px-4">{order.products.reduce((sum, p) => sum + p.quantity, 0)}</td>
-                    <td className="py-2 px-4">
-                        <StatusBadge status={order.status} />
-                    </td>
-                </tr>
-            </tbody>
-        </table>
-    </>
-);
+const OrderDetailTable = ({ order }) => {
+    if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
+
+    const columns = [
+        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Agen ID',
+            key: 'agenId',
+            render: (val) => val || 'AG-001',
+        },
+        {
+            header: 'Alamat',
+            key: 'alamat',
+            render: (val) => val || 'Jl. Melati no.20 Jakarta',
+        },
+        { header: 'Tanggal Order', key: 'orderDate' },
+        {
+            header: 'Jumlah Produk',
+            key: 'products',
+            render: (products) =>
+                Array.isArray(products)
+                    ? products.reduce((sum, p) => sum + p.quantity, 0)
+                    : 0,
+        },
+        {
+            header: 'Status Order',
+            key: 'status',
+            render: (status) => <StatusBadge status={status} />,
+        },
+    ];
+
+    const data = [order];
+
+    return (
+        <>
+            <h2 className="font-semibold text-md mb-2">Detail Order</h2>
+            <ReusableTable
+                columns={columns}
+                data={data}
+                footer={
+                    <tr>
+                        <td
+                            colSpan={columns.length}
+                            className="border-t border-gray-300 px-4 py-3 text-right text-sm text-gray-600"
+                        >
+                        </td>
+                    </tr>
+                }
+            />
+        </>
+    );
+};
 
 export default OrderDetailTable;

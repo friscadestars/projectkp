@@ -1,6 +1,6 @@
 // src/Components/Agen/Dashboard/RecentOrders.jsx
 import React from 'react';
-import OrderTable from '../Table/OrderTable';
+import OrderTable from './OrderTable';
 
 const RecentOrders = ({ orders }) => (
     <>

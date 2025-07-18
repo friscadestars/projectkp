@@ -4,45 +4,39 @@ const TabelMonitoringDistributor = ({ orders }) => {
   console.log('Orders (distributor list) received by table:', orders);
 
   return (
-    <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
-      <table className="min-w-full text-sm text-center">
-        <thead className="bg-primary-dark text-white">
+    <div className="order-table-container">
+      <table className="order-table">
+        <thead>
           <tr>
-            <th className="px-4 py-2">No</th>
-            <th className="px-4 py-2">Distributor ID</th>
-            <th className="px-4 py-2">Nama Distributor</th>
-            <th className="px-4 py-2">Email</th>
-            <th className="px-4 py-2">No. Rekening</th>
-            <th className="px-4 py-2">Alamat</th>
-            <th className="px-4 py-2">Terakhir Order</th>
-            <th className="px-4 py-2">Status Keaktifan</th>
-            <th className="px-4 py-2">Aksi</th>
+            <th>No</th>
+            <th>Distributor ID</th>
+            <th>Nama Distributor</th>
+            <th>Email</th>
+            <th>No. Rekening</th>
+            <th>Alamat</th>
+            <th>Terakhir Order</th>
+            <th>Status Keaktifan</th>
+            <th>Aksi</th>
           </tr>
         </thead>
         <tbody>
           {orders.map((order, index) => (
-            <tr key={order.distributorId} className="border-b border-gray-300 hover:bg-gray-50">
-              <td className="px-4 py-2">{index + 1}</td>
-              <td className="px-4 py-2">{order.distributorId}</td>
-              <td className="px-4 py-2">{order.distributor}</td>
-              <td className="px-4 py-2">{order.email || "-"}</td>
-              <td className="px-4 py-2">{order.noRek || "-"}</td>
-              <td className="px-4 py-2">{order.address || "-"}</td>
-              <td className="px-4 py-2">{order.lastOrder || "-"}</td>
-              <td className="px-4 py-2">
-                <span
-                  className={`text-xs px-2 py-1 rounded ${
-                    order.isActive ? "bg-btn-info text-white" : "bg-btn-disabled text-white"
-                  }`}
-                >
+            <tr key={order.distributorId}>
+              <td>{index + 1}</td>
+              <td>{order.distributorId}</td>
+              <td>{order.distributor}</td>
+              <td>{order.email || "-"}</td>
+              <td>{order.noRek || "-"}</td>
+              <td>{order.address || "-"}</td>
+              <td>{order.lastOrder || "-"}</td>
+              <td>
+                <span className={`status-badge ${order.isActive ? "status-approved" : "status-default"}`}>
                   {order.isActive ? "Aktif" : "Tidak Aktif"}
                 </span>
               </td>
-              <td className="px-4 py-2">
+              <td>
                 <button
-                  className={`px-3 py-1 rounded ${
-                    order.isActive ? "bg-btn-warning text-white" : "bg-btn-success text-white"
-                  }`}
+                  className={`agen-button-toggle ${order.isActive ? "btn-hentikan" : "btn-aktifkan"}`}
                 >
                   {order.isActive ? "Hentikan" : "Aktifkan"}
                 </button>

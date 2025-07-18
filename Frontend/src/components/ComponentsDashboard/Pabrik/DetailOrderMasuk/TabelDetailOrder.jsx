@@ -1,4 +1,5 @@
 import React from 'react';
+import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
 
 const getStatusClasses = (status) => {
     switch (status) {
@@ -13,41 +14,37 @@ const getStatusClasses = (status) => {
 const TabelDetailOrder = ({ order }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
+    const columns = [
+        { key: 'orderId', label: 'Order ID' },
+        { key: 'distributor', label: 'Distributor' },
+        { key: 'agentId', label: 'Agen ID' },
+        { key: 'agenAddress', label: 'Alamat Agen' },
+        { key: 'orderDate', label: 'Tanggal Order' },
+        {
+            key: 'status',
+            label: 'Status Order',
+            render: (value) => (
+                <span className={`px-3 py-1 rounded text-sm ${getStatusClasses(value)}`}>
+                    {value}
+                </span>
+            ),
+        },
+    ];
+
+    const data = [order];
+
     return (
         <div>
             <h2 className="text-lg font-semibold mb-1.5">Detail Order</h2>
-            {/* Wrapper tabel dengan rounded */}
             <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
-                <table className="min-w-full text-sm text-center whitespace-nowrap">
-                    <thead className="bg-primary-dark text-white">
-                        <tr>
-                            <th className="px-4 py-3">Order ID</th>
-                            <th className="px-4 py-3">Distributor</th>
-                            <th className="px-4 py-3">Agen ID</th>
-                            <th className="px-4 py-3">Alamat Agen</th>
-                            <th className="px-4 py-3">Tanggal Order</th>
-                            <th className="px-4 py-3">Status Order</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr className="border-b border-gray-300 hover:bg-gray-50">
-                            <td className="px-4 py-3">{order.orderId}</td>
-                            <td className="px-4 py-3">{order.distributor}</td>
-                            <td className="px-4 py-3">{order.agentId}</td>
-                            <td className="px-4 py-3">{order.agenAddress}</td>
-                            <td className="px-4 py-3">{order.orderDate}</td>
-                            <td className="px-4 py-3">
-                                <span className={`px-3 py-1 rounded bg-red- text-sm ${getStatusClasses(order.status)}`}>
-                                    {order.status}
-                                </span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <ReusableTable
+                    columns={columns}
+                    data={data}
+                    className="min-w-full text-sm text-center whitespace-nowrap"
+                />
             </div>
         </div>
     );
 };
-
 
 export default TabelDetailOrder;

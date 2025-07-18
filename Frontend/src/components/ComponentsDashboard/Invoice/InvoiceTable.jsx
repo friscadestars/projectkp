@@ -1,49 +1,50 @@
 import React from 'react';
+import ReusableTable from '../Common/ReusableTable';
 
-const InvoiceTable = ({ products }) => {
-    const isEmpty = !products || products.length === 0;
+const InvoiceTable = ({ products = [] }) => {
+    const columns = [
+        {
+            key: 'nama',
+            label: 'Nama Produk',
+        },
+        {
+            key: 'jumlah',
+            label: 'Jumlah',
+            render: (val) => (
+                <div className="text-right">{val || 0}</div>
+            ),
+        },
+        {
+            key: 'harga',
+            label: 'Harga Satuan',
+            render: (val) => {
+                const numeric = parseInt((val || '0').toString().replace(/[^\d]/g, ''));
+                return <div className="text-right">Rp {numeric.toLocaleString('id-ID')}</div>;
+            },
+        },
+        {
+            key: 'subtotal',
+            label: 'Subtotal',
+            render: (_, row) => {
+                const hargaAngka = parseInt((row.harga || '0').toString().replace(/[^\d]/g, ''));
+                const subtotal = (row.jumlah || 0) * hargaAngka;
+                return <div className="text-right">Rp {subtotal.toLocaleString('id-ID')}</div>;
+            },
+        },
+    ];
+
+    // Karena subtotal dihitung manual, kita tidak butuh key `subtotal` di objek.
+    const data = products.map(p => ({
+        ...p,
+        subtotal: null, // placeholder supaya render tetap jalan
+    }));
 
     return (
-        <table className="w-full table-auto border border-gray-300 mb-6 text-center">
-            <thead className="bg-gray-100">
-                <tr>
-                    <th className="border border-gray-300 px-4 py-2">Nama Produk</th>
-                    <th className="border border-gray-300 px-4 py-2">Jumlah</th>
-                    <th className="border border-gray-300 px-4 py-2">Harga Satuan</th>
-                    <th className="border border-gray-300 px-4 py-2">Subtotal</th>
-                </tr>
-            </thead>
-            <tbody>
-                {isEmpty ? (
-                    <tr className="text-sm">
-                        <td className="border border-gray-300 px-4 py-2">-</td>
-                        <td className="border border-gray-300 px-4 py-2">0</td>
-                        <td className="border border-gray-300 px-4 py-2">Rp 0</td>
-                        <td className="border border-gray-300 px-4 py-2">Rp 0</td>
-                    </tr>
-                ) : (
-                    products.map((product, i) => {
-                        const hargaAngka = parseInt(
-                            (product.harga || '0').toString().replace(/[^\d]/g, '')
-                        );
-                        const subtotal = (product.jumlah || 0) * hargaAngka;
-
-                        return (
-                            <tr key={i} className="text-sm">
-                                <td className="border border-gray-300 px-4 py-2">{product.nama || '-'}</td>
-                                <td className="border border-gray-300 px-4 py-2">{product.jumlah || 0}</td>
-                                <td className="border border-gray-300 px-4 py-2">
-                                    Rp {hargaAngka.toLocaleString('id-ID')}
-                                </td>
-                                <td className="border border-gray-300 px-4 py-2">
-                                    Rp {subtotal.toLocaleString('id-ID')}
-                                </td>
-                            </tr>
-                        );
-                    })
-                )}
-            </tbody>
-        </table>
+        <ReusableTable
+            columns={columns}
+            data={data}
+            className="w-full table-auto border border-gray-300 mb-6 text-sm"
+        />
     );
 };
 

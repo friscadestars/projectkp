@@ -1,12 +1,12 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Open+Sans:wght@400;600&display=swap");
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Lato:ital,wght@0,100;0,300;0,400;0,700;0,900;1,100;1,300;1,400;1,700;1,900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;1,400&family=Lato:wght@400;700&display=swap");
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@import "tailwindcss";
-@plugin "flowbite-react/plugin/tailwindcss";
-@source "../.flowbite-react/class-list.json";
-
-@theme {
+/* CSS variables (hanya untuk referensi manual, tidak otomatis masuk ke Tailwind theme) */
+:root {
   --color-primary-darkest: #141414;
   --color-primary-dark: #122786;
   --color-primary-light: #CFE4FF;
@@ -25,4 +25,276 @@
 
   --font-lato: "Lato", sans-serif;
   --font-inter: "Inter", sans-serif;
+}
+
+/* Semua custom class menggunakan @layer components */
+@layer components {
+    .bg-btn-primary {
+    @apply bg-blue-600 hover:bg-blue-700 text-white;
+  }
+
+  .bg-btn-success {
+    @apply bg-green-600 hover:bg-green-700 text-white;
+  }
+
+  .bg-btn-info {
+    @apply bg-cyan-600 hover:bg-cyan-700 text-white;
+  }
+
+  .bg-btn-confirm {
+    @apply bg-teal-600 hover:bg-teal-700 text-white;
+  }
+
+  .bg-btn-warning {
+    @apply bg-yellow-500 hover:bg-yellow-600 text-white;
+  }
+
+  .bg-btn-danger {
+    @apply bg-red-600 hover:bg-red-700 text-white;
+  }
+
+  .bg-btn-disabled {
+    @apply bg-gray-400 text-white cursor-not-allowed;
+  }
+
+  .bg-btn-dark {
+    @apply bg-[#122786] hover:bg-gray-800 text-white;
+  }
+
+  .bg-btn-light {
+    @apply bg-gray-100 hover:bg-gray-200 text-black;
+  }
+
+  .dashboard-container {
+    @apply bg-white border border-gray-200 rounded-lg p-6 shadow-md;
+  }
+
+  .order-table-container {
+    @apply overflow-x-auto;
+  }
+
+  .order-table {
+    @apply min-w-full text-sm text-center border-collapse;
+  }
+
+  .order-table thead tr {
+    @apply bg-blue-900 text-white;
+  }
+
+  .order-table th,
+  .order-table td {
+    @apply px-4 py-2;
+  }
+
+  .order-table thead th:first-child,
+  .order-table thead th:last-child {
+    border-radius: 0;
+  }
+
+  .order-table tbody tr {
+    @apply border-t border-gray-200 hover:bg-gray-50;
+  }
+
+  .status-badge {
+    @apply px-3 py-1 text-sm font-bold rounded inline-block;
+  }
+
+  .status-pending {
+    @apply bg-yellow-400 text-white;
+  }
+
+  .status-approved {
+    @apply bg-green-500 text-white;
+  }
+
+  .status-shipped {
+    @apply bg-cyan-500 text-white;
+  }
+
+  .status-processing {
+    @apply bg-blue-500 text-white;
+  }
+
+  .status-rejected {
+    @apply bg-red-500 text-white;
+  }
+
+  .status-default {
+    @apply bg-gray-200 text-gray-700;
+  }
+
+  .status-finished {
+    @apply bg-green-700 text-white font-bold px-3 py-1 rounded text-sm;
+  }
+
+  .button-delete {
+    @apply bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm font-bold;
+  }
+
+  .payment-lunas {
+    @apply bg-green-600 text-white font-bold;
+  }
+
+  .payment-belum-lunas {
+    @apply bg-red-600 text-white font-bold;
+  }
+
+  .payment-unknown {
+    @apply bg-gray-400 text-white font-bold;
+  }
+
+  .button-invoice {
+    @apply bg-blue-900 text-white px-3 py-1 rounded text-sm hover:bg-blue-800 font-bold;
+  }
+
+  .button-detail {
+    @apply bg-blue-900 text-white text-sm font-bold px-3 py-1 rounded hover:bg-blue-800;
+  }
+
+  .button-confirm {
+    @apply text-sm font-bold px-3 py-1 rounded;
+  }
+
+  .button-confirm:disabled {
+    @apply bg-gray-200 text-gray-400 cursor-not-allowed;
+  }
+
+  .button-confirm.active {
+    @apply bg-green-700 text-white hover:bg-green-800;
+  }
+
+  .detail-order-error {
+    @apply p-8 text-red-500;
+  }
+
+  .detail-order-header {
+    @apply flex items-center gap-4 mb-6;
+  }
+
+  .detail-order-icon {
+    @apply w-8 h-8;
+  }
+
+  .detail-order-container {
+    @apply bg-white border-2 border-gray-200 shadow-lg rounded-xl p-6 mx-auto space-y-6 max-w-[96rem];
+  }
+
+  .detail-order-title {
+    @apply text-xl font-semibold text-blue-900;
+  }
+
+  .agen-table {
+    @apply min-w-full text-sm text-center border-collapse;
+  }
+
+  .agen-table thead tr {
+    @apply bg-blue-900 text-white;
+  }
+
+  .agen-table th,
+  .agen-table td {
+    @apply px-4 py-2 border-b;
+  }
+
+  .agen-table tbody tr {
+    @apply hover:bg-gray-50;
+  }
+
+  .agen-status {
+    @apply px-2 py-1 rounded text-sm font-bold inline-block;
+  }
+
+  .agen-status.aktif {
+    @apply bg-blue-500 text-white;
+  }
+
+  .agen-status.nonaktif {
+    @apply bg-gray-300 text-gray-800;
+  }
+
+  .agen-button-toggle {
+    @apply px-3 py-2 rounded text-sm font-bold text-white;
+  }
+
+  .agen-button-toggle.btn-hentikan {
+    @apply bg-red-600 hover:opacity-90;
+  }
+
+  .agen-button-toggle.btn-aktifkan {
+    @apply bg-green-600 hover:opacity-90;
+  }
+
+  .monitoring-order-table {
+    @apply min-w-full text-sm text-center border-collapse;
+  }
+
+  .monitoring-order-table thead tr {
+    @apply bg-blue-900 text-white;
+  }
+
+  .monitoring-order-table th,
+  .monitoring-order-table td {
+    @apply px-4 py-2 border-b;
+  }
+
+  .monitoring-order-table tbody tr {
+    @apply hover:bg-gray-50;
+  }
+
+  .button-group {
+    @apply flex justify-center gap-2;
+  }
+
+  .btn-detail {
+    @apply bg-blue-800 text-white px-3 py-1 rounded text-sm hover:opacity-90 font-bold;
+  }
+
+  .btn-invoice {
+    @apply bg-indigo-900 text-white px-3 py-1 rounded text-sm hover:opacity-90 font-bold;
+  }
+
+  .product-summary-table {
+    @apply w-full text-sm text-center border border-gray-300;
+  }
+
+  .product-summary-table thead tr {
+    @apply bg-blue-900 text-white;
+  }
+
+  .product-summary-table th,
+  .product-summary-table td {
+    @apply px-4 py-2;
+  }
+
+  .product-summary-table tbody tr {
+    @apply border-b;
+  }
+
+  .product-summary-total-row {
+    @apply font-semibold;
+  }
+
+  .form-header {
+    @apply flex items-center gap-2 mb-4;
+  }
+
+  .form-header-icon {
+    @apply w-5 h-5;
+  }
+
+  .form-header-title {
+    @apply text-blue-900 font-semibold text-sm;
+  }
+
+  .form-input-group {
+    @apply flex flex-wrap gap-4 mb-4;
+  }
+
+  .form-input {
+    @apply border border-gray-300 rounded-md px-3 py-2 text-sm w-1/4;
+  }
+
+  .form-submit-button {
+    @apply bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 font-bold;
+  }
 }

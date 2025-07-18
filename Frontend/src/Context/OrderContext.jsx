@@ -153,13 +153,27 @@ export const OrderProvider = ({ children }) => {
         setOrders(prev => sortOrders(prev.filter(order => order.orderId !== orderId)));
     };
 
+    const approveOrder = (orderId) => {
+    console.log('Approving order:', orderId); // ✅ debug
+    setOrders(prev =>
+        sortOrders(
+            prev.map(order =>
+                order.orderId === orderId
+                    ? { ...order, status: 'Disetujui' }
+                    : order
+            )
+        )
+    );
+};
+
     return (
         <OrderContext.Provider value={{
             orders,
             setOrders,
             markAsCompleted,
             updateProductPrice,
-            deleteOrder
+            deleteOrder,
+            approveOrder
         }}>
             {children}
         </OrderContext.Provider>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useRiwayatPengiriman } from '../../../../hooks/Pabrik/useRiwayatPengiriman';
-import FilterBarRiwayat from '../../Distributor/RiwayatOrder/FilterBarRiwayat';
+import FilterBarRiwayat from "../../Common/FilterBarRiwayat";
 
 const TabelRiwayatPengiriman = () => {
   const {
@@ -28,7 +28,8 @@ const TabelRiwayatPengiriman = () => {
       {/* Table */}
       <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
         <table className="min-w-full text-sm text-center">
-          <thead className="bg-primary-dark text-white">
+          {/* ✅ Ubah header ke bg-blue-900 untuk warna biru gelap */}
+          <thead className="bg-blue-900 text-white">
             <tr>
               <th className="px-4 py-2">No</th>
               <th className="px-4 py-2">Order ID</th>
@@ -82,7 +83,7 @@ const TabelRiwayatPengiriman = () => {
                 <td className="px-4 py-2">
                   <button
                     onClick={() => handleDetail(order)}
-                    className="bg-btn-dark hover:bg-gray-800 text-white px-3 py-1 rounded cursor-pointer"
+                    className="bg-blue-900 hover:bg-gray-800 text-white px-3 py-1 rounded"
                   >
                     Detail
                   </button>

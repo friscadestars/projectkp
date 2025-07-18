@@ -1,12 +1,9 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import FormTitle from '../../Components/ComponentsDashboard/Common/PageHeader';
-import OrderDetailTable from '../../Components/ComponentsDashboard/Distributor/Monitoring/OrderDetailTable';
-import ProductSummaryTable from '../../Components/ComponentsDashboard/Distributor/Monitoring/ProductSummaryTable';
+import DetailOrderContent from '../../components/ComponentsDashboard/Distributor/Monitoring/MonitoringOrder/DetailOrderContent';
 import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
-import { useOrderDetail } from '../../hooks/Distributor/useOrderDetail';
+import { useOrderDetail } from '../../hooks/Distributor/DetailOrder/useOrderDetail';
 import { useNavigation } from '../../hooks/useNavigation';
-import OrderAndProductLayout from '../../Components/ComponentsDashboard/Common/OrderAndProductLayout';
 import iconMonitoring from '../../assets/IconHeader/MonitoringIcon.png';
 
 const DetailMonitoringOrder = () => {
@@ -24,12 +21,10 @@ const DetailMonitoringOrder = () => {
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(!showDropdown)}
         >
-            <FormTitle icon={iconMonitoring} title="Monitoring Order" />
-            <OrderAndProductLayout
+            <DetailOrderContent
                 order={order}
-                products={order.products}
-                OrderTableComponent={OrderDetailTable}
-                ProductTableComponent={ProductSummaryTable}
+                icon={iconMonitoring}
+                titleText="Monitoring Order"
             />
         </Layout>
     );

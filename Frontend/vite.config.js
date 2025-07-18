@@ -1,11 +1,9 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import tailwindcss from '@tailwindcss/vite'
-import flowbiteReact from "flowbite-react/plugin/vite";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  plugins: [react(), tailwindcss(), flowbiteReact()],
+  plugins: [react()],
   server: {
     historyApiFallback: true,
   },
-})
+});

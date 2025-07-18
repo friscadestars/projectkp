@@ -1,0 +1,65 @@
+// src/hooks/Agen/usePermintaanOrder.js
+import { useOrder } from "../../../Context/OrderContext";
+import { useNavigation } from "../../useNavigation";
+import { agenMenuItems } from "../../../components/ComponentsDashboard/Constants/menuItems";
+import useOrderFormState from "./useOrderFormState";
+import { formatDate } from "../../../components/ComponentsDashboard/Common/date";
+import bagIcon from "../../../assets/IconHeader/IconBag.png";
+
+export const usePermintaanOrderPage = () => {
+    const { orders, setOrders } = useOrder();
+
+    const agentId = "AG001";
+    const distributorInfo = { id: "DS-002", name: "PT. Maju Jaya" };
+
+    const { handleNavigation } = useNavigation(agenMenuItems);
+
+    const {
+        produk, jumlah, harga, alamat, produkList,
+        setProduk, setJumlah, setHarga, setAlamat,
+        handleAddProduk, handleDeleteProduk,
+        handleSubmit
+    } = useOrderFormState({
+        agentId,
+        distributorInfo,
+        orders,
+        setOrders,
+        onSuccess: () => handleNavigation('/ringkasan-order')
+    });
+
+    const layoutProps = {
+        menuItems: agenMenuItems,
+        activeLabel: "Permintaan Order",
+        onNavigate: handleNavigation
+    };
+
+    const pageTitleProps = {
+        icon: bagIcon,
+        title: "Form Permintaan Order"
+    };
+
+    const orderFormProps = {
+        produk,
+        jumlah,
+        harga,
+        produkList,
+        alamat,
+        setProduk,
+        setJumlah,
+        setHarga,
+        setAlamat,
+        handleAddProduk,
+        handleDeleteProduk,
+        orderId: `ORD-00${orders.length + 1}`,
+        agentId,
+        distributorName: distributorInfo.name,
+        orderDate: formatDate(new Date())
+    };
+
+    return {
+        layoutProps,
+        pageTitleProps,
+        orderFormProps,
+        handleSubmit
+    };
+};

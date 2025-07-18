@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
+import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
 
 const TabelDetailSedangDiproduksi = ({ order }) => {
   const { products = [] } = order;
@@ -13,8 +14,8 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
       text,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6', // biru
-      cancelButtonColor: '#d33',     // merah
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
       confirmButtonText,
       cancelButtonText: 'Batal',
     });
@@ -66,9 +67,22 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
     }
   };
 
+  const columns = [
+    { key: 'name', label: 'Nama Produk' },
+    { key: 'quantity', label: 'Jumlah Produk' },
+    {
+      key: 'statusProduksi',
+      label: 'Status Produksi',
+      render: (_, __, ___) =>
+        statusProduksi === 'Dikirim' || statusProduksi === 'Selesai Produksi'
+          ? 'Selesai'
+          : 'Menunggu Produksi',
+    },
+  ];
+
   return (
     <div>
-      {/* Informasi Order */}
+      {/* Info Order */}
       <div className="mb-4 border p-4 rounded border-gray-200 shadow-sm bg-gray-50 text-sm">
         <p className="mb-2">
           <strong>Order ID: {order.orderId}</strong>
@@ -93,37 +107,12 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
 
       {/* Tabel Produk */}
       <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
-        <table className="min-w-full text-sm text-center border">
-          <thead className="bg-primary-dark text-white">
-            <tr className="border-b border-gray-300">
-              <th className="px-4 py-2">Nama Produk</th>
-              <th className="px-4 py-2">Jumlah Produk</th>
-              <th className="px-4 py-2">Status Produksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {products.map((product, index) => (
-              <tr
-                key={index}
-                className="border-b border-gray-300 hover:bg-gray-50"
-              >
-                <td className="px-4 py-2">{product.name}</td>
-                <td className="px-4 py-2">{product.quantity}</td>
-                <td className="px-4 py-2 text-sm text-gray-600">
-                  {statusProduksi === 'Dikirim' || statusProduksi === 'Selesai Produksi'
-                    ? 'Selesai'
-                    : 'Menunggu Produksi'}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <ReusableTable columns={columns} data={products} />
       </div>
 
-      {/* Section Resi & Button */}
+      {/* Resi & Button */}
       {statusProduksi !== 'Dikirim' && (
         <div className="flex flex-col gap-4 mt-6">
-          {/* No Resi hanya muncul saat Selesai Produksi */}
           {statusProduksi === 'Selesai Produksi' && (
             <div className="flex flex-col w-1/3 gap-1">
               <label className="text-sm font-medium">No. Resi:</label>
@@ -138,7 +127,6 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
           )}
 
           <div className="flex gap-2">
-            {/* Tombol Selesai */}
             <button
               onClick={handleSelesaiProduksi}
               disabled={statusProduksi !== 'Sedang Diproduksi'}
@@ -151,7 +139,6 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
               Selesai
             </button>
 
-            {/* Tombol Kirim */}
             <button
               onClick={handleKirim}
               disabled={statusProduksi !== 'Selesai Produksi'}
