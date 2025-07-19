@@ -1,7 +1,7 @@
 // src/Components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderContent.jsx
 import React from 'react';
 import PageTitle from '../../Common/PageHeader';
-import DetailOrderSection from './DetailOrderSection'; // Gabungan dari OrderInfoTable + ProdukDetailTable
+import DetailOrderSection from './DetailOrderSection'; 
 import ValidasiActions from '../../Common/ValidasiActions';
 
 const DetailOrderContent = ({
@@ -22,6 +22,7 @@ const DetailOrderContent = ({
                     handleSetHarga={handleSetHarga}
                 />
                 <ValidasiActions
+                    orderId={order?.orderId} 
                     handleTerima={handleTerima}
                     handleTolak={handleTolak}
                 />

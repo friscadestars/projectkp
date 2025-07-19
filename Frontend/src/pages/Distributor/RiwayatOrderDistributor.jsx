@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader';
 import RiwayatOrderSection from '../../components/ComponentsDashboard/Distributor/RiwayatOrder/RiwayatOrderContent'; // gabungan
-import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
 import iconRiwayat from '../../assets/IconHeader/IconRiwayat.png';
 import { useRiwayatOrderDistributor } from '../../hooks/Distributor/Riwayat/useRiwayatOrderDistributor';
 import { useNavigation } from '../../hooks/useNavigation';

@@ -1,5 +1,5 @@
+// hooks/useRiwayatOrderDistributor.js
 import { useState } from 'react';
-import Swal from 'sweetalert2'; // Import SweetAlert2
 
 export const useRiwayatOrderDistributor = () => {
     const [orders, setOrders] = useState([
@@ -26,27 +26,8 @@ export const useRiwayatOrderDistributor = () => {
     ]);
 
     const handleDelete = (id) => {
-    Swal.fire({
-        title: 'Yakin ingin menghapus?',
-        text: 'Data yang sudah dihapus tidak dapat dikembalikan!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#16a34a',  
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            onDelete(id);
-            Swal.fire({
-                title: 'Terhapus!',
-                text: 'Riwayat order berhasil dihapus.',
-                icon: 'success',
-                confirmButtonColor: '#2563eb',
-            });
-        }
-    });
-};
+        setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
+    };
 
     return { orders, handleDelete };
 };

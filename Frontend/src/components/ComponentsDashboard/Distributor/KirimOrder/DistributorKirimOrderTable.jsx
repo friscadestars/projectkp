@@ -1,10 +1,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
+import { useOrder } from '../../../../Context/OrderContext'; // Pastikan pathnya sesuai
 
-const DistributorKirimOrderTable = ({ orders }) => {
+const DistributorKirimOrderTable = () => {
     const navigate = useNavigate();
+    const { orders } = useOrder(); // Ambil orders dari context
 
     const columns = [
         {
@@ -56,22 +58,24 @@ const DistributorKirimOrderTable = ({ orders }) => {
         },
     ];
 
-    return (
-        <ReusableTable
-            columns={columns}
-            data={orders}
-            footer={
-                <tr>
-                    <td
-                        colSpan={columns.length}
-                        className="px-4 py-3 text-right text-gray-600 font-medium"
-                    >
-                        Total Order: {orders.length}
-                    </td>
-                </tr>
-            }
-        />
-    );
+return (
+    <ReusableTable
+        columns={columns}
+        data={orders.filter(order => order.status === 'Disetujui')} // hanya tampilkan yang Disetujui
+        footer={
+            <tr>
+                <td
+                    colSpan={columns.length}
+                    className="px-4 py-3 text-right text-gray-600 font-medium"
+                >
+                    Total Order: {
+                        orders.filter(order => order.status === 'Disetujui').length
+                    }
+                </td>
+            </tr>
+        }
+    />
+);
 };
 
 export default DistributorKirimOrderTable;

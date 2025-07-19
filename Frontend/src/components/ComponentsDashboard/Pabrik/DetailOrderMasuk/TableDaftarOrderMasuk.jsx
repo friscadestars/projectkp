@@ -7,7 +7,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         { label: 'Order ID', key: 'orderId' },
         { label: 'Distributor', key: 'distributor' },
         { label: 'Agen ID', key: 'agentId' },
-        { label: 'Alamat Agen', key: 'agenAddress' },
+        { label: 'Alamat Agen', key: 'agentAddress' },
         { label: 'Jumlah', key: 'jumlahProduk' },
         { label: 'Tanggal Order', key: 'orderDate' },
         {
@@ -33,9 +33,13 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         },
     ];
 
-    const dataWithIndex = orders.map((order, idx) => ({
+    // ✅ Ambil semua order yang statusnya 'Tertunda' (berarti baru dikirim ke pabrik)
+    const filteredOrders = orders.filter(order => order.status === 'Tertunda');
+
+    const dataWithIndex = filteredOrders.map((order, idx) => ({
         ...order,
         no: idx + 1,
+        jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0
     }));
 
     return (

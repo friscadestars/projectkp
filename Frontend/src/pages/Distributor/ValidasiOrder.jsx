@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
 import { useOrder } from '../../Context/OrderContext.jsx';
 import iconValidasi from '../../assets/IconHeader/ValidasiIcon.png';
-import ValidasiOrderSection from '../../Components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderSection';
+import ValidasiOrderSection from '../../components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderSection';
 import PageHeaderWithIcon from '../../components/ComponentsDashboard/Common/PageHeader';
 import { useNavigation } from '../../hooks/useNavigation';
 

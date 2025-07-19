@@ -1,6 +1,6 @@
 import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
-import StatusBadge from '../../Common/StatusBadge'; // Pastikan path ini sesuai
+import StatusBadge from '../../Common/StatusBadge'; 
 
 const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, handleTolak }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia</p>;
@@ -11,12 +11,12 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
         {
             header: 'Agen ID',
             key: 'agenId',
-            render: () => 'AG-001', // default sementara
+            render: () => 'AG-001', 
         },
         {
             header: 'Alamat',
             key: 'alamat',
-            render: () => 'Jl. Melati no.20 Jakarta', // default sementara
+            render: () => 'Jl. Melati no.20 Jakarta', 
         },
         { header: 'Tanggal Order', key: 'orderDate' },
         {

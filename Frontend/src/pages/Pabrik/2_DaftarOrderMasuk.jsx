@@ -3,10 +3,10 @@ import Layout from '../../Components/ComponentsDashboard/Layout/Layout.jsx';
 import { pabrikMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems.js';
 import { useDaftarOrderMasuk } from '../../hooks/Pabrik/useDaftarOrderMasuk.js';
 import { useNavigation } from '../../hooks/useNavigation.js';
-import PageHeader from '../../Components/ComponentsDashboard/Common/PageHeader.jsx';
+import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader.jsx';
 import TableDaftarOrderMasuk from '../../components/ComponentsDashboard/Pabrik/DetailOrderMasuk/TableDaftarOrderMasuk.jsx';
 import IconOrderMasuk from '../../assets/IconHeader/IconOrderMasuk.png';
-import SearchInput from '../../Components/ComponentsDashboard/Common/SearchInput.jsx';
+import SearchInput from '../../components/ComponentsDashboard/Common/SearchInput.jsx';
 
 const DaftarOrderMasuk = () => {
     const [showDropdown, setShowDropdown] = useState(false);

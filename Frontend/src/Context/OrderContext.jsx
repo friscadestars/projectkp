@@ -44,9 +44,9 @@ export const OrderProvider = ({ children }) => {
             },
             {
                 id: 2,
-                orderId: 'ORD-004',
+                orderId: 'ORD-003',
                 distributor: 'PT. Maju Jaya',
-                agentId: 'AGN-002',
+                agentId: 'AGN-001',
                 factoryId: 'FCT-002',
                 orderDate: '17/06/2025',
                 shippingDate: '18/06/2025',
@@ -60,7 +60,7 @@ export const OrderProvider = ({ children }) => {
             },
             {
                 id: 3,
-                orderId: 'ORD-003',
+                orderId: 'ORD-004',
                 distributor: 'PT. Maju Jaya',
                 agentId: 'AGN-003',
                 factoryId: 'FCT-001',
@@ -121,6 +121,9 @@ export const OrderProvider = ({ children }) => {
         ])
     );
 
+    const [ordersMasukPabrik, setOrdersMasukPabrik] = useState([]);
+    const [validasiOrders, setValidasiOrders] = useState([]); // ✅ Tambahkan validasiOrders
+
     const markAsCompleted = (orderId) => {
         setOrders(prev =>
             sortOrders(
@@ -151,30 +154,81 @@ export const OrderProvider = ({ children }) => {
 
     const deleteOrder = (orderId) => {
         setOrders(prev => sortOrders(prev.filter(order => order.orderId !== orderId)));
+        setValidasiOrders(prev => prev.filter(order => order.orderId !== orderId)); // ✅ Hapus juga dari validasi
     };
 
     const approveOrder = (orderId) => {
-    console.log('Approving order:', orderId); // ✅ debug
-    setOrders(prev =>
-        sortOrders(
-            prev.map(order =>
-                order.orderId === orderId
-                    ? { ...order, status: 'Disetujui' }
-                    : order
+        setOrders(prev =>
+            sortOrders(
+                prev.map(order =>
+                    order.orderId === orderId
+                        ? { ...order, status: 'Disetujui' }
+                        : order
+                )
             )
-        )
-    );
-};
+        );
+    };
+
+    const updateOrderStatus = (orderId, newStatus) => {
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString('id-ID');
+
+        setOrders(prev => {
+            let updatedOrderItem = null;
+
+            const updated = sortOrders(
+                prev.map(order => {
+                    if (order.orderId !== orderId) return order;
+
+                    const updatedOrder = {
+                        ...order,
+                        status: newStatus,
+                        shippingDate: newStatus === 'Tertunda' ? formattedDate : order.shippingDate
+                    };
+
+                    updatedOrderItem = updatedOrder;
+                    return updatedOrder;
+                })
+            );
+
+            if (newStatus === 'Tertunda' && updatedOrderItem) {
+                setOrdersMasukPabrik(prevMasuk => {
+                    const alreadyExists = prevMasuk.some(
+                        o => o.orderId === updatedOrderItem.orderId
+                    );
+                    if (!alreadyExists) {
+                        return [...prevMasuk, structuredClone(updatedOrderItem)];
+                    }
+                    return prevMasuk;
+                });
+            }
+
+            return updated;
+        });
+    };
+
+    const addNewOrder = (newOrder) => {
+        setOrders(prev => sortOrders([...prev, newOrder]));
+        setValidasiOrders(prev => [...prev, newOrder]);
+    };
 
     return (
-        <OrderContext.Provider value={{
-            orders,
-            setOrders,
-            markAsCompleted,
-            updateProductPrice,
-            deleteOrder,
-            approveOrder
-        }}>
+        <OrderContext.Provider
+            value={{
+                orders,
+                setOrders,
+                ordersMasukPabrik,
+                setOrdersMasukPabrik,
+                validasiOrders,
+                setValidasiOrders,
+                markAsCompleted,
+                updateProductPrice,
+                deleteOrder,
+                approveOrder,
+                updateOrderStatus,
+                addNewOrder 
+            }}
+        >
             {children}
         </OrderContext.Provider>
     );

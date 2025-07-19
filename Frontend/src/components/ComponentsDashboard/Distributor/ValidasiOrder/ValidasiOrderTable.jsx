@@ -1,7 +1,7 @@
 // src/Components/Table/ValidasiOrderTable.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable'; 
 
 const ValidasiOrderTable = ({ orders }) => {
     const navigate = useNavigate();

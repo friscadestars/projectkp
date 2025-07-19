@@ -51,7 +51,6 @@ const ProductDetailTable = ({ products }) => {
         <>
             <tr>
                 <td colSpan={columns.length} className="px-4 py-3 text-right font-medium text-gray-600">
-                    {/* Kosong atau bisa isi total harga */}
                 </td>
             </tr>
         </>
@@ -63,7 +62,7 @@ const ProductDetailTable = ({ products }) => {
             <ReusableTable
                 columns={columns}
                 data={products}
-                footer={footerRow} // ✅ gunakan variabel
+                footer={footerRow}
             />
         </div>
     );

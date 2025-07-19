@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../hooks/useNavigation';
 import TagihanDistributorContent from '../../components/ComponentsDashboard/Distributor/Tagihan/TagihanDistributorContent';
 import { useTagihanDistributorPage } from '../../hooks/Distributor/Tagihan/useTagihanDistributorPage';

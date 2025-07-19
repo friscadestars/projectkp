@@ -1,12 +1,6 @@
-import { useState } from "react";
-
-const formatDate = (date) => {
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
-};
+// src/pages/agen/formpermintaanorder/useOrderFormState.js
+import { useState } from "react"; // ✅ Tambahkan ini
+import { useOrder } from "../../../Context/OrderContext"; 
 
 const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSuccess }) => {
     const [produk, setProduk] = useState("");
@@ -14,6 +8,8 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSucc
     const [harga, setHarga] = useState("");
     const [alamat, setAlamat] = useState("");
     const [produkList, setProdukList] = useState([]);
+
+    const { addNewOrder } = useOrder(); 
 
     const handleAddProduk = () => {
         if (produk && jumlah && harga) {
@@ -39,7 +35,7 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSucc
             agentId: agentId,
             distributorId: distributorInfo.id,
             distributor: distributorInfo.name,
-            orderDate: formatDate(new Date()),
+            orderDate: new Date().toLocaleDateString('id-ID'),
             address: alamat,
             status: "Tertunda",
             products: produkList.map(p => ({
@@ -50,9 +46,9 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSucc
             }))
         };
 
-        setOrders([...orders, newOrder]);
+        addNewOrder(newOrder); 
         onSuccess?.();
-        return { success: true }; // return status
+        return { success: true };
     };
 
     return {
@@ -63,4 +59,4 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSucc
     };
 };
 
-export default useOrderFormState;
+export default useOrderFormState; // ✅ Tambahkan ini agar bisa di-import default

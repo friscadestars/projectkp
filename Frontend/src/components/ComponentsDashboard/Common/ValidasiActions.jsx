@@ -1,8 +1,12 @@
+// src/Components/ComponentsDashboard/Common/ValidasiActions.jsx
 import React from 'react';
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom';
 
-const ValidasiActions = ({ handleTerima, handleTolak }) => {
-    const showConfirmation = async (title, text, onConfirm) => {
+const ValidasiActions = ({ orderId, handleTerima, handleTolak }) => {
+    const navigate = useNavigate();
+
+    const showConfirmation = async (title, text, onConfirm, redirectPath) => {
         const result = await Swal.fire({
             title,
             text,
@@ -15,7 +19,11 @@ const ValidasiActions = ({ handleTerima, handleTolak }) => {
         });
 
         if (result.isConfirmed && typeof onConfirm === 'function') {
-            onConfirm();
+            await onConfirm(orderId);
+
+            if (redirectPath) {
+                navigate(redirectPath);
+            }
         }
     };
 
@@ -39,7 +47,7 @@ const ValidasiActions = ({ handleTerima, handleTolak }) => {
                     showConfirmation(
                         'Tolak Order',
                         'Apakah Anda yakin ingin menolak order ini? Tindakan ini tidak dapat dibatalkan.',
-                        handleTolak
+                        handleTolak,
                     )
                 }
             >

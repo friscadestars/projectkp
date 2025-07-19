@@ -4,7 +4,7 @@ const SubmitButton = ({ onClick }) => {
   const showConfirmation = async () => {
     const result = await Swal.fire({
       title: 'Konfirmasi Kirim Order',
-      text: 'Apakah Anda yakin ingin mengirim order ini ke pabrik?',
+      text: 'Apakah Anda yakin ingin mengirim order ini ke distributor?',
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#16a34a',
@@ -19,7 +19,7 @@ const SubmitButton = ({ onClick }) => {
       if (res?.success) {
         await Swal.fire({
           title: 'Order Dikirim',
-          text: 'Order berhasil dikirim ke pabrik.',
+          text: 'Order berhasil dikirim ke distributor.',
           icon: 'success',
           confirmButtonColor: '#2563eb',
         });

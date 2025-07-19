@@ -16,12 +16,12 @@ const ValidasiOrderPage = () => {
     };
 
     const handleTerima = () => {
-        approveOrder(orderId); // ✅ ubah status
-        navigate('/distributor/kirim-ke-pabrik'); // ✅ pindah ke halaman kirim
+        approveOrder(orderId); 
+        navigate('/distributor/kirim-ke-pabrik'); 
     };
 
     const handleTolak = () => {
-        // opsional jika ada rejectOrder di context
+       
     };
 
     return (
