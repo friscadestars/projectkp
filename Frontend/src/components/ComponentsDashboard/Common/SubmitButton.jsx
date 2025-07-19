@@ -1,6 +1,9 @@
 import Swal from 'sweetalert2';
+import { useNavigate } from 'react-router-dom'; // ✅ Tambahkan ini
 
 const SubmitButton = ({ onClick }) => {
+  const navigate = useNavigate(); // ✅ Inisialisasi navigasi
+
   const showConfirmation = async () => {
     const result = await Swal.fire({
       title: 'Konfirmasi Kirim Order',
@@ -23,6 +26,8 @@ const SubmitButton = ({ onClick }) => {
           icon: 'success',
           confirmButtonColor: '#2563eb',
         });
+
+        navigate('/distributor/validasi-order'); // ✅ Navigasi ke halaman setelah alert ditutup
       } else {
         await Swal.fire({
           title: 'Gagal Mengirim',

@@ -92,9 +92,13 @@ const OrderForm = ({
                     <tbody>
                         {produkList.map((item, index) => (
                             <tr key={index} className="border-b">
-                                <td className="px-4 py-2">{item.nama}</td>
-                                <td className="px-4 py-2">{item.jumlah}</td>
-                                <td className="px-4 py-2">Rp {item.harga.toLocaleString("id-ID")}</td>
+                                <td className="px-4 py-2">{item.nama || '-'}</td>
+                                <td className="px-4 py-2">{item.jumlah || '-'}</td>
+                                <td className="px-4 py-2">
+                                    {typeof item.harga === "number"
+                                        ? `Rp ${item.harga.toLocaleString("id-ID")}`
+                                        : "Rp -"}
+                                </td>
                                 <td className="px-4 py-2">
                                     <button
                                         onClick={() => handleDeleteProduk(index)}

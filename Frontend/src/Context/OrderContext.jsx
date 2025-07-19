@@ -122,7 +122,7 @@ export const OrderProvider = ({ children }) => {
     );
 
     const [ordersMasukPabrik, setOrdersMasukPabrik] = useState([]);
-    const [validasiOrders, setValidasiOrders] = useState([]); // ✅ Tambahkan validasiOrders
+    const [validasiOrders, setValidasiOrders] = useState([]);
 
     const markAsCompleted = (orderId) => {
         setOrders(prev =>
@@ -154,7 +154,7 @@ export const OrderProvider = ({ children }) => {
 
     const deleteOrder = (orderId) => {
         setOrders(prev => sortOrders(prev.filter(order => order.orderId !== orderId)));
-        setValidasiOrders(prev => prev.filter(order => order.orderId !== orderId)); // ✅ Hapus juga dari validasi
+        setValidasiOrders(prev => prev.filter(order => order.orderId !== orderId)); 
     };
 
     const approveOrder = (orderId) => {
@@ -208,9 +208,37 @@ export const OrderProvider = ({ children }) => {
     };
 
     const addNewOrder = (newOrder) => {
-        setOrders(prev => sortOrders([...prev, newOrder]));
-        setValidasiOrders(prev => [...prev, newOrder]);
-    };
+  const adjustedOrder = {
+    ...newOrder,
+    products: newOrder.products.map((product) => ({
+      ...product,
+      quantity: product.jumlah,
+      jumlah: undefined,
+    })),
+  };
+
+  setOrders(prev => sortOrders([...prev, adjustedOrder]));
+  setValidasiOrders(prev => [...prev, adjustedOrder]);
+};
+
+const [notifications, setNotifications] = useState([]);
+const addNotification = (message) => {
+  const date = new Date();
+  const formatted = date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  });
+
+  setNotifications(prev => [
+    {
+      id: Date.now(), 
+      message,
+      date: formatted
+    },
+    ...prev
+  ]);
+};
 
     return (
         <OrderContext.Provider
@@ -226,7 +254,10 @@ export const OrderProvider = ({ children }) => {
                 deleteOrder,
                 approveOrder,
                 updateOrderStatus,
-                addNewOrder 
+                addNewOrder,
+        notifications,           
+        setNotifications,          
+        addNotification 
             }}
         >
             {children}

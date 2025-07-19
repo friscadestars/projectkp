@@ -35,9 +35,10 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
 
             {/* Sidebar */}
             <aside
-                className={`fixed md:static z-40 bg-blue-900 text-white min-h-screen w-64 px-4 py-3 transform transition-transform duration-300
+                className={`fixed md:static z-40 bg-blue-900 text-white w-64 px-4 py-3 transform transition-transform duration-300
                 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                md:translate-x-0`}
+                md:translate-x-0
+                h-full md:h-screen overflow-y-auto`}
             >
                 {/* Close button untuk mobile */}
                 <div className="flex justify-end md:hidden mb-4">
@@ -68,12 +69,11 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                         }
                                     }}
                                 >
-                                    <div className="flex items-center">
+                                    <div className="flex items-center space-x-2">
                                         <img src={item.icon} alt={item.label} className="w-16 h-19" />
                                         <span className="font-semibold">{item.label}</span>
                                     </div>
 
-                                    {/* Dropdown icon */}
                                     {item.subItems && (
                                         <img
                                             src={iconDropdown}
@@ -83,7 +83,6 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                     )}
                                 </div>
 
-                                {/* Submenu */}
                                 {item.subItems && openMenus[item.label] && (
                                     <ul className="ml-8 mt-1 space-y-1">
                                         {item.subItems.map((subItem, subIndex) => (
@@ -95,7 +94,7 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                                     }`}
                                                 onClick={() => {
                                                     onNavigate(subItem.label);
-                                                    setIsSidebarOpen(false); // Close sidebar on mobile
+                                                    setIsSidebarOpen(false);
                                                 }}
                                             >
                                                 {subItem.label}

@@ -10,7 +10,7 @@ const ReusableTable = ({
     const hasCustomRender = typeof renderRow === 'function';
 
     return (
-        <div className="order-table-container">
+        <div className="order-table-container overflow-x-auto w-full">
             <table className={`order-table ${className}`.trim()}>
                 <thead>
                     <tr>
