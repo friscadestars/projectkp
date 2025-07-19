@@ -4,7 +4,7 @@ import { agenMenuItems } from "../../../Components/ComponentsDashboard/Constants
 import useOrderFormState from "./useOrderFormState";
 import { formatDate } from "../../../components/ComponentsDashboard/Common/date";
 import bagIcon from "../../../assets/IconHeader/IconBag.png";
-import { useState } from "react"; // ✅ Tambahkan ini
+import { useState } from "react"; 
 
 export const usePermintaanOrderPage = () => {
     const { orders, setOrders } = useOrder();
@@ -13,7 +13,6 @@ export const usePermintaanOrderPage = () => {
 
     const { handleNavigation } = useNavigation(agenMenuItems);
 
-    // ✅ Tambahkan state showDropdown
     const [showDropdown, setShowDropdown] = useState(false);
     const toggleDropdown = () => setShowDropdown(prev => !prev);
 
@@ -30,7 +29,6 @@ export const usePermintaanOrderPage = () => {
         onSuccess: () => handleNavigation('/ringkasan-order')
     });
 
-    // ✅ Masukkan showDropdown dan toggleDropdown ke layoutProps
     const layoutProps = {
         menuItems: agenMenuItems,
         activeLabel: "Permintaan Order",

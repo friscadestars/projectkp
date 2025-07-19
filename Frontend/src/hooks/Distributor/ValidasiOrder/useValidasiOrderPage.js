@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2'; 
-import { useOrder } from '../../../Context/OrderContext'; // ✅ Import hanya sekali
+import { useOrder } from '../../../Context/OrderContext'; 
 import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import iconValidasi from '../../../assets/IconHeader/ValidasiIcon.png';
@@ -10,7 +10,7 @@ import iconValidasi from '../../../assets/IconHeader/ValidasiIcon.png';
 export const useValidasiOrderPage = () => {
     const { orderId } = useParams();
     const navigate = useNavigate();
-    const { orders, updateProductPrice, updateOrderStatus } = useOrder(); // ✅ Gunakan dengan benar
+    const { orders, updateProductPrice, updateOrderStatus } = useOrder(); 
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
     const order = orders.find(o => o.orderId === orderId);
@@ -31,11 +31,11 @@ export const useValidasiOrderPage = () => {
         inputPrices.forEach(p => {
             const numeric = parseInt(p.price);
             if (!isNaN(numeric)) {
-                updateProductPrice(orderId, p.name, numeric); // ✅ Update harga
+                updateProductPrice(orderId, p.name, numeric); 
             }
         });
 
-        updateOrderStatus(orderId, 'Disetujui'); // ✅ Update status
+        updateOrderStatus(orderId, 'Disetujui'); 
 
         Swal.fire({
             icon: 'success',
@@ -50,7 +50,7 @@ export const useValidasiOrderPage = () => {
     const handleTolak = () => {
         if (!order) return;
 
-        updateOrderStatus(orderId, 'Ditolak'); // ✅ Update status
+        updateOrderStatus(orderId, 'Ditolak'); 
 
         Swal.fire({
             icon: 'info',

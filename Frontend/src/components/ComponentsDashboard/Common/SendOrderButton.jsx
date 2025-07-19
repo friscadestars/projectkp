@@ -2,11 +2,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { useOrder } from '../../../Context/OrderContext'; // ✅ Ambil context
+import { useOrder } from '../../../Context/OrderContext'; // Ambil context
 
 const SendOrderButton = ({ orderId }) => {
     const navigate = useNavigate();
-    const { updateOrderStatus } = useOrder(); // ✅ Ambil fungsi update status
+    const { updateOrderStatus } = useOrder(); // Ambil fungsi update status
 
     const handleClick = () => {
         Swal.fire({
@@ -20,7 +20,6 @@ const SendOrderButton = ({ orderId }) => {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                // ✅ Ubah status menjadi 'Tertunda' untuk order masuk di pabrik
                 updateOrderStatus(orderId, 'Tertunda');
 
                 Swal.fire({

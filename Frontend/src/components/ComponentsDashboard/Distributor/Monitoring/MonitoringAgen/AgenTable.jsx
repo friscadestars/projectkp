@@ -1,6 +1,6 @@
 // src/Components/Distributor/Agen/AgenTable.jsx
 import React from "react";
-import ReusableTable from "../../../Common/ReusableTable"; // pastikan path sesuai
+import ReusableTable from "../../../Common/ReusableTable";
 
 const AgenTable = ({ agenList, toggleAktif }) => {
     const columns = [

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNavigation } from '../../useNavigation';
 import { getOrderPageInfo } from '../../../utils/Agen/InfoDetailOrder';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 
 export const useDetailOrderPage = () => {
     const location = useLocation();
@@ -21,6 +21,6 @@ export const useDetailOrderPage = () => {
         showDropdown,
         toggleDropdown: () => setShowDropdown(prev => !prev),
         handleNavigation,
-        agenMenuItems // ✅ tambahkan ini
+        agenMenuItems 
     };
 };

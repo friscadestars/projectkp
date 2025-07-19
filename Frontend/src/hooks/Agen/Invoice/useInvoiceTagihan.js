@@ -8,7 +8,7 @@ const useInvoiceTagihan = () => {
     const [invoiceData, setInvoiceData] = useState(null);
     const [statusPembayaran, setStatusPembayaran] = useState('Belum Lunas');
     const [showDropdown, setShowDropdown] = useState(false);
-    const [showModal, setShowModal] = useState(false); // ✅ Tambahkan ini
+    const [showModal, setShowModal] = useState(false); 
 
     useEffect(() => {
         if (location.state && location.state.tagihan) {
@@ -22,12 +22,11 @@ const useInvoiceTagihan = () => {
 
     const handleConfirmPayment = () => {
         setStatusPembayaran('Lunas');
-        setShowModal(false); // ✅ Tutup modal saat pembayaran dikonfirmasi
+        setShowModal(false); 
     };
 
     const toggleDropdown = () => setShowDropdown(prev => !prev);
 
-    // ✅ Handler tambahan
     const openModal = () => setShowModal(true);
     const closeModal = () => setShowModal(false);
 

@@ -1,5 +1,5 @@
 // src/pages/agen/formpermintaanorder/useOrderFormState.js
-import { useState } from "react"; // ✅ Tambahkan ini
+import { useState } from "react"; 
 import { useOrder } from "../../../Context/OrderContext"; 
 
 const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSuccess }) => {
@@ -59,4 +59,4 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, setOrders, onSucc
     };
 };
 
-export default useOrderFormState; // ✅ Tambahkan ini agar bisa di-import default
+export default useOrderFormState; 

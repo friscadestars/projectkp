@@ -1,6 +1,6 @@
 import iconTagihan from '../../../assets/IconHeader/IconTagihan.png';
 import { useNavigation } from '../../useNavigation';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import useInvoiceTagihan from './useInvoiceTagihan';
 
 export const useInvoiceTagihanPage = () => {
@@ -36,7 +36,7 @@ export const useInvoiceTagihanPage = () => {
         onConfirmPayment: handleConfirmPayment,
         onOpenModal: openModal,
         onCloseModal: closeModal,
-        showModal, // ✅ Tambahkan ini
+        showModal, 
         showAgen: false,
         showDistributor: true,
         showConfirmationButton: true
