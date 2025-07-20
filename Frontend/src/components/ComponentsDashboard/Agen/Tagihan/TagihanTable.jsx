@@ -71,11 +71,18 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
         {
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
-            render: (val) => (
-                <span className={getStatusPembayaranClass(val || 'Belum Lunas')}>
-                    {val || 'Belum Lunas'}
-                </span>
-            ),
+            render: (_, row) => {
+                const status =
+                    row.statusPembayaran ||
+                    row.tagihan?.statusPembayaran ||
+                    'Belum Lunas';
+
+                return (
+                    <span className={getStatusPembayaranClass(status)}>
+                        {status}
+                    </span>
+                );
+            }
         },
         {
             header: 'Aksi',
@@ -84,13 +91,24 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
             render: (_, row) => (
                 <button
                     onClick={() => {
+                        const tagihanData = {
+                            ...row,
+                            statusPembayaran:
+                                row.statusPembayaran ||
+                                row.tagihan?.statusPembayaran ||
+                                'Belum Lunas',
+                        };
+
                         if (role === 'distributor') {
                             navigate(`/distributor/invoice/${row.orderId}`, {
-                                state: { tagihan: row },
+                                state: { tagihan: tagihanData },
                             });
                         } else {
                             navigate('/agen/invoice-tagihan', {
-                                state: { tagihan: row, orderId: row.orderId },
+                                state: {
+                                    tagihan: tagihanData,
+                                    orderId: row.orderId,
+                                },
                             });
                         }
                     }}

@@ -76,7 +76,7 @@ const OrderDetailTable = ({ order }) => {
             render: (val) => (
                 <span className={`px-3 py-1 text-sm rounded text-white font-bold
                     ${val === 'Belum Dikirim' ? 'bg-orange-400' :
-                        val === 'Disetujui' ? 'bg-green-500' :
+                        val === 'Diproduksi' ? 'bg-green-500' :
                             val === 'Diproses' ? 'bg-blue-500' :
                                 val === 'Dikirim' ? 'bg-cyan-500' :
                                     val === 'Diterima' ? 'bg-emerald-500' :

@@ -13,15 +13,24 @@
   --color-secondary: #F4F6F9;
   --color-secondary-light: #EFF9FF;
 
-  --color-btn-primary: #007BFF;     /* Biru tombol utama */
-  --color-btn-success: #4EA63A;     /* Hijau: Selesai Produksi */
-  --color-btn-info: #17A2B8;        /* Cyan: Dikirim */
-  --color-btn-confirm: #009970;     /* Hijau: Diterima */
-  --color-btn-warning: #FF2F00;     /* Merah: Belum Dikirim */
-  --color-btn-danger: #FB0004;      /* Merah terang: status kritis */
-  --color-btn-disabled: #9CAFC8;    /* Abu: Tombol nonaktif */
-  --color-btn-dark: #122786;        /* Biru gelap: secondary */
-  --color-btn-light: #FFFAFA;       /* Putih */
+  --color-btn-primary: #007BFF;
+  /* Biru tombol utama */
+  --color-btn-success: #4EA63A;
+  /* Hijau: Selesai Produksi */
+  --color-btn-info: #17A2B8;
+  /* Cyan: Dikirim */
+  --color-btn-confirm: #009970;
+  /* Hijau: Diterima */
+  --color-btn-warning: #FF2F00;
+  /* Merah: Belum Dikirim */
+  --color-btn-danger: #FB0004;
+  /* Merah terang: status kritis */
+  --color-btn-disabled: #9CAFC8;
+  /* Abu: Tombol nonaktif */
+  --color-btn-dark: #122786;
+  /* Biru gelap: secondary */
+  --color-btn-light: #FFFAFA;
+  /* Putih */
 
   --font-lato: "Lato", sans-serif;
   --font-inter: "Inter", sans-serif;
@@ -29,7 +38,7 @@
 
 /* Semua custom class menggunakan @layer components */
 @layer components {
-    .bg-btn-primary {
+  .bg-btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white;
   }
 

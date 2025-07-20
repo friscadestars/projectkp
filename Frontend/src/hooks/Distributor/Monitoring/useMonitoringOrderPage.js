@@ -6,7 +6,7 @@ export const useMonitoringOrderPage = () => {
     const [search, setSearch] = useState('');
     const { orders } = useOrder();
 
-    const allowedStatuses = ['Disetujui', 'Diproses', 'Dikirim', 'Diterima'];
+    const allowedStatuses = ['Diproduksi', 'Diproses', 'Dikirim', 'Diterima'];
 
     const filteredOrders = orders.filter(order =>
         allowedStatuses.includes(order.status) &&

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
 const useTagihanPage = () => {

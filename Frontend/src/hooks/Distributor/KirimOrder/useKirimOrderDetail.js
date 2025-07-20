@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '../../../Context/OrderContext.jsx';
-import { distributorMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 
 export const useKirimOrderDetail = () => {
     const { orderId } = useParams();

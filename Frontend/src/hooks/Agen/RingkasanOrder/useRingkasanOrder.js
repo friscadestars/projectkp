@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../../../Context/OrderContext';
-import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
 const useRingkasanOrder = () => {
@@ -26,15 +26,19 @@ const useRingkasanOrder = () => {
     };
 
     const confirmReceipt = () => {
-        const updated = orders.map(order =>
-            order.id === selectedId && order.status === 'Dikirim'
-                ? {
+        const updated = orders.map(order => {
+            if (order.id === selectedId && order.status === 'Dikirim') {
+                const total = order.products.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
+                return {
                     ...order,
                     status: 'Selesai',
                     receivedDate: new Date().toLocaleDateString('id-ID'),
-                }
-                : order
-        );
+                    total,
+                };
+            }
+            return order;
+        });
+
         setOrders(updated);
         setShowModal(false);
         setSelectedId(null);
@@ -78,11 +82,17 @@ const useRingkasanOrder = () => {
         return new Date(y, m - 1, d);
     };
 
+    // Filter status yang diizinkan ditampilkan
+    const allowedStatuses = ['Tertunda', 'Disetujui', 'Diproses', 'Ditolak', 'Dikirim'];
+
     const filteredOrders = orders
         .filter(order =>
-            (order.orderId && order.orderId.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (order.distributor && order.distributor.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (order.status && order.status.toLowerCase().includes(searchTerm.toLowerCase()))
+            allowedStatuses.includes(order.status) &&
+            (
+                (order.orderId && order.orderId.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (order.distributor && order.distributor.toLowerCase().includes(searchTerm.toLowerCase())) ||
+                (order.status && order.status.toLowerCase().includes(searchTerm.toLowerCase()))
+            )
         )
         .sort((a, b) => {
             const dateA = parseDate(a.orderDate);

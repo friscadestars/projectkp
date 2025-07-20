@@ -5,7 +5,7 @@ import { useNavigation } from '../../useNavigation';
 import useTagihanPage from './useTagihanPage';
 
 export const useTagihanPageProps = () => {
-    const { orders } = useOrder();
+    const { orders, updateOrderStatus } = useOrder(); // pastikan fungsi ini ada di context
     const {
         showDropdown,
         toggleDropdown,
@@ -14,6 +14,11 @@ export const useTagihanPageProps = () => {
     } = useTagihanPage();
 
     const { handleNavigation } = useNavigation(agenMenuItems);
+
+    // Fungsi untuk handle perubahan status (misal: dari "Belum Bayar" ke "Lunas")
+    const handleStatusChange = (orderId, newStatus) => {
+        updateOrderStatus(orderId, newStatus);
+    };
 
     return {
         layoutProps: {
@@ -34,7 +39,8 @@ export const useTagihanPageProps = () => {
         },
         tagihanTableProps: {
             orders,
-            searchTerm
+            searchTerm,
+            onStatusChange: handleStatusChange // 🟢 Tambahkan handler ke props table
         }
     };
 };

@@ -1,7 +1,7 @@
 import React from 'react';
 import AgenLayout from '../../Components/ComponentsDashboard/Layout/Layout';
 import PageHeaderWithIcon from '../../components/ComponentsDashboard/Common/PageHeader';
-import SearchInput from '../../Components/ComponentsDashboard/Common/SearchInput';
+import SearchInput from '../../components/ComponentsDashboard/Common/SearchInput';
 import TagihanTable from '../../components/ComponentsDashboard/Agen/Tagihan/TagihanTable';
 import { useTagihanPageProps } from '../../hooks/Agen/Tagihan/useTagihanPageProps';
 
@@ -10,7 +10,7 @@ const Tagihan = () => {
 
     return (
         <AgenLayout {...props.layoutProps}
-        role="agen" 
+            role="agen"
         >
             <PageHeaderWithIcon {...props.pageHeaderProps} />
             <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6">

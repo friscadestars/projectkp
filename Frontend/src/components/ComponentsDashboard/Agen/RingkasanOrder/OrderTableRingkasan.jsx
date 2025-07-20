@@ -1,8 +1,13 @@
 import React from 'react';
 import Swal from 'sweetalert2';
-import ReusableTable from '../../Common/ReusableTable'; // sesuaikan path jika berbeda
+import { useNavigate } from 'react-router-dom';
+import ReusableTable from '../../Common/ReusableTable';
+import { useOrder } from '../../../../Context/OrderContext';
 
-const OrderTableRingkasan = ({ orders, onDetail, onConfirm, getEstimatedDate, getStatusClasses }) => {
+const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClasses }) => {
+    const { moveToHistory, setOrderToApproved } = useOrder();
+    const navigate = useNavigate();
+
     const showConfirmation = async (orderId) => {
         const result = await Swal.fire({
             title: 'Konfirmasi Penerimaan Order',
@@ -16,35 +21,26 @@ const OrderTableRingkasan = ({ orders, onDetail, onConfirm, getEstimatedDate, ge
         });
 
         if (result.isConfirmed) {
-            onConfirm(orderId); // panggil handler dari parent
+            setOrderToApproved(orderId);
+            moveToHistory(orderId);
             Swal.fire({
                 title: 'Berhasil!',
                 text: `Order ${orderId} telah dikonfirmasi diterima.`,
                 icon: 'success',
                 confirmButtonColor: '#2563eb',
+            }).then(() => {
+                navigate('/agen/riwayat-order');
             });
         }
     };
 
     const columns = [
-        {
-            header: 'No',
-            key: 'no',
-            render: (_, __, rowIndex) => rowIndex + 1,
-        },
+        { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
         { header: 'Order ID', key: 'orderId' },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Tanggal Order', key: 'orderDate' },
-        {
-            header: 'Estimasi Sampai',
-            key: 'deliveryEstimate',
-            render: (_, row) => getEstimatedDate(row),
-        },
-        {
-            header: 'No. Resi',
-            key: 'noResi',
-            render: (value) => value || '-',
-        },
+        { header: 'Estimasi Sampai', key: 'deliveryEstimate', render: (_, row) => getEstimatedDate(row) },
+        { header: 'No. Resi', key: 'noResi', render: (value) => value || '-' },
         {
             header: 'Status Order',
             key: 'status',

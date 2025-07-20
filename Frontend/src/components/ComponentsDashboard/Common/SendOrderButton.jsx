@@ -2,11 +2,11 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
-import { useOrder } from '../../../Context/OrderContext'; // Ambil context
+import { useOrder } from '../../../Context/OrderContext';
 
 const SendOrderButton = ({ orderId }) => {
     const navigate = useNavigate();
-    const { updateOrderStatus } = useOrder(); // Ambil fungsi update status
+    const { updateOrderStatus, markAsProcessed } = useOrder();
 
     const handleClick = () => {
         Swal.fire({
@@ -20,7 +20,8 @@ const SendOrderButton = ({ orderId }) => {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                updateOrderStatus(orderId, 'Tertunda');
+                updateOrderStatus(orderId, 'Diproses');
+                markAsProcessed(orderId);
 
                 Swal.fire({
                     icon: 'success',
@@ -28,7 +29,7 @@ const SendOrderButton = ({ orderId }) => {
                     text: `Order ${orderId} berhasil dikirim ke pabrik.`,
                     confirmButtonColor: '#2563eb',
                 }).then(() => {
-                    navigate('/distributor/kirim-order');
+                    navigate('/distributor/monitoring-order');
                 });
             }
         });

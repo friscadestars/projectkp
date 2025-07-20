@@ -113,7 +113,7 @@ export const OrderProvider = ({ children }) => {
                 shippingDate: '-',
                 deliveryEstimate: '-',
                 noResi: '-',
-                status: 'Tertunda',
+                status: 'Diterima',
                 products: [
                     { name: 'Produk Z', quantity: 1, unitPrice: 0, requestedPrice: 10000 }
                 ]
@@ -121,8 +121,10 @@ export const OrderProvider = ({ children }) => {
         ])
     );
 
+    const [historyOrders, setHistoryOrders] = useState([]);
     const [ordersMasukPabrik, setOrdersMasukPabrik] = useState([]);
     const [validasiOrders, setValidasiOrders] = useState([]);
+    const [monitoringOrders, setMonitoringOrders] = useState([]);
 
     const markAsCompleted = (orderId) => {
         setOrders(prev =>
@@ -154,7 +156,7 @@ export const OrderProvider = ({ children }) => {
 
     const deleteOrder = (orderId) => {
         setOrders(prev => sortOrders(prev.filter(order => order.orderId !== orderId)));
-        setValidasiOrders(prev => prev.filter(order => order.orderId !== orderId)); 
+        setValidasiOrders(prev => prev.filter(order => order.orderId !== orderId));
     };
 
     const approveOrder = (orderId) => {
@@ -208,37 +210,116 @@ export const OrderProvider = ({ children }) => {
     };
 
     const addNewOrder = (newOrder) => {
-  const adjustedOrder = {
-    ...newOrder,
-    products: newOrder.products.map((product) => ({
-      ...product,
-      quantity: product.jumlah,
-      jumlah: undefined,
-    })),
-  };
+        const adjustedOrder = {
+            ...newOrder,
+            products: newOrder.products.map((product) => ({
+                ...product,
+                quantity: product.jumlah,
+                jumlah: undefined,
+            })),
+        };
 
-  setOrders(prev => sortOrders([...prev, adjustedOrder]));
-  setValidasiOrders(prev => [...prev, adjustedOrder]);
-};
+        setOrders(prev => sortOrders([...prev, adjustedOrder]));
+        setValidasiOrders(prev => [...prev, adjustedOrder]);
+    };
 
-const [notifications, setNotifications] = useState([]);
-const addNotification = (message) => {
-  const date = new Date();
-  const formatted = date.toLocaleDateString("id-ID", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric"
-  });
+    const [notifications, setNotifications] = useState([]);
+    const addNotification = (message) => {
+        const date = new Date();
+        const formatted = date.toLocaleDateString("id-ID", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric"
+        });
 
-  setNotifications(prev => [
-    {
-      id: Date.now(), 
-      message,
-      date: formatted
-    },
-    ...prev
-  ]);
-};
+        setNotifications(prev => [
+            {
+                id: Date.now(),
+                message,
+                date: formatted
+            },
+            ...prev
+        ]);
+    };
+
+    const sendToMonitoringOrder = (orderId) => {
+        setOrders(prevOrders => {
+            const updatedOrders = prevOrders.map(order => {
+                if (order.orderId === orderId) {
+                    return {
+                        ...order,
+                        status: 'Diproses',
+                        shippingDate: new Date().toLocaleDateString('id-ID'),
+                    };
+                }
+                return order;
+            });
+
+            const updatedOrder = updatedOrders.find(order => order.orderId === orderId);
+
+            if (updatedOrder) {
+                setMonitoringOrders(prev => {
+                    const alreadyExists = prev.some(o => o.orderId === orderId);
+                    if (!alreadyExists) {
+                        return [...prev, structuredClone(updatedOrder)];
+                    }
+                    return prev;
+                });
+            }
+
+            return sortOrders(updatedOrders);
+        });
+
+        addNotification(`Order ${orderId} berhasil dikirim ke monitoring.`);
+    };
+
+    const moveToHistory = (orderId) => {
+        setOrders(prevOrders =>
+            prevOrders.map(order => {
+                if (order.orderId === orderId && order.status === 'Dikirim') {
+                    const products = order.products || [];
+                    const total = products.reduce((sum, item) => {
+                        const price = item.unitPrice || 0;
+                        const qty = item.quantity || 0;
+                        return sum + price * qty;
+                    }, 0);
+
+                    return {
+                        ...order,
+                        status: 'Selesai',
+                        receivedDate: new Date().toLocaleDateString('id-ID'),
+                        total,
+                    };
+                }
+                return order;
+            })
+        );
+    };
+
+    // Fungsi ubah status dari Tertunda menjadi Disetujui di kirim order ke ringkasan order
+    const setOrderToApproved = (orderId) => {
+        setOrders(prev =>
+            sortOrders(
+                prev.map(order =>
+                    order.orderId === orderId && order.status === 'Tertunda'
+                        ? { ...order, status: 'Disetujui' }
+                        : order
+                )
+            )
+        );
+    };
+
+    const markAsProcessed = (orderId) => {
+        setOrders(prev =>
+            sortOrders(
+                prev.map(order =>
+                    order.orderId === orderId && order.status === 'Disetujui'
+                        ? { ...order, status: 'Diproses' }
+                        : order
+                )
+            )
+        );
+    };
 
     return (
         <OrderContext.Provider
@@ -249,15 +330,21 @@ const addNotification = (message) => {
                 setOrdersMasukPabrik,
                 validasiOrders,
                 setValidasiOrders,
+                monitoringOrders,
+                sendToMonitoringOrder,
                 markAsCompleted,
                 updateProductPrice,
                 deleteOrder,
                 approveOrder,
+                setOrderToApproved,
                 updateOrderStatus,
                 addNewOrder,
-        notifications,           
-        setNotifications,          
-        addNotification 
+                notifications,
+                setNotifications,
+                addNotification,
+                historyOrders,
+                moveToHistory,
+                markAsProcessed
             }}
         >
             {children}

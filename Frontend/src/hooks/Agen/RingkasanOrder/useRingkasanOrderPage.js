@@ -1,6 +1,6 @@
 // src/hooks/Agen/useRingkasanOrderPage.js
 import truckIcon from '../../../assets/IconHeader/IconTruck.png';
-import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 import useRingkasanOrder from './useRingkasanOrder';
 

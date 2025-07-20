@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useOrder } from '../../../Context/OrderContext';
-import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
 const useRiwayatOrder = () => {

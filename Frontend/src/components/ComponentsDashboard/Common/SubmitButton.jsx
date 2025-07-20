@@ -1,8 +1,10 @@
 import Swal from 'sweetalert2';
-import { useNavigate } from 'react-router-dom'; // ✅ Tambahkan ini
+import { useNavigate } from 'react-router-dom';
+import { useOrder } from '../../../Context/OrderContext';
 
-const SubmitButton = ({ onClick }) => {
-  const navigate = useNavigate(); // ✅ Inisialisasi navigasi
+const SubmitButton = ({ onClick, orderId }) => {
+  const navigate = useNavigate();
+  const { markAsProcessed } = useOrder();
 
   const showConfirmation = async () => {
     const result = await Swal.fire({
@@ -17,9 +19,11 @@ const SubmitButton = ({ onClick }) => {
     });
 
     if (result.isConfirmed && typeof onClick === 'function') {
-      const res = await onClick(); // handleSubmit() dari props
+      const res = await onClick();
 
       if (res?.success) {
+        markAsProcessed(orderId);
+
         await Swal.fire({
           title: 'Order Dikirim',
           text: 'Order berhasil dikirim ke distributor.',
@@ -27,7 +31,7 @@ const SubmitButton = ({ onClick }) => {
           confirmButtonColor: '#2563eb',
         });
 
-        navigate('/distributor/validasi-order'); // ✅ Navigasi ke halaman setelah alert ditutup
+        navigate('/distributor/validasi-order');
       } else {
         await Swal.fire({
           title: 'Gagal Mengirim',
