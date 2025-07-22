@@ -57,7 +57,7 @@ export default function Navbar() {
                   to={item.path}
                   className={`block py-2 px-3 hover:underline md:p-0 ${
                     location.pathname === item.path
-                      ? "text-primary-dark font-bold underline"
+                      ? "text-primary-dark font-bold"
                       : ""
                   }`}
                   onClick={() => setIsMenuOpen(false)} // auto close menu on mobile
