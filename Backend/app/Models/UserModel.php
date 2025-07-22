@@ -6,13 +6,32 @@ use CodeIgniter\Model;
 
 class UserModel extends Model
 {
-    protected $table            = 'users';
-    protected $primaryKey       = 'id';
+    protected $table      = 'users';
+    protected $primaryKey = 'id';
 
-    protected $allowedFields    = [
-        'name', 'no_telp', 'email', 'password', 'role', 'alamat', 'nama_rekening', 'rekening'
+    // Aktifkan timestamps jika kamu menggunakan created_at dan updated_at
+    protected $useTimestamps = true;
+
+    // Kolom yang diizinkan untuk disimpan
+    protected $allowedFields = [
+        'name',
+        'username',
+        'email',
+        'password',
+        'role',
+        'no_telp',
+        'nama_rekening',
+        'rekening',
+        'nama_bank',
+        'alamat',
+        'created_by'
     ];
 
-    protected $useTimestamps = true;
-    protected $returnType    = 'array';
+    // Tipe pengembalian data
+    protected $returnType = 'array';
+
+    // Validasi opsional
+    protected $validationRules    = [];
+    protected $validationMessages = [];
+    protected $skipValidation     = true; // kamu bisa ubah ini ke false kalau pakai validasi bawaan
 }

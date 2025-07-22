@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
@@ -21,9 +20,9 @@ class CreateUsersTable extends Migration
                 'constraint' => 100,
                 'null'       => false
             ],
-            'no_telp' => [
+            'username' => [
                 'type'       => 'VARCHAR',
-                'constraint' => 15,
+                'constraint' => 50,
                 'null'       => false,
                 'unique'     => true
             ],
@@ -44,9 +43,15 @@ class CreateUsersTable extends Migration
                 'default'    => 'agen',
                 'null'       => false
             ],
+            'no_telp' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 15,
+                'null'       => false,
+                'unique'     => true
+            ],
             'alamat' => [
-                'type'       => 'TEXT',
-                'null'       => true
+                'type' => 'TEXT',
+                'null' => true
             ],
             'nama_rekening' => [
                 'type'       => 'VARCHAR',
@@ -56,6 +61,17 @@ class CreateUsersTable extends Migration
             'rekening' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
+                'null'       => true
+            ],
+            'nama_bank' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true
+            ],
+            'created_by' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
                 'null'       => true
             ],
             'created_at' => [
@@ -69,6 +85,7 @@ class CreateUsersTable extends Migration
         ]);
 
         $this->forge->addKey('id', true);
+        $this->forge->addForeignKey('created_by', 'users', 'id', 'SET NULL', 'CASCADE');
         $this->forge->createTable('users');
     }
 
