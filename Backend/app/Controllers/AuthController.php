@@ -40,7 +40,6 @@ public function register()
 
     // Hirarki role
     $roleHierarchy = [
-        'admin' => 'pabrik',
         'pabrik' => 'distributor',
         'distributor' => 'agen'
     ];
