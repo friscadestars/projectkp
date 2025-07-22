@@ -2,15 +2,19 @@ import React from "react";
 import Email from "../../assets/icons/email.png";
 import WhatsApp from "../../assets/icons/whatsapp.png";
 import Instagram from "../../assets/icons/instagram.png";
+import Logo from "../../assets/logo2.png";
 
 const Footer = () => {
   return (
     <footer className="bg-primary-dark text-white py-10 px-6 md:px-16">
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        {/* Brand */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        {/* Logo Brand */}
         <div>
-          <h3 className="font-bold text-lg mb-4">OrderLink</h3>
-          <p className="text-gray-300">
+          <div className="flex items-center space-x-2 mb-3">
+            <img src={Logo} alt="Logo OrderLink" className="h-10" />
+            <span className="font-bold text-xl ">OrderLink</span>
+          </div>
+          <p className="text-gray-300 md:text-left">
             Kami berkomitmen memberikan layanan terbaik untuk mendukung
             pengelolaan distribusi bisnis Anda secara efisien.
           </p>
@@ -18,7 +22,7 @@ const Footer = () => {
 
         {/* Jelajahi */}
         <div>
-          <h4 className="font-semibold mb-2">Jelajahi</h4>
+          <h4 className="font-semibold mb-2 ">Jelajahi</h4>
           <ul className="space-y-1 text-gray-300">
             <li>
               <a href="/" className="hover:underline transition">
@@ -43,26 +47,9 @@ const Footer = () => {
           </ul>
         </div>
 
-        {/* Legal */}
-        <div>
-          <h4 className="font-semibold mb-2">Legal</h4>
-          <ul className="space-y-1 text-gray-300">
-            <li>
-              <a href="#" className="hover:underline transition">
-                Terms
-              </a>
-            </li>
-            <li>
-              <a href="#" className="hover:underline transition">
-                Privacy
-              </a>
-            </li>
-          </ul>
-        </div>
-
         {/* Kontak */}
         <div>
-          <h4 className="font-semibold mb-2">Kontak</h4>
+          <h4 className="font-semibold mb-2 md:text-left">Kontak</h4>
           <div className="flex gap-4">
             <a href="#">
               <img
