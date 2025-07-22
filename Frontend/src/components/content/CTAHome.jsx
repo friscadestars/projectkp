@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const CTA = () => {
   return (
-    <section className="py-20 px-6 md:px-16 flex flex-col md:flex-row justify-between items-center rounded-lg mx-6 md:mx-16">
+    <section className="py-20 px-6 md:px-16 flex flex-col md:flex-row justify-between items-center rounded-lg mx-6 md:mx-16" data-aos="fade-up">
       {/* Left Side */}
       <div className="text-center md:text-left">
         <h2 className="md:text-3xl  font-bold text-primary-dark mb-4">

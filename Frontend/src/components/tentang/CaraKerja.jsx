@@ -6,7 +6,7 @@ import iconPabrik from "../../assets/icons/homepage/pabrik.png";
 
 export default function CaraKerja() {
   return (
-    <section className="bg-secondary py-20 px-6 md:px-16">
+    <section className="bg-secondary py-20 px-6 md:px-16" data-aos="fade-up">
       <h2 className="text-2xl md:text-3xl font-bold text-center text-primary-dark mb-12">
         Cara Kerja OrderLink
       </h2>

@@ -4,7 +4,7 @@ import Checklist from "../../assets/icons/checklist.png";
 
 const FiturUtamaHome = () => {
   return (
-    <section className="py-20 px-6 md:px-16">
+    <section className="py-20 px-6 md:px-16" data-aos="fade-up">
       {/* Heading */}
       <h2 className="md:text-3xl font-bold text-center text-primary-dark mb-12">
         Fitur Utama Yang Kami Tawarkan

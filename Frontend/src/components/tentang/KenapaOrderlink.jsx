@@ -4,7 +4,7 @@ import Checklist from "../../assets/icons/checklist.png";
 
 export default function KenapaOrderlink() {
   return (
-    <section className="bg-gray-50 py-20 px-6 md:px-16">
+    <section className="bg-gray-50 py-20 px-6 md:px-16" data-aos="fade-up">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         {/* Teks */}
         <div>

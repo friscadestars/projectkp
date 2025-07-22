@@ -1,6 +1,9 @@
 import { Routes, Route } from 'react-router-dom';
 import './index.css';
 
+// Components
+import ScrollToTop from "./components/navbar/ScrollToTop";
+
 // Public Pages
 import HomePage from './pages/HomePage.jsx';
 import TentangPage from './pages/TentangPage.jsx';
@@ -57,59 +60,62 @@ import DaftarHarga from './pages/Pabrik/9_DaftarHarga.jsx';
 
 function App() {
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<HomePage />} />
-      <Route path="/tentang" element={<TentangPage />} />
-      <Route path="/fitur" element={<FiturPage />} />
-      <Route path="/faq" element={<FAQPage />} />
+    <>
+    <ScrollToTop />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<HomePage />} />
+        <Route path="/tentang" element={<TentangPage />} />
+        <Route path="/fitur" element={<FiturPage />} />
+        <Route path="/faq" element={<FAQPage />} />
 
-      {/* Auth */}
-      <Route path="/masuk" element={<MasukPage />} />
-      <Route path="/registrasi" element={<RegistrasiPage />} />
+        {/* Auth */}
+        <Route path="/masuk" element={<MasukPage />} />
+        <Route path="/registrasi" element={<RegistrasiPage />} />
 
-      {/* Beranda */}
-      <Route path="/berandaAgen" element={<BerandaAgen />} />
-      <Route path="/berandaPabrik" element={<BerandaPabrik />} />
-      <Route path="/berandaDistributor" element={<BerandaDistributor />} />
+        {/* Beranda */}
+        <Route path="/berandaAgen" element={<BerandaAgen />} />
+        <Route path="/berandaPabrik" element={<BerandaPabrik />} />
+        <Route path="/berandaDistributor" element={<BerandaDistributor />} />
 
-      {/* Agen Routes */}
-      <Route path="/agen/dashboard-agen" element={<DashboardAgen />} />
-      <Route path="/agen/ringkasan-order" element={<RingkasanOrder />} />
-      <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
-      <Route path="/agen/riwayat-order" element={<RiwayatOrder />} />
-      <Route path="/agen/detail-order" element={<DetailOrder />} />
-      <Route path="/agen/tagihan" element={<TagihanOrder />} />
-      <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />
+        {/* Agen Routes */}
+        <Route path="/agen/dashboard-agen" element={<DashboardAgen />} />
+        <Route path="/agen/ringkasan-order" element={<RingkasanOrder />} />
+        <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
+        <Route path="/agen/riwayat-order" element={<RiwayatOrder />} />
+        <Route path="/agen/detail-order" element={<DetailOrder />} />
+        <Route path="/agen/tagihan" element={<TagihanOrder />} />
+        <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />
 
-      {/* Distributor Routes */}
-      <Route path="/distributor/dashboard-distributor" element={<DashboardDistributor />} />
-      <Route path="/distributor/validasi-order" element={<ValidasiOrder />} />
-      <Route path="/distributor/detail-validasi/:orderId" element={<DetailValidasiOrder />} />
-      <Route path="/distributor/kirim-order" element={<KirimOrderKePabrik />} />
-      <Route path="/distributor/detail-kirim/:orderId" element={<DetailKirimOrderKePabrik />} />
-      <Route path="/distributor/monitoring-order" element={<MonitoringOrder />} />
-      <Route path="/distributor/monitoring-order/detail/:orderId" element={<DetailMonitoringOrder />} />
-      <Route path="/distributor/monitoring-agen" element={<MonitoringAgen />} />
-      <Route path="/distributor/daftar-harga-pabrik" element={<DaftarHargaPabrik />} />
-      <Route path="/distributor/daftar-harga-distributor" element={<DaftarHargaDistributor />} />
-      <Route path="/distributor/riwayat-order" element={<RiwayatOrderDistributor />} />
-      <Route path="/distributor/riwayat-order/detail/:orderId" element={<DetailRiwayatOrder />} />
-      <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
-      <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
+        {/* Distributor Routes */}
+        <Route path="/distributor/dashboard-distributor" element={<DashboardDistributor />} />
+        <Route path="/distributor/validasi-order" element={<ValidasiOrder />} />
+        <Route path="/distributor/detail-validasi/:orderId" element={<DetailValidasiOrder />} />
+        <Route path="/distributor/kirim-order" element={<KirimOrderKePabrik />} />
+        <Route path="/distributor/detail-kirim/:orderId" element={<DetailKirimOrderKePabrik />} />
+        <Route path="/distributor/monitoring-order" element={<MonitoringOrder />} />
+        <Route path="/distributor/monitoring-order/detail/:orderId" element={<DetailMonitoringOrder />} />
+        <Route path="/distributor/monitoring-agen" element={<MonitoringAgen />} />
+        <Route path="/distributor/daftar-harga-pabrik" element={<DaftarHargaPabrik />} />
+        <Route path="/distributor/daftar-harga-distributor" element={<DaftarHargaDistributor />} />
+        <Route path="/distributor/riwayat-order" element={<RiwayatOrderDistributor />} />
+        <Route path="/distributor/riwayat-order/detail/:orderId" element={<DetailRiwayatOrder />} />
+        <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
+        <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
 
-      {/* Pabrik Routes */}
-      <Route path="/pabrik/dashboard-pabrik" element={<DashboardPabrik />} />
-      <Route path="/pabrik/daftar-order-masuk" element={<DaftarOrderMasuk />} />
-      <Route path="/pabrik/detail-order" element={<DetailOrderMasuk />} />
-      <Route path="/pabrik/produksi-pengiriman" element={<ProduksiPengiriman />} />
-      <Route path="/pabrik/detail-produksi/sedang-produksi" element={<SedangDiproduksi />} />
-      <Route path="/pabrik/riwayat-pengiriman" element={<Riwayat />} />
-      <Route path="/pabrik/detail-riwayat" element={<DetailRiwayat />} />
-      <Route path="/pabrik/monitoring-distributor" element={<MonitoringDistributor />} />
-      <Route path="/pabrik/daftar-harga" element={<DaftarHarga />} />
+        {/* Pabrik Routes */}
+        <Route path="/pabrik/dashboard-pabrik" element={<DashboardPabrik />} />
+        <Route path="/pabrik/daftar-order-masuk" element={<DaftarOrderMasuk />} />
+        <Route path="/pabrik/detail-order" element={<DetailOrderMasuk />} />
+        <Route path="/pabrik/produksi-pengiriman" element={<ProduksiPengiriman />} />
+        <Route path="/pabrik/detail-produksi/sedang-produksi" element={<SedangDiproduksi />} />
+        <Route path="/pabrik/riwayat-pengiriman" element={<Riwayat />} />
+        <Route path="/pabrik/detail-riwayat" element={<DetailRiwayat />} />
+        <Route path="/pabrik/monitoring-distributor" element={<MonitoringDistributor />} />
+        <Route path="/pabrik/daftar-harga" element={<DaftarHarga />} />
 
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

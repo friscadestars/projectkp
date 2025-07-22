@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 const HeroHome = () => {
   return (
-    <section className="bg-white mt-20 mr-10 py-20 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between">
+    <section className="bg-white mt-20 mr-10 py-20 px-6 md:px-16 flex flex-col md:flex-row items-center justify-between" data-aos="zoom-in">
       {/* Left Side - Text */}
       <div className="max-w-xl">
         <h1 className="text-3xl font-extrabold font-inter text-primary-dark mb-4">

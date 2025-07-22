@@ -2,7 +2,7 @@ import React from "react";
 
 export default function HeroFitur() {
   return (
-    <section className="py-16 px-6 md:px-16 text-center mt-20">
+    <section className="py-16 px-6 md:px-16 text-center mt-20" data-aos="zoom-in">
       <h1 className="text-2xl md:text-3xl font-bold text-primary-dark mb-4">
         Fitur Utama OrderLink
       </h1>

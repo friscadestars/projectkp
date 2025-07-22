@@ -3,7 +3,7 @@ import heroTentangImg from "../../assets/tentang/hero-tentang.png";
 
 export default function HeroTentang() {
   return (
-    <section className="bg-white py-20 px-6 md:px-16 mt-20">
+    <section className="bg-white py-20 px-6 md:px-16 mt-20" data-aos="zoom-in">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
         {/* Gambar */}
         <div className="flex justify-center">

@@ -77,7 +77,7 @@ const fiturData = [
 
 export default function FiturUtama() {
   return (
-    <section className="py-16 px-6 md:px-16 bg-gray-50">
+    <section className="py-16 px-6 md:px-16 bg-gray-50" data-aos="fade-up">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         {fiturData.map((role, index) => (
           <div
