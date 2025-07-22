@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
-
 
 export default function RegistrasiForm() {
   const location = useLocation();
@@ -29,36 +27,47 @@ export default function RegistrasiForm() {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (form.password !== form.ulangiPassword) {
-    alert("Password dan Ulangi Password tidak cocok");
-    return;
-  }
+    if (form.password !== form.ulangiPassword) {
+      alert("Password dan Ulangi Password tidak cocok");
+      return;
+    }
 
   const payload = {
     nama: form.nama,
     username: form.username,
-   email: form.email,
+    email: form.email,
     password: form.password,
     noTelepon: form.noTelepon,
-   pemilikRekening: form.pemilikRekening,
-   noRekening: form.noRekening,
+    pemilikRekening: form.pemilikRekening,
+    noRekening: form.noRekening,
     namaBank: form.namaBank,
-   alamat: form.alamat
+    alamat: form.alamat
   };
 
+  const token = localStorage.getItem("token"); // ✅ Ambil token dari localStorage
+
   try {
-    const response = await axios.post("http://localhost:8080/api/register", payload, {
+    const response = await fetch("http://localhost:8080/api/register", {
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`, // ✅ Kirim token di header
       },
+      body: JSON.stringify(payload),
     });
 
-    alert("Registrasi berhasil!");
-    console.log(response.data);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.messages?.error || "Gagal registrasi");
+    }
 
-    // reset form
+    const data = await response.json();
+    alert("Registrasi berhasil!");
+    console.log(data);
+
+    // Reset form
     setForm({
       nama: "",
       namaBank: "",
@@ -71,17 +80,12 @@ export default function RegistrasiForm() {
       password: "",
       ulangiPassword: "",
     });
-  } catch (error) {
-    console.error(error);
-    if (error.response?.data?.messages) {
-      alert("Validasi gagal: " + JSON.stringify(error.response.data.messages));
-    } else if (error.response?.data?.message) {
-      alert("Gagal: " + error.response.data.message);
-    } else {
-      alert("Terjadi kesalahan saat registrasi.");
+    } catch (error) {
+      console.error("Registrasi error:", error.message);
+      alert("Registrasi gagal: " + error.message);
     }
-  }
-};
+  };
+
 
 
   return (
@@ -103,7 +107,7 @@ export default function RegistrasiForm() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Nama Agen */}
           <Input
-            label="Nama Agen*"
+            label={role === "pabrik" ? "Nama Distributor*" : "Nama Agen*"}
             name="nama"
             value={form.nama}
             onChange={handleChange}
