@@ -43,13 +43,13 @@ export default function MasukForm() {
       // Navigasi berdasarkan role
       switch (user.role) {
         case "agen":
-          navigate("/agen/dashboard-agen");
+          navigate("/berandaAgen");
           break;
         case "distributor":
-          navigate("/distributor/dashboard-distributor");
+          navigate("/berandaDistributor");
           break;
         case "pabrik":
-          navigate("/pabrik/dashboard-pabrik");
+          navigate("/berandaPabrik");
           break;
         default:
           alert("Role tidak dikenali!");

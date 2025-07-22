@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 
-export default function RegistrasiForm({ role }) {
+export default function RegistrasiForm() {
+  const location = useLocation();
+  const role = location.state?.role || "unknown";
+
   const [form, setForm] = useState({
     nama: "",
     namaBank: "",
@@ -16,6 +20,7 @@ export default function RegistrasiForm({ role }) {
     password: "",
     ulangiPassword: "",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [showUlangiPassword, setShowUlangiPassword] = useState(false);
 
@@ -90,7 +95,9 @@ export default function RegistrasiForm({ role }) {
         <p className="mb-6 text-gray-600 text-center" >
         <FaLock className="inline-block w-3 h-3 text-primary-darkest mr-2 align-baseline" />
           Anda masuk sebagai:{" "}
-          <b>{role === "pabrik" ? "Produsen" : "Distributor"}</b>
+
+        <b>{role === "pabrik" ? "Pabrik" : role === "distributor" ? "Distributor" : "Tidak diketahui"}</b>
+
         </p>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">

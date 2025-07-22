@@ -18,6 +18,7 @@ const HeroPabrik = () => {
         </p>
         <Link
           to="/registrasi"
+          state={{ role: "pabrik" }}
           className="inline-block border text-sm bg-primary-dark hover:bg-blue-800 text-white font-semibold py-2 px-5 rounded-xl pt-3 pb-3 hover:scale-105 transition-all duration-200 cursor-pointer"
         >
           Registrasi Sekarang
