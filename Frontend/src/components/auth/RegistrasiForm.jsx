@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 export default function RegistrasiForm() {
   const location = useLocation();
   const role = location.state?.role || "unknown";
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   const [form, setForm] = useState({
     nama: "",
@@ -64,8 +65,10 @@ export default function RegistrasiForm() {
     }
 
     const data = await response.json();
-    alert("Registrasi berhasil!");
     console.log(data);
+
+    // ✅ Tampilkan modal success
+    setShowSuccessModal(true);
 
     // Reset form
     setForm({
@@ -85,8 +88,6 @@ export default function RegistrasiForm() {
       alert("Registrasi gagal: " + error.message);
     }
   };
-
-
 
   return (
     <div className="flex justify-center items-center min-h-[85vh] py-12 pb-20 bg-gray-50">
@@ -229,7 +230,48 @@ export default function RegistrasiForm() {
           </div>
         </form>
       </div>
+
+      {/* Alert Regitrasi Berhasil */}
+      {showSuccessModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+        <div className="bg-white rounded-xl shadow-lg p-8 max-w-sm text-center">
+          <h3 className="text-xl font-semibold text-primary-dark mb-4">
+            🎉 Registrasi Berhasil!
+          </h3>
+          <p className="text-gray-700 mb-6">
+            Akun baru berhasil dibuat.
+          </p>
+          <div className="flex justify-center gap-4">
+            <button
+              onClick={() => setShowSuccessModal(false)}
+              className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+            >
+              Tetap di Halaman
+            </button>
+            <button
+              onClick={() => {
+                const role = localStorage.getItem("role"); // ambil role dari localStorage
+
+                if (role === "pabrik") {
+                  window.location.href = "/berandaPabrik";
+                } else if (role === "distributor") {
+                  window.location.href = "/berandaDistributor";
+                } else {
+                  window.location.href = "/"; // fallback ke halaman utama
+                }
+              }}
+              className="px-4 py-2 bg-primary-dark text-white rounded-lg hover:bg-blue-800 transition"
+            >
+              Ke Beranda
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
     </div>
+
+    
   );
 }
 
