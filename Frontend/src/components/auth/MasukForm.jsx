@@ -1,30 +1,67 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export default function MasukForm() {
   const [selectedRole, setSelectedRole] = useState("Agen");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Role:", selectedRole);
-    console.log("Email:", email);
-    console.log("Password:", password);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    // Simpan role ke localStorage
-    localStorage.setItem("role", selectedRole);
+   try {
+      const response = await fetch("http://localhost:8080/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    // Cek role & redirect
-    if (selectedRole === "Agen") {
-      navigate("/berandaAgen"); // Redirect ke halaman beranda Agen
-    } else if (selectedRole === "Distributor") {
-      navigate("/berandaDistributor"); // Redirect ke halaman beranda Distributor
-    } else if (selectedRole === "Pabrik") {
-      navigate("/berandaPabrik"); // Redirect ke halaman beranda Pabrik
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.messages?.error || "Gagal login");
+      }
+
+      const data = await response.json();
+      const { token, user } = data;
+
+      // Validasi role
+      const expectedRole = selectedRole.toLowerCase();
+      if (user.role !== expectedRole) {
+        alert(`Role yang dipilih tidak cocok dengan akun ini.`);
+        return;
+      }
+
+      // Simpan ke localStorage
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", user.role);
+      localStorage.setItem("user_id", user.id);
+      localStorage.setItem("user_email", user.email);
+
+      // Navigasi berdasarkan role
+      switch (user.role) {
+        case "agen":
+          navigate("/agen/dashboard-agen");
+          break;
+        case "distributor":
+          navigate("/distributor/dashboard-distributor");
+          break;
+        case "pabrik":
+          navigate("/pabrik/dashboard-pabrik");
+          break;
+        default:
+          alert("Role tidak dikenali!");
+      }
+
+    } catch (error) {
+      console.error("Login error:", error.message);
+      alert("Login gagal: " + error.message);
     }
   };
+
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -55,7 +92,7 @@ export default function MasukForm() {
           ))}
         </div>
 
-        {/* Form */}
+        {/* Form Login */}
         <form onSubmit={handleSubmit}>
           {/* Email */}
           <div className="mb-4">
@@ -95,7 +132,7 @@ export default function MasukForm() {
             />
           </div>
 
-          {/* Submit Button */}
+          {/* Tombol Login */}
           <button
             type="submit"
             className="w-full bg-primary-dark text-white py-2 rounded-xl font-medium hover:bg-blue-800 transition duration-200"

@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { FaEye, FaEyeSlash, FaLock } from "react-icons/fa";
+import axios from "axios";
+
 
 export default function RegistrasiForm({ role }) {
   const [form, setForm] = useState({
@@ -21,10 +23,61 @@ export default function RegistrasiForm({ role }) {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("Data Registrasi:", form);
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (form.password !== form.ulangiPassword) {
+    alert("Password dan Ulangi Password tidak cocok");
+    return;
+  }
+
+  const payload = {
+    nama: form.nama,
+    username: form.username,
+   email: form.email,
+    password: form.password,
+    noTelepon: form.noTelepon,
+   pemilikRekening: form.pemilikRekening,
+   noRekening: form.noRekening,
+    namaBank: form.namaBank,
+   alamat: form.alamat
   };
+
+  try {
+    const response = await axios.post("http://localhost:8080/api/register", payload, {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    alert("Registrasi berhasil!");
+    console.log(response.data);
+
+    // reset form
+    setForm({
+      nama: "",
+      namaBank: "",
+      pemilikRekening: "",
+      email: "",
+      noRekening: "",
+      noTelepon: "",
+      username: "",
+      alamat: "",
+      password: "",
+      ulangiPassword: "",
+    });
+  } catch (error) {
+    console.error(error);
+    if (error.response?.data?.messages) {
+      alert("Validasi gagal: " + JSON.stringify(error.response.data.messages));
+    } else if (error.response?.data?.message) {
+      alert("Gagal: " + error.response.data.message);
+    } else {
+      alert("Terjadi kesalahan saat registrasi.");
+    }
+  }
+};
+
 
   return (
     <div className="flex justify-center items-center min-h-[85vh] py-12 pb-20 bg-gray-50">
@@ -123,6 +176,8 @@ export default function RegistrasiForm({ role }) {
                 required
             ></textarea>
             </div>
+
+            
 
           {/* Username */}
           <Input

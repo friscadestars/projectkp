@@ -6,4 +6,8 @@ export default defineConfig({
   server: {
     historyApiFallback: true,
   },
+   proxy: {
+      '/api': 'http://localhost:8080'
+    }
 });
+
