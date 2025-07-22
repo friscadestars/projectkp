@@ -21,22 +21,22 @@ const Footer = () => {
           <h4 className="font-semibold mb-2">Jelajahi</h4>
           <ul className="space-y-1 text-gray-300">
             <li>
-              <a href="#" className="hover:underline transition">
+              <a href="/" className="hover:underline transition">
                 Beranda
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline transition">
+              <a href="/tentang" className="hover:underline transition">
                 Tentang
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline transition">
+              <a href="/fitur" className="hover:underline transition">
                 Fitur
               </a>
             </li>
             <li>
-              <a href="#" className="hover:underline transition">
+              <a href="/faq" className="hover:underline transition">
                 FAQ
               </a>
             </li>
