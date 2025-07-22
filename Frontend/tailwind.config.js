@@ -45,6 +45,13 @@ export default {
         'btn-disabled': '#9CA3AF',  // abu-abu
         'btn-dark': '#122786',      // abu gelap
         'btn-light': '#F3F4F6',     // abu terang
+
+        // Warna tema utama
+        'primary-darkest': '#141414',
+        'primary-dark': '#122786',
+        'primary-light': '#CFE4FF',
+        'secondary': '#F4F6F9',
+        'secondary-light': '#EFF9FF',
       },
       maxWidth: {
         // Batas lebar tambahan
