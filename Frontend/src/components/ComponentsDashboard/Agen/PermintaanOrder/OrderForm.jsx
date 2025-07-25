@@ -5,8 +5,8 @@ const OrderForm = ({
     produk, jumlah, harga, produkList, alamat,
     setProduk, setJumlah, setHarga, setAlamat,
     handleAddProduk, handleDeleteProduk,
-    orderId, agentId, distributorName, orderDate,
-    children 
+    orderId, agentName, distributorName, orderDate,
+    children
 }) => {
     return (
         <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6 space-y-6">
@@ -20,7 +20,7 @@ const OrderForm = ({
                 />
                 <input
                     type="text"
-                    value={agentId}
+                    value={`${agentName}`}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
@@ -32,7 +32,7 @@ const OrderForm = ({
                 />
                 <input
                     type="text"
-                    value={distributorName}
+                    value={`${distributorName}`}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
@@ -44,7 +44,8 @@ const OrderForm = ({
                 placeholder="Alamat Pengiriman"
                 value={alamat}
                 onChange={(e) => setAlamat(e.target.value)}
-                className="border border-gray-400 px-3 py-2 rounded w-full text-sm text-gray-400"
+                className={`border border-gray-400 px-3 py-2 rounded w-full text-sm ${alamat ? 'text-black' : 'text-gray-400'
+                    }`}
             />
 
             {/* Tambah Produk */}
@@ -54,21 +55,24 @@ const OrderForm = ({
                     placeholder="Nama Produk"
                     value={produk}
                     onChange={(e) => setProduk(e.target.value)}
-                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${produk ? 'text-black' : 'text-gray-400'
+                        }`}
                 />
                 <input
                     type="number"
                     placeholder="Jumlah"
                     value={jumlah}
                     onChange={(e) => setJumlah(e.target.value)}
-                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${jumlah ? 'text-black' : 'text-gray-400'
+                        }`}
                 />
                 <input
                     type="number"
                     placeholder="Harga Satuan Request"
                     value={harga}
                     onChange={(e) => setHarga(e.target.value)}
-                    className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${harga ? 'text-black' : 'text-gray-400'
+                        }`}
                 />
                 <button
                     onClick={handleAddProduk}

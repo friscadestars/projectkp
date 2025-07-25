@@ -19,7 +19,6 @@ class AuthController extends ResourceController
     }
 
     // 🔐 API: REGISTER
-    // 🔐 API: REGISTER
     public function register()
     {
         $authHeader = $this->request->getHeaderLine('Authorization');
@@ -89,14 +88,26 @@ class AuthController extends ResourceController
 
         $this->userModel->insert($userData);
 
+        // >>> TAMBAHAN: ambil ID user yang baru dibuat
+        $newUserId = $this->userModel->getInsertID();
+
+        // >>> TAMBAHAN: auto-insert ke agent_distributor jika
+        // distributor mendaftarkan agen (sesuai roleHierarchy yang ada sekarang)
+        if ($creatorRole === 'distributor' && $allowedRole === 'agen') {
+            // gunakan FQCN agar tidak perlu menambah "use" di atas
+            $agentDistributorModel = new \App\Models\AgentDistributorModel();
+            $agentDistributorModel->insert([
+                'agent_id'       => (int) $newUserId,
+                'distributor_id' => (int) $creatorId,
+                'created_at'     => date('Y-m-d H:i:s')
+            ]);
+        }
+
         return $this->respondCreated([
             'message' => "User dengan role '{$allowedRole}' berhasil dibuat oleh {$creatorRole}",
-            'user_id' => $this->userModel->getInsertID()
+            'user_id' => $newUserId
         ]);
     }
-
-
-
 
     // 🔐 API: LOGIN
     public function login()

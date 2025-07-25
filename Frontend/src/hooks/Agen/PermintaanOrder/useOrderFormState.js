@@ -1,6 +1,13 @@
 import { useState } from 'react';
 import { useOrder } from "../../../Context/OrderContext";
 
+// ✅ Pastikan BASE_URL mengarah ke /api
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
+// Fungsi untuk format tanggal ke format MySQL
+const toMySQLDatetime = (d = new Date()) =>
+  d.toISOString().slice(0, 19).replace('T', ' ');
+
 const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const { addNewOrder } = useOrder();
 
@@ -10,14 +17,15 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const [harga, setHarga] = useState("");
   const [alamat, setAlamat] = useState("");
 
+  // Tambahkan produk ke daftar
   const handleAddProduk = () => {
     if (!produk || !jumlah || !harga) return;
     setProdukList((prev) => [
       ...prev,
       {
         nama: produk,
-        jumlah: parseInt(jumlah),
-        harga: parseInt(harga),
+        jumlah: parseInt(jumlah, 10),
+        harga: parseInt(harga, 10),
       },
     ]);
     setProduk("");
@@ -25,39 +33,69 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
     setHarga("");
   };
 
+  // Hapus produk dari daftar
   const handleDeleteProduk = (index) => {
     setProdukList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const handleSubmit = () => {
+  // Submit order
+  const handleSubmit = async () => {
     if (!produkList.length || !alamat) {
       return { success: false, message: "Produk dan alamat harus diisi" };
     }
 
-    const newOrder = {
-      orderId: `ORD-${String(orders.length + 1).padStart(3, "0")}`,
-      distributor: distributorInfo.name,
-      agentId,
-      factoryId: "-",
-      orderDate: new Date().toLocaleDateString("id-ID"),
-      shippingDate: "-",
-      deliveryEstimate: "-",
-      noResi: "-",
-      status: "Tertunda",
-      products: produkList,
-      alamat,
-      address: alamat,
+    const payload = {
+      agen_id: Number(agentId), // FK orders
+      distributor_id: Number(distributorInfo.id), // FK orders
+      pabrik_id: null,
+      status: 'pending',
+      order_date: toMySQLDatetime(),
+      delivery_date: null,
+      resi: null,
+      accepted_at: null,
+      note: alamat,
+      products: produkList.map(p => ({
+        product_name: p.nama,
+        quantity: p.jumlah,
+        unit_price: p.harga,
+        address: alamat
+      }))
     };
 
-    addNewOrder(newOrder);
+    try {
+      const res = await fetch(`${API_BASE}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          // ✅ Tambahkan token jika pakai autentikasi bearer
+          'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+        },
+        body: JSON.stringify(payload)
+      });
 
-    // Reset form
-    setProdukList([]);
-    setAlamat("");
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        return { success: false, message: err?.message || 'Gagal membuat order' };
+      }
 
-    if (onSuccess) onSuccess();
+      const data = await res.json();
 
-    return { success: true };
+      addNewOrder?.({
+        ...data.data,
+        products: produkList,
+        alamat
+      });
+
+      // Reset form
+      setProdukList([]);
+      setAlamat("");
+
+      onSuccess?.();
+      return { success: true };
+    } catch (e) {
+      console.error(e);
+      return { success: false, message: 'Network/Server error' };
+    }
   };
 
   return {

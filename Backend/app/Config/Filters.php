@@ -35,9 +35,9 @@ class Filters extends BaseFilters
         'performance'   => \CodeIgniter\Filters\PerformanceMetrics::class,
         'auth'          => \App\Filters\AuthFilter::class,
         'cors'          => \App\Filters\Cors::class,
-     ];
+    ];
 
-    
+
 
     /**
      * List of special required filters.
@@ -73,9 +73,10 @@ class Filters extends BaseFilters
     public array $globals = [
         'before' => [
             'cors',
-    ],
+        ],
         'after' => [
-           
+            'cors',
+
             // 'honeypot',
             // 'secureheaders',
         ],

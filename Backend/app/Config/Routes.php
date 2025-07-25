@@ -18,6 +18,7 @@ $routes->group('api', function ($routes) {
 
 $routes->group('api', ['filter' => 'auth'], function ($routes) {
 
+    $routes->get('agen-distributor/(:num)', 'AgentDistributorController::show/$1');
     $routes->put('users/(:num)/active', 'UserController::setActive/$1');
     $routes->resource('users', ['controller' => 'UserController']);
     $routes->get('orders', 'OrderController::index');          // GET semua order
@@ -45,4 +46,12 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->resource('prices', ['controller' => 'ProductPriceController']);
 
     $routes->resource('notifications', ['controller' => 'NotificationController']);
+});
+
+$routes->options('(:any)', function () {
+    return service('response')
+        ->setHeader('Access-Control-Allow-Origin', '*')
+        ->setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        ->setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE')
+        ->setStatusCode(200);
 });

@@ -31,7 +31,7 @@ const SubmitButton = ({ onClick, orderId }) => {
           confirmButtonColor: '#2563eb',
         });
 
-        navigate('/distributor/validasi-order');
+        navigate('/agen/permintaan-order');
       } else {
         await Swal.fire({
           title: 'Gagal Mengirim',

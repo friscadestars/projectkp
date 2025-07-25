@@ -1,32 +1,61 @@
+import { useEffect, useState } from "react";
 import { useOrder } from "../../../Context/OrderContext";
 import { useNavigation } from "../../useNavigation";
 import { agenMenuItems } from "../../../components/ComponentsDashboard/Constants/menuItems";
 import useOrderFormState from "./useOrderFormState";
 import { formatDate } from "../../../components/ComponentsDashboard/Common/date";
 import bagIcon from "../../../assets/IconHeader/IconBag.png";
-import { useState } from "react";
 
 export const usePermintaanOrderPage = () => {
     const { orders, setOrders } = useOrder();
-    const agentId = "AG001";
-    const distributorInfo = { id: "DS-002", name: "PT. Maju Jaya" };
+    const agentId = 5; // user login
+    const agentName = "Agen 2"; // bisa diambil dari login context/session nanti
 
+    const [distributorInfo, setDistributorInfo] = useState(null);
     const { handleNavigation } = useNavigation(agenMenuItems);
-
     const [showDropdown, setShowDropdown] = useState(false);
-    const toggleDropdown = () => setShowDropdown(prev => !prev);
+    const toggleDropdown = () => setShowDropdown((prev) => !prev);
+
+    useEffect(() => {
+        fetch(`http://localhost:8080/api/agen-distributor/${agentId}`, {
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.distributor_id && data.name) {
+                    setDistributorInfo({
+                        id: data.distributor_id,
+                        name: data.name,
+                        email: data.email
+                    });
+                } else {
+                    alert('Distributor tidak ditemukan untuk agen ini.');
+                }
+            })
+            .catch(err => console.error("Error fetch distributor:", err));
+    }, []);
 
     const {
-        produk, jumlah, harga, alamat, produkList,
-        setProduk, setJumlah, setHarga, setAlamat,
-        handleAddProduk, handleDeleteProduk,
+        produk,
+        jumlah,
+        harga,
+        alamat,
+        produkList,
+        setProduk,
+        setJumlah,
+        setHarga,
+        setAlamat,
+        handleAddProduk,
+        handleDeleteProduk,
         handleSubmit
     } = useOrderFormState({
         agentId,
-        distributorInfo,
+        distributorInfo: distributorInfo || { id: null, name: "" },
         orders,
         setOrders,
-        onSuccess: () => handleNavigation('/ringkasan-order')
+        onSuccess: () => handleNavigation("/ringkasan-order")
     });
 
     const layoutProps = {
@@ -34,7 +63,7 @@ export const usePermintaanOrderPage = () => {
         activeLabel: "Permintaan Order",
         onNavigate: handleNavigation,
         showDropdown,
-        toggleDropdown,
+        toggleDropdown
     };
 
     const pageTitleProps = {
@@ -55,8 +84,8 @@ export const usePermintaanOrderPage = () => {
         handleAddProduk,
         handleDeleteProduk,
         orderId: `ORD-00${orders.length + 1}`,
-        agentId,
-        distributorName: distributorInfo.name,
+        agentName,
+        distributorName: distributorInfo?.name || '',
         orderDate: formatDate(new Date())
     };
 
