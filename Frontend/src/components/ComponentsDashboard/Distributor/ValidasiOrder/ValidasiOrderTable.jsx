@@ -1,7 +1,7 @@
 // src/Components/Table/ValidasiOrderTable.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Common/ReusableTable'; 
+import ReusableTable from '../../Common/ReusableTable';
 
 const ValidasiOrderTable = ({ orders }) => {
     const navigate = useNavigate();
@@ -20,8 +20,8 @@ const ValidasiOrderTable = ({ orders }) => {
         },
         {
             header: 'Alamat',
-            key: 'address',
-            render: (val) => val || 'Jl. Melati no.20 Jakarta',
+            key: 'alamat',
+            render: (_, row) => row.address || row.alamat || 'Alamat tidak tersedia',
         },
         { header: 'Tanggal Order', key: 'orderDate' },
         {

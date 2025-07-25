@@ -212,15 +212,16 @@ export const OrderProvider = ({ children }) => {
     const addNewOrder = (newOrder) => {
         const adjustedOrder = {
             ...newOrder,
+            address: newOrder.address || newOrder.alamat || '', // ⬅️ pastikan field 'address' tersedia
             products: newOrder.products.map((product) => ({
                 ...product,
-                quantity: product.jumlah,
+                quantity: product.jumlah ?? product.quantity,
                 jumlah: undefined,
             })),
         };
 
-        setOrders(prev => sortOrders([...prev, adjustedOrder]));
-        setValidasiOrders(prev => [...prev, adjustedOrder]);
+        setOrders((prev) => sortOrders([...prev, adjustedOrder]));
+        setValidasiOrders((prev) => [...prev, adjustedOrder]);
     };
 
     const [notifications, setNotifications] = useState([]);

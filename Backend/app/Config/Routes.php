@@ -10,16 +10,16 @@ use CodeIgniter\Router\RouteCollection;
 $routes->options('api/(:any)', 'Home::options');
 
 
-$routes->group('api', function($routes) {
+$routes->group('api', function ($routes) {
     $routes->post('login', 'AuthController::login');
     $routes->post('register', 'AuthController::register');
 });
 
 
-$routes->group('api', ['filter' => 'auth'], function($routes) {
+$routes->group('api', ['filter' => 'auth'], function ($routes) {
 
-    $routes->get('users', 'UserController::index'); // contoh endpoint yang diproteksi
-
+    $routes->put('users/(:num)/active', 'UserController::setActive/$1');
+    $routes->resource('users', ['controller' => 'UserController']);
     $routes->get('orders', 'OrderController::index');          // GET semua order
     $routes->get('orders/(:num)', 'OrderController::show/$1'); // GET by id
     $routes->post('orders', 'OrderController::create');        // POST buat order
@@ -45,5 +45,4 @@ $routes->group('api', ['filter' => 'auth'], function($routes) {
     $routes->resource('prices', ['controller' => 'ProductPriceController']);
 
     $routes->resource('notifications', ['controller' => 'NotificationController']);
-
 });

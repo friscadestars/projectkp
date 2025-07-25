@@ -21,10 +21,11 @@ class AuthFilter implements FilterInterface
         }
 
         $token = $matches[1];
-        $secretKey = 'RAHASIA-ANDA'; // Pindahkan ke .env pada produksi
+        $secretKey = getenv('JWT_SECRET'); // Pindahkan ke .env pada produksi
 
         try {
             $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
+            $request->user = $decoded->data;
             // Token valid, bisa digunakan untuk menetapkan user aktif di context jika perlu
             // Misalnya simpan di request attribute atau ke session jika dibutuhkan
 

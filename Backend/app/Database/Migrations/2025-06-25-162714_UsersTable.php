@@ -68,6 +68,13 @@ class CreateUsersTable extends Migration
                 'constraint' => 50,
                 'null'       => true
             ],
+            // // ✅ Tambahan kolom status aktif
+            'is_active' => [
+                'type'       => 'TINYINT',
+                'constraint' => 1,
+                'default'    => 1,
+                'null'       => false
+            ],
             'created_by' => [
                 'type'       => 'INT',
                 'constraint' => 11,

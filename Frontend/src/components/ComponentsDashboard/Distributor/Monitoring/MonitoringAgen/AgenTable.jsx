@@ -11,6 +11,7 @@ const AgenTable = ({ agenList, toggleAktif }) => {
         },
         { header: "Nama Agen", key: "name" },
         { header: "Email", key: "email" },
+        { header: "No. Telepon", key: "telepon" },
         { header: "No.Rek", key: "rekening" },
         { header: "Nama Rekening", key: "namaRekening" },
         { header: "Nama Bank", key: "namaBank" },
@@ -20,7 +21,9 @@ const AgenTable = ({ agenList, toggleAktif }) => {
             header: "Status Keaktifan",
             key: "aktif",
             render: (val) => (
-                <span className={`agen-status ${val ? 'aktif' : 'nonaktif'}`}>
+                <span
+                    className={`agen-status ${val ? 'aktif' : 'nonaktif'} text-xs px-2 py-1 rounded font-bold`}
+                >
                     {val ? "Aktif" : "Tidak Aktif"}
                 </span>
             ),
@@ -29,14 +32,29 @@ const AgenTable = ({ agenList, toggleAktif }) => {
             header: "Aksi",
             key: "aksi",
             render: (_, row) => (
-                <button
-                    className={`agen-button-toggle ${row.aktif ? 'btn-hentikan' : 'btn-aktifkan'}`}
-                    onClick={() => toggleAktif(row.id)}
-                >
-                    {row.aktif ? "Hentikan" : "Aktifkan"}
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        className={`agen-button-toggle ${row.aktif ? 'btn-hentikan' : 'btn-aktifkan'} text-xs px-2 py-1`}
+                        onClick={() => toggleAktif(row.id)}
+                    >
+                        {row.aktif ? "Hentikan" : "Aktifkan"}
+                    </button>
+                    <button
+                        className="agen-button-edit bg-blue-900 text-white text-xs px-2 py-1 rounded font-bold"
+                        onClick={() => row.onEdit(row.id)}
+
+                    >
+                        Edit
+                    </button>
+                    <button
+                        className="agen-button-delete bg-blue-900 text-white text-xs px-2 py-1 rounded font-bold"
+                        onClick={() => row.onDelete(row.id)}
+                    >
+                        Hapus
+                    </button>
+                </div>
             ),
-        },
+        }
     ];
 
     return (

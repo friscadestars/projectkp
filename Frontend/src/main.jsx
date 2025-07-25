@@ -12,14 +12,16 @@ import AOS from 'aos';
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
-      <OrderProvider>
-        <AuthProvider>
+      {/* AuthProvider harus di luar, baru OrderProvider, baru App */}
+      <AuthProvider>
+        <OrderProvider>
           <App />
-        </AuthProvider>
-      </OrderProvider>
+        </OrderProvider>
+      </AuthProvider>
     </BrowserRouter>
   </React.StrictMode>
 );
+
 
 AOS.init({
   duration: 800, // durasi animasi (ms)

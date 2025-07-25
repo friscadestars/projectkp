@@ -3,49 +3,160 @@
 namespace App\Controllers;
 
 use App\Models\UserModel;
+use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\RESTful\ResourceController;
 
 class UserController extends ResourceController
 {
     protected $userModel;
+    protected $format = 'json';
 
     public function __construct()
     {
         $this->userModel = new UserModel();
     }
 
-    public function index() // GET all
+    // GET /api/users?role=agen
+    public function index()
     {
-        return $this->respond($this->userModel->findAll());
+        $role = $this->request->getGet('role');
+
+        $builder = $this->userModel->select([
+            'id',
+            'name',
+            'email',
+            'role',
+            'no_telp',
+            'alamat',
+            'nama_rekening',
+            'rekening',
+            'nama_bank',
+            'is_active',
+            'created_at',
+        ]);
+
+        if (!empty($role)) {
+            $builder->where('role', $role);
+        }
+
+        $users = $builder->findAll();
+
+        return $this->respond($users);
     }
 
-    public function show($id = null) // GET single user
+    // GET /api/users/{id}
+    public function show($id = null)
     {
-        $data = $this->userModel->find($id);
-        if (!$data) return $this->failNotFound('User tidak ditemukan');
+        $data = $this->userModel
+            ->select('id, name, email, role, no_telp, alamat, nama_rekening, rekening, nama_bank, created_at')
+            ->find($id);
+
+        if (!$data) {
+            return $this->failNotFound('User tidak ditemukan');
+        }
+
         return $this->respond($data);
     }
 
-    public function create() // POST
+    // POST /api/users
+    public function create()
     {
         $data = $this->request->getJSON(true);
-        $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
-        $this->userModel->insert($data);
-        return $this->respondCreated(['message' => 'User berhasil dibuat']);
-    }
+        if (!$data) {
+            return $this->failValidationErrors('Payload tidak valid');
+        }
 
-    public function update($id = null) // PUT
-    {
-        $data = $this->request->getJSON(true);
         if (isset($data['password'])) {
             $data['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         }
-        $this->userModel->update($id, $data);
-        return $this->respond(['message' => 'User berhasil diupdate']);
+
+        if (!$this->userModel->insert($data)) {
+            return $this->failValidationErrors($this->userModel->errors());
+        }
+
+        return $this->respondCreated(['message' => 'User berhasil dibuat', 'id' => $this->userModel->getInsertID()]);
     }
 
-    public function delete($id = null) // DELETE
+    // PUT /api/users/{id}
+    public function update($id = null)
     {
+        if (!$this->userModel->find($id)) {
+            return $this->failNotFound('User tidak ditemukan');
+        }
+
+        $data = $this->request->getJSON(true);
+        if (!$data) {
+            return $this->failValidationErrors('Payload tidak valid');
+        }
+
+        // Map dari frontend ke kolom DB
+        $payload = [
+            'name'           => $data['name']           ?? null,
+            'email'          => $data['email']          ?? null,
+            'no_telp'        => $data['no_telp']        ?? null,
+            'alamat'         => $data['alamat']         ?? null,
+            'nama_rekening'  => $data['nama_rekening']  ?? null,
+            'rekening'       => $data['rekening']       ?? null,
+            'nama_bank'      => $data['nama_bank']      ?? null,
+        ];
+
+        // Jangan update password kalau tidak dikirim
+        if (isset($data['password']) && $data['password'] !== '') {
+            $payload['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+        }
+
+        // Buang null agar tidak men‑overwrite kolom dengan null
+        $payload = array_filter($payload, fn($v) => $v !== null);
+
+        if (!$this->userModel->update($id, $payload)) {
+            return $this->failValidationErrors($this->userModel->errors());
+        }
+
+        $updated = $this->userModel
+            ->select('id, name, email, role, no_telp, alamat, nama_rekening, rekening, nama_bank, created_at')
+            ->find($id);
+
+        return $this->respond([
+            'message' => 'User berhasil diupdate',
+            'data'    => $updated
+        ], ResponseInterface::HTTP_OK);
+    }
+
+    public function setActive($id = null)
+    {
+        if (!$this->userModel->find($id)) {
+            return $this->failNotFound('User tidak ditemukan');
+        }
+
+        $data = $this->request->getJSON(true);
+
+        if (!is_array($data) || !array_key_exists('is_active', $data)) {
+            return $this->failValidationErrors('is_active wajib diisi');
+        }
+
+        $payload = ['is_active' => (int) $data['is_active']];
+
+        if (!$this->userModel->update($id, $payload)) {
+            return $this->failServerError('Gagal memperbarui status aktif.');
+        }
+
+        $updated = $this->userModel
+            ->select('id, name, email, role, is_active')
+            ->find($id);
+
+        return $this->respond([
+            'message' => 'Status aktif user diperbarui',
+            'data'    => $updated,
+        ]);
+    }
+
+    // DELETE /api/users/{id}
+    public function delete($id = null)
+    {
+        if (!$this->userModel->find($id)) {
+            return $this->failNotFound('User tidak ditemukan');
+        }
+
         $this->userModel->delete($id);
         return $this->respondDeleted(['message' => 'User berhasil dihapus']);
     }
