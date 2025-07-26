@@ -8,9 +8,9 @@ export default function MasukForm() {
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-   try {
+    try {
       const response = await fetch("http://localhost:8080/api/login", {
         method: "POST",
         headers: {
@@ -19,18 +19,24 @@ export default function MasukForm() {
         body: JSON.stringify({ email, password }),
       });
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.messages?.error || "Gagal login");
+      const data = await response.json();
+      console.log("Login response:", data);
+
+      if (!response.ok) {
+        throw new Error(data?.message || "Gagal login");
       }
 
-      const data = await response.json();
       const { token, user } = data;
+
+      // Cek validitas data user
+      if (!user || !user.role) {
+        throw new Error("Data user tidak valid");
+      }
 
       // Validasi role
       const expectedRole = selectedRole.toLowerCase();
       if (user.role !== expectedRole) {
-        alert(`Role yang dipilih tidak cocok dengan akun ini.`);
+        alert("Role yang dipilih tidak cocok dengan akun ini.");
         return;
       }
 
@@ -39,8 +45,9 @@ export default function MasukForm() {
       localStorage.setItem("role", user.role);
       localStorage.setItem("user_id", user.id);
       localStorage.setItem("user_email", user.email);
+      localStorage.setItem("users", JSON.stringify(user));
 
-      // Navigasi berdasarkan role
+      // Navigasi
       switch (user.role) {
         case "agen":
           navigate("/berandaAgen");
@@ -56,7 +63,7 @@ export default function MasukForm() {
       }
 
     } catch (error) {
-      console.error("Login error:", error.message);
+      console.error("Login error:", error);
       alert("Login gagal: " + error.message);
     }
   };
@@ -80,10 +87,9 @@ export default function MasukForm() {
               type="button"
               onClick={() => setSelectedRole(role)}
               className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all duration-200
-                ${
-                  selectedRole === role
-                    ? "bg-primary-dark text-white border-primary-dark"
-                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                ${selectedRole === role
+                  ? "bg-primary-dark text-white border-primary-dark"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
                 }`}
             >
               {role}

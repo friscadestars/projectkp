@@ -16,37 +16,41 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const [jumlah, setJumlah] = useState("");
   const [harga, setHarga] = useState("");
   const [alamat, setAlamat] = useState("");
-
-  // Tambahkan produk ke daftar
+  const [lastOrderId, setLastOrderId] = useState(null);
   const handleAddProduk = () => {
-    if (!produk || !jumlah || !harga) return;
+    const jumlahParsed = parseInt(jumlah, 10);
+    const hargaParsed = parseInt(harga, 10);
+
+    if (!produk || isNaN(jumlahParsed) || isNaN(hargaParsed) || jumlahParsed <= 0 || hargaParsed <= 0) {
+      return;
+    }
+
     setProdukList((prev) => [
       ...prev,
       {
         nama: produk,
-        jumlah: parseInt(jumlah, 10),
-        harga: parseInt(harga, 10),
+        jumlah: jumlahParsed,
+        harga: hargaParsed,
       },
     ]);
+
     setProduk("");
     setJumlah("");
     setHarga("");
   };
 
-  // Hapus produk dari daftar
   const handleDeleteProduk = (index) => {
     setProdukList((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Submit order
   const handleSubmit = async () => {
-    if (!produkList.length || !alamat) {
+    if (!produkList.length || !alamat.trim()) {
       return { success: false, message: "Produk dan alamat harus diisi" };
     }
 
     const payload = {
-      agen_id: Number(agentId), // FK orders
-      distributor_id: Number(distributorInfo.id), // FK orders
+      agen_id: Number(agentId),
+      distributor_id: Number(distributorInfo.id),
       pabrik_id: null,
       status: 'pending',
       order_date: toMySQLDatetime(),
@@ -67,7 +71,6 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          // ✅ Tambahkan token jika pakai autentikasi bearer
           'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
         },
         body: JSON.stringify(payload)
@@ -86,12 +89,17 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
         alamat
       });
 
-      // Reset form
+      setLastOrderId(data?.data?.id || null);
+
       setProdukList([]);
+      setProduk("");
+      setJumlah("");
+      setHarga("");
       setAlamat("");
 
       onSuccess?.();
       return { success: true };
+
     } catch (e) {
       console.error(e);
       return { success: false, message: 'Network/Server error' };
@@ -104,6 +112,7 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
     harga,
     produkList,
     alamat,
+    lastOrderId,
     setProduk,
     setJumlah,
     setHarga,

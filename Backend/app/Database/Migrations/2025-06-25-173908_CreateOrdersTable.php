@@ -48,9 +48,9 @@ class CreateOrdersTable extends Migration
                 'null' => true
             ],
             'resi' => [
-                'type' => 'VARCHAR',
+                'type'       => 'VARCHAR',
                 'constraint' => 50,
-                'null' => true
+                'null'       => true
             ],
             'accepted_at' => [
                 'type' => 'DATETIME',
@@ -59,6 +59,17 @@ class CreateOrdersTable extends Migration
             'note' => [
                 'type' => 'TEXT',
                 'null' => true
+            ],
+            'agent_order_no' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'null'       => true,
+                'default'    => 0
+            ],
+            'order_code' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 50,
+                'null'       => true
             ]
         ]);
 

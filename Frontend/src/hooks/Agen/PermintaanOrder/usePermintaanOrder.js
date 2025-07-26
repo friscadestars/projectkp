@@ -1,3 +1,4 @@
+// FILE: usePermintaanOrderPage.js
 import { useEffect, useState } from "react";
 import { useOrder } from "../../../Context/OrderContext";
 import { useNavigation } from "../../useNavigation";
@@ -6,35 +7,60 @@ import useOrderFormState from "./useOrderFormState";
 import { formatDate } from "../../../components/ComponentsDashboard/Common/date";
 import bagIcon from "../../../assets/IconHeader/IconBag.png";
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+
 export const usePermintaanOrderPage = () => {
     const { orders, setOrders } = useOrder();
-    const agentId = 5; // user login
-    const agentName = "Agen 2"; // bisa diambil dari login context/session nanti
+
+    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const agentId = users.id;
+    const agentName = users.name;
 
     const [distributorInfo, setDistributorInfo] = useState(null);
+    const [lastOrderId, setLastOrderId] = useState(0); // state utama lastOrderId
+    const [isDataReady, setIsDataReady] = useState(false);
     const { handleNavigation } = useNavigation(agenMenuItems);
     const [showDropdown, setShowDropdown] = useState(false);
     const toggleDropdown = () => setShowDropdown((prev) => !prev);
 
     useEffect(() => {
-        fetch(`http://localhost:8080/api/agen-distributor/${agentId}`, {
-            headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.distributor_id && data.name) {
+        const fetchData = async () => {
+            try {
+                if (!agentId) return;
+
+                const token = localStorage.getItem('token');
+
+                const [distributorRes, orderRes] = await Promise.all([
+                    fetch(`${API_BASE}/agen-distributor/${agentId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    }),
+                    fetch(`${API_BASE}/orders/last?agen_id=${agentId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    })
+                ]);
+
+                const distributorData = await distributorRes.json();
+                const orderData = await orderRes.json();
+
+                if (distributorData?.distributor_id) {
                     setDistributorInfo({
-                        id: data.distributor_id,
-                        name: data.name,
-                        email: data.email
+                        id: distributorData.distributor_id,
+                        name: distributorData.name,
+                        email: distributorData.email
                     });
-                } else {
-                    alert('Distributor tidak ditemukan untuk agen ini.');
                 }
-            })
-            .catch(err => console.error("Error fetch distributor:", err));
+
+                if (orderData?.order_id) {
+                    setLastOrderId(orderData.order_id); // langsung pakai dari backend
+                }
+
+                setIsDataReady(true);
+            } catch (err) {
+                console.error("Gagal memuat data:", err);
+            }
+        };
+
+        fetchData();
     }, []);
 
     const {
@@ -55,7 +81,9 @@ export const usePermintaanOrderPage = () => {
         distributorInfo: distributorInfo || { id: null, name: "" },
         orders,
         setOrders,
+        setLastOrderId,
         onSuccess: () => handleNavigation("/ringkasan-order")
+
     });
 
     const layoutProps = {
@@ -75,7 +103,7 @@ export const usePermintaanOrderPage = () => {
         produk,
         jumlah,
         harga,
-        produkList,
+        produkList: Array.isArray(produkList) ? produkList : [],
         alamat,
         setProduk,
         setJumlah,
@@ -83,7 +111,7 @@ export const usePermintaanOrderPage = () => {
         setAlamat,
         handleAddProduk,
         handleDeleteProduk,
-        orderId: `ORD-00${orders.length + 1}`,
+        orderId: lastOrderId || '',
         agentName,
         distributorName: distributorInfo?.name || '',
         orderDate: formatDate(new Date())
@@ -93,6 +121,7 @@ export const usePermintaanOrderPage = () => {
         layoutProps,
         pageTitleProps,
         orderFormProps,
-        handleSubmit
+        handleSubmit,
+        loading: !isDataReady
     };
 };

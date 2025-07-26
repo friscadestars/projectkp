@@ -12,18 +12,29 @@ const ValidasiOrderTable = ({ orders }) => {
             key: 'no',
             render: (_, __, index) => index + 1,
         },
-        { header: 'Order ID', key: 'orderId' },
         {
-            header: 'Agen ID',
-            key: 'agentId',
-            render: (val) => val || 'AG-001',
+            header: 'Order ID', key: 'orderCode',
+            render: (val) => (val || '').toUpperCase()
+        },
+        {
+            header: 'Agen',
+            key: 'agenName',
+            render: (val) => val || 'Nama tidak ditemukan',
         },
         {
             header: 'Alamat',
             key: 'alamat',
             render: (_, row) => row.address || row.alamat || 'Alamat tidak tersedia',
         },
-        { header: 'Tanggal Order', key: 'orderDate' },
+        {
+            header: 'Tanggal Order',
+            key: 'orderDate',
+            render: (val) => new Date(val).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            })
+        },
         {
             header: 'Jumlah Produk',
             key: 'products',

@@ -31,6 +31,7 @@ class OrderController extends ResourceController
             return $this->respond([]);
         }
 
+        // Ambil semua item untuk order yang ada
         $orderIds = array_column($orders, 'id');
         $items = $this->orderItemModel
             ->whereIn('order_id', $orderIds)
@@ -41,28 +42,38 @@ class OrderController extends ResourceController
             $grouped[$item['order_id']][] = $item;
         }
 
+        // Kumpulkan semua user id (agen & distributor) dari list order
         $userIds = [];
         foreach ($orders as $order) {
-            if ($order['agen_id']) {
-                $userIds[] = $order['agen_id'];
+            if (!empty($order['agen_id'])) {
+                $userIds[] = (int) $order['agen_id'];
             }
             if (!empty($order['distributor_id'])) {
-                $userIds[] = $order['distributor_id'];
+                $userIds[] = (int) $order['distributor_id'];
             }
         }
 
-        $userModel = new UserModel();
-        $users = $userModel->whereIn('id', array_unique($userIds))->findAll();
-
+        // Ambil nama user2 tsb
         $userMap = [];
-        foreach ($users as $u) {
-            $userMap[$u['id']] = $u['name'];
+        if (!empty($userIds)) {
+            $userModel = new UserModel();
+            $users = $userModel->whereIn('id', array_unique($userIds))->findAll();
+
+            foreach ($users as $u) {
+                $userMap[(int) $u['id']] = $u['name'];
+            }
         }
 
+        // Bentuk response final
         foreach ($orders as &$order) {
             $order['items'] = $grouped[$order['id']] ?? [];
-            $order['agen_name'] = $userMap[$order['agen_id']] ?? 'Agen tidak dikenal';
-            $order['distributor_name'] = $userMap[$order['distributor_id']] ?? 'Distributor tidak dikenal';
+
+            $order['agen'] = $userMap[(int) $order['agen_id']] ?? 'Nama tidak ditemukan';
+            $order['distributor'] = $userMap[(int) $order['distributor_id']] ?? 'Nama tidak ditemukan';
+
+            $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0); // ✅
+
+            unset($order['agen_id'], $order['distributor_id']);
         }
 
         return $this->respond($orders);
@@ -87,6 +98,11 @@ class OrderController extends ResourceController
 
         $alamat   = $payload['alamat'] ?? $payload['note'] ?? null;
         $products = $payload['products'] ?? [];
+        $nextNo = $this->model
+            ->where('agen_id', (int) $payload['agen_id'])
+            ->countAllResults() + 1;
+
+        $orderCode = sprintf('ord-%03d', $nextNo);
 
         $orderData = [
             'agen_id'        => (int) ($payload['agen_id'] ?? 0),
@@ -98,6 +114,8 @@ class OrderController extends ResourceController
             'resi'           => $payload['resi'] ?? null,
             'accepted_at'    => $payload['accepted_at'] ?? null,
             'note'           => $alamat,
+            'agent_order_no' => $nextNo,
+            'order_code'     => $orderCode,
         ];
 
         $db = \Config\Database::connect();
@@ -128,12 +146,14 @@ class OrderController extends ResourceController
             $order = $this->model->find($orderId);
             $order['items'] = $this->orderItemModel->where('order_id', $orderId)->findAll();
 
-            // 🔧 Tambahkan nama agen dan distributor
             $userModel = new UserModel();
             $agen = $userModel->find($order['agen_id']);
             $distributor = $userModel->find($order['distributor_id']);
-            $order['agen_name'] = $agen['name'] ?? 'Agen tidak dikenal';
-            $order['distributor_name'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+            // kembalikan nama, dan hapus id jika tidak ingin ditampilkan
+            $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
+            $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+            unset($order['agen_id'], $order['distributor_id']);
 
             return $this->respondCreated([
                 'message' => 'Order berhasil dibuat',
@@ -160,12 +180,14 @@ class OrderController extends ResourceController
             ->where('order_id', $id)
             ->findAll();
 
-        // 🔧 Tambahkan nama agen dan distributor
         $userModel = new UserModel();
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
-        $order['agen_name'] = $agen['name'] ?? 'Agen tidak dikenal';
-        $order['distributor_name'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+        $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
+        $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+        unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond($order);
     }
@@ -203,12 +225,14 @@ class OrderController extends ResourceController
         $order = $this->model->find($id);
         $order['items'] = $this->orderItemModel->where('order_id', $id)->findAll();
 
-        // 🔧 Tambahkan nama agen dan distributor
         $userModel = new UserModel();
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
-        $order['agen_name'] = $agen['name'] ?? 'Agen tidak dikenal';
-        $order['distributor_name'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+        $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
+        $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+        unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond([
             'message' => 'Order berhasil diperbarui',
@@ -229,5 +253,50 @@ class OrderController extends ResourceController
         $this->model->delete($id);
 
         return $this->respondDeleted(['message' => 'Order berhasil dihapus']);
+    }
+
+    public function updateItemPrice($orderId = null)
+    {
+        $payload = $this->request->getJSON(true);
+
+        if (!$orderId || !isset($payload['product_name']) || !isset($payload['unit_price'])) {
+            return $this->failValidationErrors('Data tidak lengkap');
+        }
+
+        $updated = $this->orderItemModel
+            ->where('order_id', $orderId)
+            ->where('product_name', $payload['product_name'])
+            ->set(['unit_price' => $payload['unit_price']])
+            ->update();
+
+        if ($updated === false) {
+            return $this->failServerError('Gagal memperbarui harga');
+        }
+
+        return $this->respondUpdated(['message' => 'Harga berhasil diperbarui']);
+    }
+
+    public function countAgen($agenId = null)
+    {
+        $agenId = $agenId ?? $this->request->getGet('agen_id');
+
+        if (!$agenId) {
+            return $this->failValidationErrors('Parameter agen_id diperlukan');
+        }
+
+        // Ambil jumlah order yang sudah pernah dilakukan agen ini
+        $orderCount = $this->model
+            ->where('agen_id', (int)$agenId)
+            ->countAllResults();
+
+        $nextOrderNumber = $orderCount + 1;
+
+        $nextOrderId = 'ORD-' . str_pad($nextOrderNumber, 3, '0', STR_PAD_LEFT);
+
+        return $this->respond([
+            'count'     => $orderCount,
+            'order_id'  => $nextOrderId,
+            'message'   => 'Order ID berikutnya berhasil dihasilkan untuk agen ini'
+        ]);
     }
 }

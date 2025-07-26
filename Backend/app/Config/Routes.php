@@ -21,11 +21,13 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('agen-distributor/(:num)', 'AgentDistributorController::show/$1');
     $routes->put('users/(:num)/active', 'UserController::setActive/$1');
     $routes->resource('users', ['controller' => 'UserController']);
+
     $routes->get('orders', 'OrderController::index');          // GET semua order
     $routes->get('orders/(:num)', 'OrderController::show/$1'); // GET by id
     $routes->post('orders', 'OrderController::create');        // POST buat order
     $routes->put('orders/(:num)', 'OrderController::update/$1'); // PUT update
-    $routes->delete('orders/(:num)', 'OrderController::delete/$1'); // ✅ Tambahkan ini
+    $routes->delete('orders/(:num)', 'OrderController::delete/$1'); // DELETE order
+    $routes->put('orders/(:num)/update-item-price', 'OrderController::updateItemPrice/$1'); // ✅ Tambahan ini
 
     $routes->resource('order-items');
 
@@ -46,6 +48,9 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->resource('prices', ['controller' => 'ProductPriceController']);
 
     $routes->resource('notifications', ['controller' => 'NotificationController']);
+
+    $routes->get('orders/last', 'OrderController::countAgen');         // via query string ?agen_id=
+    $routes->get('orders/last/(:num)', 'OrderController::countAgen/$1');
 });
 
 $routes->options('(:any)', function () {
