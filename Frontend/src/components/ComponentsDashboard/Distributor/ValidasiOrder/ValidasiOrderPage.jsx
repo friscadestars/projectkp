@@ -16,12 +16,12 @@ const ValidasiOrderPage = () => {
     };
 
     const handleTerima = () => {
-        approveOrder(orderId); 
-        navigate('/distributor/kirim-ke-pabrik'); 
+        approveOrder(orderId);
+        navigate('/distributor/kirim-ke-pabrik');
     };
 
     const handleTolak = () => {
-       
+
     };
 
     return (

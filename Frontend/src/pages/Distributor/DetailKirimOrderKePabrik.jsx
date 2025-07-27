@@ -24,7 +24,7 @@ const DetailKirimOrderKePabrik = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
-            role="distributor" 
+            role="distributor"
         >
             <FormTitle icon={iconKirimOrder} title="Kirim Orderan ke Pabrik" />
 

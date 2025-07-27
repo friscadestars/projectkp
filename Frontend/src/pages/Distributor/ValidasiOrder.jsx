@@ -1,18 +1,54 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { distributorMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
-import { useOrder } from '../../Context/OrderContext.jsx';
+import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import iconValidasi from '../../assets/IconHeader/ValidasiIcon.png';
 import ValidasiOrderSection from '../../components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderSection';
 import PageHeaderWithIcon from '../../components/ComponentsDashboard/Common/PageHeader';
 import { useNavigation } from '../../hooks/useNavigation';
+import { fetchOrders, updateOrderStatus } from '../../services/ordersApi';
 
 const ValidasiOrder = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const { handleNavigation } = useNavigation(distributorMenuItems);
-    const { orders, approveOrder, deleteOrder } = useOrder();
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [err, setErr] = useState(null);
 
-    const pendingOrders = orders.filter(order => order.status === 'Tertunda');
+    useEffect(() => {
+        (async () => {
+            try {
+                const allOrders = await fetchOrders();
+                setOrders(allOrders.filter(o =>
+                    o.status === 'pending' || o.status === 'processing'
+                ));
+            } catch (e) {
+                setErr(e.message);
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
+
+    const handleTerima = async (orderId) => {
+        try {
+            await updateOrderStatus(orderId, 'approved');
+            setOrders(prev => prev.filter(o => o.orderId !== orderId));
+        } catch (e) {
+            alert('Gagal menyetujui order: ' + e.message);
+        }
+    };
+
+    const handleTolak = async (orderId) => {
+        try {
+            await updateOrderStatus(orderId, 'cancelled');
+            setOrders(prev => prev.filter(o => o.orderId !== orderId));
+        } catch (e) {
+            alert('Gagal menolak order: ' + e.message);
+        }
+    };
+
+    if (loading) return <div>Memuat...</div>;
+    if (err) return <div className="text-red-500">Error: {err}</div>;
 
     return (
         <Layout
@@ -21,13 +57,13 @@ const ValidasiOrder = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
-            role="distributor" 
+            role="distributor"
         >
             <PageHeaderWithIcon icon={iconValidasi} title="Validasi Order" />
             <ValidasiOrderSection
-                orders={pendingOrders}
-                handleTerima={approveOrder} // langsung pakai dari context
-                handleTolak={deleteOrder}   // langsung pakai dari context
+                orders={orders}
+                handleTerima={handleTerima}
+                handleTolak={handleTolak}
             />
         </Layout>
     );

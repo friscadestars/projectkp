@@ -1,4 +1,3 @@
-// PermintaanOrderContent.jsx
 import React from "react";
 import PageTitle from "../../Common/PageHeader";
 import OrderForm from "./OrderForm";
@@ -10,7 +9,9 @@ const PermintaanOrderContent = ({
   setProduk, setJumlah, setHarga, setAlamat,
   handleAddProduk, handleDeleteProduk,
   handleSubmit,
-  orderId, agentId, distributorName, orderDate
+  orderId,
+  agentName, distributorName,
+  orderDate
 }) => {
   return (
     <>
@@ -28,7 +29,7 @@ const PermintaanOrderContent = ({
         handleAddProduk={handleAddProduk}
         handleDeleteProduk={handleDeleteProduk}
         orderId={orderId}
-        agentId={agentId}
+        agentName={agentName}
         distributorName={distributorName}
         orderDate={orderDate}
       >

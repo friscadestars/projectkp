@@ -10,9 +10,17 @@ class OrderModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
-        'agen_id', 'distributor_id', 'pabrik_id',
-        'status', 'order_date', 'delivery_date',
-        'resi', 'accepted_at', 'note'
+        'agen_id',
+        'distributor_id',
+        'pabrik_id',
+        'status',
+        'order_date',
+        'delivery_date',
+        'resi',
+        'accepted_at',
+        'note',
+        'agent_order_no',
+        'order_code',
     ];
 
     protected $useTimestamps = false;

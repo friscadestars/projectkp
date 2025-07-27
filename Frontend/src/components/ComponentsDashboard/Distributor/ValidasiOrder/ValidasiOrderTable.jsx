@@ -1,7 +1,8 @@
 // src/Components/Table/ValidasiOrderTable.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import ReusableTable from '../../Common/ReusableTable'; 
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
 const ValidasiOrderTable = ({ orders }) => {
     const navigate = useNavigate();
@@ -12,18 +13,29 @@ const ValidasiOrderTable = ({ orders }) => {
             key: 'no',
             render: (_, __, index) => index + 1,
         },
-        { header: 'Order ID', key: 'orderId' },
         {
-            header: 'Agen ID',
-            key: 'agentId',
-            render: (val) => val || 'AG-001',
+            header: 'Order ID', key: 'orderCode',
+            render: (val) => (val || '').toUpperCase()
+        },
+        {
+            header: 'Agen',
+            key: 'agenName',
+            render: (val) => val || 'Nama tidak ditemukan',
         },
         {
             header: 'Alamat',
-            key: 'address',
-            render: (val) => val || 'Jl. Melati no.20 Jakarta',
+            key: 'alamat',
+            render: (_, row) => row.address || row.alamat || 'Alamat tidak tersedia',
         },
-        { header: 'Tanggal Order', key: 'orderDate' },
+        {
+            header: 'Tanggal Order',
+            key: 'orderDate',
+            render: (val) => new Date(val).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            })
+        },
         {
             header: 'Jumlah Produk',
             key: 'products',
@@ -35,11 +47,7 @@ const ValidasiOrderTable = ({ orders }) => {
         {
             header: 'Status Order',
             key: 'status',
-            render: (val) => (
-                <span className="bg-yellow-400 text-white px-2 py-1 rounded text-sm font-bold">
-                    {val}
-                </span>
-            ),
+            render: (val) => <StatusBadge status={val} />,
         },
         {
             header: 'Aksi',

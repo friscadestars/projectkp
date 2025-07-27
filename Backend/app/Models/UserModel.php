@@ -24,7 +24,8 @@ class UserModel extends Model
         'rekening',
         'nama_bank',
         'alamat',
-        'created_by'
+        'created_by',
+        'is_active'
     ];
 
     // Tipe pengembalian data

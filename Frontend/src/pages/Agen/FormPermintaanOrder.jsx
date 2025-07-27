@@ -9,10 +9,16 @@ import { usePermintaanOrderPage } from "../../hooks/Agen/PermintaanOrder/usePerm
 const PermintaanOrder = () => {
     const props = usePermintaanOrderPage();
 
+    // Jika masih loading, tidak render apapun
+    if (props.loading) return null;
+
+    // Tampilkan error jika ada
+    if (props.error) {
+        return <div className="text-red-600 text-center py-10">{props.error}</div>;
+    }
+
     return (
-        <Layout {...props.layoutProps}
-        role="agen" 
-        >
+        <Layout {...props.layoutProps} role="agen">
             <PageTitle {...props.pageTitleProps} />
             <OrderForm {...props.orderFormProps}>
                 <SubmitButton onClick={props.handleSubmit} />

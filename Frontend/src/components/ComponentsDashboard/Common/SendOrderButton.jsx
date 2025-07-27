@@ -1,4 +1,3 @@
-// src/Components/ComponentsDashboard/Common/SendOrderButton.jsx
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -6,7 +5,7 @@ import { useOrder } from '../../../Context/OrderContext';
 
 const SendOrderButton = ({ orderId }) => {
     const navigate = useNavigate();
-    const { updateOrderStatus, markAsProcessed } = useOrder();
+    const { updateOrderStatus, markAsProcessed, sendToMonitoringOrder } = useOrder();
 
     const handleClick = () => {
         Swal.fire({
@@ -22,6 +21,7 @@ const SendOrderButton = ({ orderId }) => {
             if (result.isConfirmed) {
                 updateOrderStatus(orderId, 'Diproses');
                 markAsProcessed(orderId);
+                sendToMonitoringOrder(orderId); // ✅ Tambahkan ini
 
                 Swal.fire({
                     icon: 'success',

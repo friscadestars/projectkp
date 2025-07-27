@@ -10,7 +10,11 @@ class OrderItemModel extends Model
     protected $primaryKey = 'id';
 
     protected $allowedFields = [
-        'order_id', 'product_name', 'quantity', 'unit_price', 'address'
+        'order_id',
+        'product_name',
+        'quantity',
+        'unit_price',
+        'address'
     ];
 
     protected $useTimestamps = false;

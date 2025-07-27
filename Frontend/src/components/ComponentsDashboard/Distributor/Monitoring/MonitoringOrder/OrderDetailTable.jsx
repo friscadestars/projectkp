@@ -1,56 +1,45 @@
 import React from "react";
 import ReusableTable from "../../../Common/ReusableTable";
+import StatusBadge from '../../../Common/StatusBadge';
 
 const OrderDetailTable = ({ order }) => {
-    if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
+    if (!order) return <p>Data tidak ditemukan.</p>;
 
     const columns = [
-        { header: 'Order ID', key: 'orderId' },
-        { header: 'Agen ID', key: 'agenId', render: () => 'AG-001' },
-        { header: 'Pabrik ID', key: 'pabrikId', render: () => 'PB-001' },
-        { header: 'Tanggal Order', key: 'orderDate' },
         {
-            header: 'Estimasi Sampai',
-            key: 'estimatedDate',
+            header: 'Order ID', key: 'order_code',
+            render: (val) => (val || '').toUpperCase(),
+        },
+        {
+            header: 'Agen', key: 'agen',
+            render: (val) => val || 'Nama tidak ditemukan',
+        },
+        {
+            header: 'Pabrik ID', key: 'pabrik_id',
             render: (val) => val || '-',
+        },
+        {
+            header: 'Tanggal Order', key: 'order_date',
+            render: (val) => val?.split(' ')[0] || '-',
+        },
+        {
+            header: 'Estimasi Sampai', key: 'delivery_date',
+            render: (val) => val?.split(' ')[0] || '-',
         },
         {
             header: 'Status Order',
             key: 'status',
-            render: (val) => (
-                <span className={`
-                    px-3 py-1 text-sm rounded text-white font-bold
-                    ${val === 'Belum Dikirim' ? 'bg-orange-400' :
-                        val === 'Disetujui' ? 'bg-green-500' :
-                            val === 'Diproses' ? 'bg-blue-500' :
-                                val === 'Dikirim' ? 'bg-cyan-500' :
-                                    val === 'Diterima' ? 'bg-emerald-500' :
-                                        'bg-gray-400'
-                    }
-                `}>
-                    {val}
-                </span>
-            ),
+            render: status => <StatusBadge status={status} />,
         },
     ];
-
-    const data = [order];
 
     return (
         <>
             <h2 className="font-semibold text-md mb-2">Detail Order</h2>
             <ReusableTable
                 columns={columns}
-                data={data}
-                footer={
-                    <tr>
-                        <td
-                            colSpan={columns.length}
-                            className="px-4 py-3 border-t border-gray-300 text-sm text-gray-600 text-right font-medium"
-                        >
-                        </td>
-                    </tr>
-                }
+                data={[order]}
+                footer={<tr><td colSpan={columns.length}></td></tr>}
             />
         </>
     );

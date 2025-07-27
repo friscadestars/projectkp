@@ -50,7 +50,7 @@ import InvoiceTagihanDistributor from './pages/Distributor/InvoiceTagihanDistrib
 // Pabrik Pages
 import DashboardPabrik from './pages/Pabrik/1_DashboardPabrik.jsx';
 import DaftarOrderMasuk from './pages/Pabrik/2_DaftarOrderMasuk.jsx';
-import DetailOrderMasuk from './pages/Pabrik/3_DetailOrderMasuk.jsx'; 
+import DetailOrderMasuk from './pages/Pabrik/3_DetailOrderMasuk.jsx';
 import ProduksiPengiriman from './pages/Pabrik/4_ProduksiPengiriman.jsx';
 import SedangDiproduksi from './pages/Pabrik/5_SedangProduksi.jsx';
 import Riwayat from './pages/Pabrik/6_Riwayat.jsx';
@@ -61,9 +61,9 @@ import DaftarHarga from './pages/Pabrik/9_DaftarHarga.jsx';
 function App() {
   return (
     <>
-    <ScrollToTop />
+      <ScrollToTop />
       <Routes>
-        {/* Public Routes */}
+        {/* ...semua route kamu sebelumnya tetap... */}
         <Route path="/" element={<HomePage />} />
         <Route path="/tentang" element={<TentangPage />} />
         <Route path="/fitur" element={<FiturPage />} />
@@ -78,7 +78,7 @@ function App() {
         <Route path="/berandaPabrik" element={<BerandaPabrik />} />
         <Route path="/berandaDistributor" element={<BerandaDistributor />} />
 
-        {/* Agen Routes */}
+        {/* Agen */}
         <Route path="/agen/dashboard-agen" element={<DashboardAgen />} />
         <Route path="/agen/ringkasan-order" element={<RingkasanOrder />} />
         <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
@@ -87,12 +87,12 @@ function App() {
         <Route path="/agen/tagihan" element={<TagihanOrder />} />
         <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />
 
-        {/* Distributor Routes */}
+        {/* Distributor */}
         <Route path="/distributor/dashboard-distributor" element={<DashboardDistributor />} />
         <Route path="/distributor/validasi-order" element={<ValidasiOrder />} />
         <Route path="/distributor/detail-validasi/:orderId" element={<DetailValidasiOrder />} />
         <Route path="/distributor/kirim-order" element={<KirimOrderKePabrik />} />
-        <Route path="/distributor/detail-kirim/:orderId" element={<DetailKirimOrderKePabrik />} />
+        <Route path="/distributor/detail-kirim/:orderCode" element={<DetailKirimOrderKePabrik />} />
         <Route path="/distributor/monitoring-order" element={<MonitoringOrder />} />
         <Route path="/distributor/monitoring-order/detail/:orderId" element={<DetailMonitoringOrder />} />
         <Route path="/distributor/monitoring-agen" element={<MonitoringAgen />} />
@@ -103,7 +103,7 @@ function App() {
         <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
         <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
 
-        {/* Pabrik Routes */}
+        {/* Pabrik */}
         <Route path="/pabrik/dashboard-pabrik" element={<DashboardPabrik />} />
         <Route path="/pabrik/daftar-order-masuk" element={<DaftarOrderMasuk />} />
         <Route path="/pabrik/detail-order" element={<DetailOrderMasuk />} />
@@ -113,7 +113,6 @@ function App() {
         <Route path="/pabrik/detail-riwayat" element={<DetailRiwayat />} />
         <Route path="/pabrik/monitoring-distributor" element={<MonitoringDistributor />} />
         <Route path="/pabrik/daftar-harga" element={<DaftarHarga />} />
-
       </Routes>
     </>
   );

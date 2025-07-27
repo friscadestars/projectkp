@@ -6,16 +6,19 @@ const OrderDetailTable = ({ order }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
     const columns = [
-        { header: 'Order ID', key: 'orderId' },
         {
-            header: 'Agen ID',
-            key: 'agenId',
-            render: (val) => val || 'AG-001',
+            header: 'Order ID', key: 'orderCode',
+            render: (val) => (val || '').toUpperCase()
+        },
+        {
+            header: 'Agen',
+            key: 'agenName',
+            render: (val) => val || 'Nama tidak ditemukan',
         },
         {
             header: 'Alamat',
             key: 'alamat',
-            render: (val) => val || 'Jl. Melati no.20 Jakarta',
+            render: (val) => val || 'Alamat tidak ditemukan',
         },
         { header: 'Tanggal Order', key: 'orderDate' },
         {
