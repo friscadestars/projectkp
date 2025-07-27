@@ -8,7 +8,7 @@ import iconMonitoring from '../../assets/IconHeader/MonitoringIcon.png';
 
 const DetailMonitoringOrder = () => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const { order, loading } = useMonitoringOrderDetail(); // ✅ ganti hook-nya
+    const { order, loading } = useMonitoringOrderDetail();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
     if (loading) {
