@@ -22,7 +22,7 @@ const EditAgenModal = ({ agen, onClose, onSave }) => {
             <div className="bg-white p-6 rounded-md w-full max-w-md">
                 <h2 className="text-xl font-bold mb-2 text-center">Edit Agen</h2>
 
-                {/* ✅ Tambahan keterangan umum */}
+                {/* Tambahan keterangan umum */}
                 <p className="text-sm text-gray-600 mb-4">
                     Silakan ubah data agen pada form di bawah ini, lalu klik <strong>Simpan</strong> untuk menyimpan perubahan.
                 </p>

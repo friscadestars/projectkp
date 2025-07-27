@@ -1,3 +1,4 @@
+// src/components/.../OrderForm.jsx
 import React from "react";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
 
@@ -10,29 +11,33 @@ const OrderForm = ({
 }) => {
     return (
         <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6 space-y-6">
-            {/* Informasi Agen, Distributor, Tanggal, Alamat */}
+            {/* Informasi Order: OrderID, Agen (LOGIN), Tanggal, Distributor */}
             <div className="grid grid-cols-4 gap-4">
                 <input
                     type="text"
+                    placeholder="Order ID"
                     value={orderId}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <input
                     type="text"
-                    value={`${agentName}`}
+                    placeholder="Agen"
+                    value={agentName}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <input
                     type="text"
+                    placeholder="Tanggal Order"
                     value={orderDate}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
                 <input
                     type="text"
-                    value={`${distributorName}`}
+                    placeholder="Distributor"
+                    value={distributorName}
                     readOnly
                     className="border border-gray-400 px-3 py-2 rounded text-sm text-gray-400"
                 />
@@ -44,8 +49,7 @@ const OrderForm = ({
                 placeholder="Alamat Pengiriman"
                 value={alamat}
                 onChange={(e) => setAlamat(e.target.value)}
-                className={`border border-gray-400 px-3 py-2 rounded w-full text-sm ${alamat ? 'text-black' : 'text-gray-400'
-                    }`}
+                className={`border border-gray-400 px-3 py-2 rounded w-full text-sm ${alamat ? 'text-black' : 'text-gray-400'}`}
             />
 
             {/* Tambah Produk */}
@@ -55,24 +59,21 @@ const OrderForm = ({
                     placeholder="Nama Produk"
                     value={produk}
                     onChange={(e) => setProduk(e.target.value)}
-                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${produk ? 'text-black' : 'text-gray-400'
-                        }`}
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${produk ? 'text-black' : 'text-gray-400'}`}
                 />
                 <input
                     type="number"
                     placeholder="Jumlah"
                     value={jumlah}
                     onChange={(e) => setJumlah(e.target.value)}
-                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${jumlah ? 'text-black' : 'text-gray-400'
-                        }`}
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${jumlah ? 'text-black' : 'text-gray-400'}`}
                 />
                 <input
                     type="number"
                     placeholder="Harga Satuan Request"
                     value={harga}
                     onChange={(e) => setHarga(e.target.value)}
-                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${harga ? 'text-black' : 'text-gray-400'
-                        }`}
+                    className={`border border-gray-400 px-3 py-2 rounded text-sm ${harga ? 'text-black' : 'text-gray-400'}`}
                 />
                 <button
                     onClick={handleAddProduk}

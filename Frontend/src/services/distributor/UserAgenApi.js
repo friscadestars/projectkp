@@ -5,7 +5,7 @@ const withAuth = (token) => ({
     Authorization: `Bearer ${token}`
 });
 
-// ✅ helper tambahan agar aman saat res tidak memiliki body JSON
+// helper tambahan agar aman saat res tidak memiliki body JSON
 const safeJson = async (res) => {
     const text = await res.text();
     if (!text) return {};
@@ -98,3 +98,18 @@ export const setActiveAgent = async (id, isActive, token) => {
     return await safeJson(res);
 };
 
+
+export const fetchAgentsByDistributor = async (distributorId, token) => {
+    if (!token) throw new Error('Token tidak ditemukan');
+    const res = await fetch(`${BASE_URL}/agen-distributor/by-distributor/${distributorId}`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...withAuth(token)
+        }
+    });
+    if (!res.ok) {
+        const err = await safeJson(res);
+        throw new Error(err.message || 'Gagal mengambil agen by distributor');
+    }
+    return await res.json();
+};

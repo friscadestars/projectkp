@@ -2,6 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
 const ValidasiOrderTable = ({ orders }) => {
     const navigate = useNavigate();
@@ -46,11 +47,7 @@ const ValidasiOrderTable = ({ orders }) => {
         {
             header: 'Status Order',
             key: 'status',
-            render: (val) => (
-                <span className="bg-yellow-400 text-white px-2 py-1 rounded text-sm font-bold">
-                    {val}
-                </span>
-            ),
+            render: (val) => <StatusBadge status={val} />,
         },
         {
             header: 'Aksi',

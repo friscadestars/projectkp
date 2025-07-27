@@ -42,7 +42,7 @@ class OrderController extends ResourceController
             $grouped[$item['order_id']][] = $item;
         }
 
-        // Kumpulkan semua user id (agen & distributor) dari list order
+        // Kumpulkan semua user id (agen, distributor, dan pabrik) dari list order
         $userIds = [];
         foreach ($orders as $order) {
             if (!empty($order['agen_id'])) {
@@ -51,9 +51,12 @@ class OrderController extends ResourceController
             if (!empty($order['distributor_id'])) {
                 $userIds[] = (int) $order['distributor_id'];
             }
+            if (!empty($order['pabrik_id'])) {
+                $userIds[] = (int) $order['pabrik_id'];
+            }
         }
 
-        // Ambil nama user2 tsb
+        // Ambil nama user2 tsb (agen, distributor, pabrik)
         $userMap = [];
         if (!empty($userIds)) {
             $userModel = new UserModel();
@@ -70,10 +73,12 @@ class OrderController extends ResourceController
 
             $order['agen'] = $userMap[(int) $order['agen_id']] ?? 'Nama tidak ditemukan';
             $order['distributor'] = $userMap[(int) $order['distributor_id']] ?? 'Nama tidak ditemukan';
+            $order['pabrik_name'] = $userMap[(int) $order['pabrik_id']] ?? 'Pabrik tidak dikenal';
 
-            $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0); // ✅
+            $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0);
 
-            unset($order['agen_id'], $order['distributor_id']);
+            // Hapus ID karena sudah diganti dengan nama
+            unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
         }
 
         return $this->respond($orders);
@@ -165,29 +170,43 @@ class OrderController extends ResourceController
         }
     }
 
-    public function show($id = null)
+    public function show($idOrCode = null)
     {
-        if (!$id) {
-            return $this->failValidationErrors('ID diperlukan');
+        if (!$idOrCode) {
+            return $this->failValidationErrors('ID / order_code diperlukan');
         }
 
-        $order = $this->model->find($id);
+        // cari berdasarkan ID numerik atau order_code string
+        if (ctype_digit((string) $idOrCode)) {
+            $order = $this->model->find((int) $idOrCode);
+        } else {
+            $order = $this->model->where('order_code', $idOrCode)->first();
+        }
+
         if (!$order) {
             return $this->failNotFound('Order tidak ditemukan');
         }
 
+        // ambil detail item
         $order['items'] = $this->orderItemModel
-            ->where('order_id', $id)
+            ->where('order_id', $order['id'])
             ->findAll();
 
         $userModel = new UserModel();
+
+        // ambil nama agen & distributor
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
 
+        // ambil nama pabrik
+        $pabrik = $userModel->find($order['pabrik_id']);
+
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+        $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        unset($order['agen_id'], $order['distributor_id']);
+        // hapus id karena sudah diganti dengan nama
+        unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
 
         return $this->respond($order);
     }
@@ -298,5 +317,39 @@ class OrderController extends ResourceController
             'order_id'  => $nextOrderId,
             'message'   => 'Order ID berikutnya berhasil dihasilkan untuk agen ini'
         ]);
+    }
+
+    public function findByAgenAndNo()
+    {
+        $agenId = $this->request->getGet('agen_id');
+        $orderNo = $this->request->getGet('agent_order_no');
+
+        if (!$agenId || !$orderNo) {
+            return $this->failValidationErrors('agen_id dan agent_order_no diperlukan');
+        }
+
+        $order = $this->model
+            ->where('agen_id', (int) $agenId)
+            ->where('agent_order_no', (int) $orderNo)
+            ->first();
+
+        if (!$order) {
+            return $this->failNotFound('Order tidak ditemukan');
+        }
+
+        $order['items'] = $this->orderItemModel
+            ->where('order_id', $order['id'])
+            ->findAll();
+
+        $userModel = new UserModel();
+        $agen = $userModel->find($order['agen_id']);
+        $distributor = $userModel->find($order['distributor_id']);
+
+        $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
+        $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
+
+        unset($order['agen_id'], $order['distributor_id']);
+
+        return $this->respond($order);
     }
 }

@@ -1,27 +1,31 @@
+import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useOrder } from '../../../Context/OrderContext.jsx';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { useNavigation } from '../../useNavigation';
+import { fetchOrderById } from '../../../services/ordersApi';
+import Swal from 'sweetalert2';
 
 export const useKirimOrderDetail = () => {
-    const { orderId } = useParams();
+    const { orderCode } = useParams(); // <== ambil ord-xxx
     const navigate = useNavigate();
-    const { orders } = useOrder();
+    const { handleNavigation } = useNavigation(distributorMenuItems);
 
-    const order = orders.find(o => o.orderId === orderId);
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const handleNavigation = (label) => {
-        const mainItem = distributorMenuItems.find(item => item.label === label);
-        const subItem = distributorMenuItems.flatMap(item => item.subItems || []).find(sub => sub.label === label);
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await fetchOrderById(orderCode);
+                setOrder(data);
+            } catch (e) {
+                Swal.fire('Gagal memuat order', e.message || 'Terjadi kesalahan', 'error')
+                    .then(() => navigate('/distributor/kirim-order'));
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, [orderCode, navigate]);
 
-        if (label === 'Logout') {
-            alert('Logout berhasil!');
-            navigate('/');
-        } else if (mainItem?.path) {
-            navigate(mainItem.path);
-        } else if (subItem?.path) {
-            navigate(subItem.path);
-        }
-    };
-
-    return { order, orderId, handleNavigation };
+    return { order, loading, orderCode, handleNavigation };
 };

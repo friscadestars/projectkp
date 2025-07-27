@@ -4,10 +4,10 @@ import Swal from 'sweetalert2';
 import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import iconValidasi from '../../../assets/IconHeader/ValidasiIcon.png';
-import { fetchOrderById, updateOrderStatus, updateOrderItemPrice } from '../../../services/ordersApi';
+import { fetchOrderById, updateOrderStatus, updateOrderItemPrice, fetchPabrikPrices } from '../../../services/ordersApi';
 
 export const useValidasiOrderPage = () => {
-    const { orderId } = useParams();
+    const { orderId } = useParams(); // <-- ini ID numerik (string)
     const navigate = useNavigate();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
@@ -17,16 +17,45 @@ export const useValidasiOrderPage = () => {
     useEffect(() => {
         (async () => {
             try {
-                const fetchedOrder = await fetchOrderById(orderId);
-                setOrder(fetchedOrder);
+                const fetchedOrder = await fetchOrderById(orderId); // dari order_items
+                const pabrikPrices = await fetchPabrikPrices(); // dari tabel product_prices
+                const normalizeStatus = (status) => {
+                    const map = {
+                        pending: 'Tertunda',
+                        approved: 'Disetujui',
+                        cancelled: 'Ditolak',
+                        shipped: 'Dikirim',
+                        processed: 'Diproses',
+                        received: 'Diterima',
+                    };
+                    return map[status?.toLowerCase()] || status;
+                };
+                const mappedOrder = {
+                    orderId: fetchedOrder.orderId,
+                    orderCode: fetchedOrder.orderCode,
+                    agenId: fetchedOrder.agenName ?? 'Nama tidak ditemukan',
+                    alamat: fetchedOrder.alamat ?? '-',
+                    orderDate: fetchedOrder.orderDate,
+                    status: fetchedOrder.status,
+                    products: (fetchedOrder.products ?? []).map((p) => ({
+                        name: p.name,
+                        quantity: p.quantity,
+                        requestedPrice: p.requestedPrice ?? 0,
+                        unitPrice: pabrikPrices[p.name] ?? 0, // Ganti jadi dari daftar harga pabrik
+                    })),
+                };
+
+                setOrder(mappedOrder);
+
                 setInputPrices(
-                    fetchedOrder.items.map(p => ({
-                        name: p.product_name,
-                        price: p.unit_price || '',
+                    mappedOrder.products.map((p) => ({
+                        name: p.name,
+                        price: p.unitPrice || '', // tetap isi dari harga pabrik
                     }))
                 );
             } catch (e) {
-                console.error('Gagal memuat order:', e.message);
+                console.error('Gagal memuat order:', e?.message ?? e);
+                Swal.fire('Gagal memuat order', e?.message ?? 'Terjadi kesalahan', 'error');
             }
         })();
     }, [orderId]);
@@ -39,15 +68,16 @@ export const useValidasiOrderPage = () => {
 
     const handleTerima = async () => {
         try {
+            // Update harga tiap item
             for (let i = 0; i < inputPrices.length; i++) {
                 const item = inputPrices[i];
-                const price = parseInt(item.price);
+                const price = parseInt(String(item.price).replace(/[^\d]/g, ''), 10);
                 if (!isNaN(price)) {
-                    await updateOrderItemPrice(orderId, item.name, price);
+                    await updateOrderItemPrice(orderId, item.name, price); // <-- pakai ID
                 }
             }
 
-            await updateOrderStatus(orderId, 'approved');
+            await updateOrderStatus(orderId, 'approved'); // <-- pakai ID
 
             Swal.fire({
                 icon: 'success',
@@ -58,13 +88,13 @@ export const useValidasiOrderPage = () => {
                 navigate('/distributor/kirim-order');
             });
         } catch (e) {
-            Swal.fire('Gagal', e.message, 'error');
+            Swal.fire('Gagal', e?.message ?? 'Terjadi kesalahan', 'error');
         }
     };
 
     const handleTolak = async () => {
         try {
-            await updateOrderStatus(orderId, 'cancelled');
+            await updateOrderStatus(orderId, 'cancelled'); // <-- pakai ID
             Swal.fire({
                 icon: 'info',
                 title: 'Order Ditolak',
@@ -74,7 +104,7 @@ export const useValidasiOrderPage = () => {
                 navigate('/distributor/validasi-order');
             });
         } catch (e) {
-            Swal.fire('Gagal menolak order', e.message, 'error');
+            Swal.fire('Gagal menolak order', e?.message ?? 'Terjadi kesalahan', 'error');
         }
     };
 
@@ -92,6 +122,6 @@ export const useValidasiOrderPage = () => {
         pageTitleProps: {
             icon: iconValidasi,
             title: 'Validasi Order',
-        }
+        },
     };
 };

@@ -12,12 +12,12 @@ const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api
 export const usePermintaanOrderPage = () => {
     const { orders, setOrders } = useOrder();
 
-    const users = JSON.parse(localStorage.getItem('users')) || {};
+    const users = JSON.parse(localStorage.getItem('user')) || {};
     const agentId = users.id;
     const agentName = users.name;
 
     const [distributorInfo, setDistributorInfo] = useState(null);
-    const [lastOrderId, setLastOrderId] = useState(0); // state utama lastOrderId
+    const [lastOrderId, setLastOrderId] = useState(0);
     const [isDataReady, setIsDataReady] = useState(false);
     const { handleNavigation } = useNavigation(agenMenuItems);
     const [showDropdown, setShowDropdown] = useState(false);
@@ -51,7 +51,7 @@ export const usePermintaanOrderPage = () => {
                 }
 
                 if (orderData?.order_id) {
-                    setLastOrderId(orderData.order_id); // langsung pakai dari backend
+                    setLastOrderId(orderData.order_id);
                 }
 
                 setIsDataReady(true);

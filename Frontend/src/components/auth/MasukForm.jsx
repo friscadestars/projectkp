@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../Context/AuthContext"; // ✅ PENTING
 
 export default function MasukForm() {
   const [selectedRole, setSelectedRole] = useState("Agen");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Ambil dari context
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -28,24 +30,18 @@ export default function MasukForm() {
 
       const { token, user } = data;
 
-      // Cek validitas data user
       if (!user || !user.role) {
         throw new Error("Data user tidak valid");
       }
 
-      // Validasi role
       const expectedRole = selectedRole.toLowerCase();
       if (user.role !== expectedRole) {
         alert("Role yang dipilih tidak cocok dengan akun ini.");
         return;
       }
 
-      // Simpan ke localStorage
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", user.role);
-      localStorage.setItem("user_id", user.id);
-      localStorage.setItem("user_email", user.email);
-      localStorage.setItem("users", JSON.stringify(user));
+      // ✅ Simpan ke context (AuthProvider)
+      login(user, token);
 
       // Navigasi
       switch (user.role) {
@@ -67,7 +63,6 @@ export default function MasukForm() {
       alert("Login gagal: " + error.message);
     }
   };
-
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-50">
@@ -99,12 +94,8 @@ export default function MasukForm() {
 
         {/* Form Login */}
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <div className="mb-4">
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email<span className="text-red-500">*</span>
             </label>
             <input
@@ -118,12 +109,8 @@ export default function MasukForm() {
             />
           </div>
 
-          {/* Password */}
           <div className="mb-6">
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password<span className="text-red-500">*</span>
             </label>
             <input
@@ -137,7 +124,6 @@ export default function MasukForm() {
             />
           </div>
 
-          {/* Tombol Login */}
           <button
             type="submit"
             className="w-full bg-primary-dark text-white py-2 rounded-xl font-medium hover:bg-blue-800 transition duration-200"
@@ -146,13 +132,9 @@ export default function MasukForm() {
           </button>
         </form>
 
-        {/* Bantuan */}
         <p className="text-center text-sm text-gray-600 mt-4">
           Butuh bantuan?{" "}
-          <a
-            href="#"
-            className="text-blue-700 hover:underline transition duration-200"
-          >
+          <a href="#" className="text-blue-700 hover:underline transition duration-200">
             Hubungi Kami
           </a>
         </p>

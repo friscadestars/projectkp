@@ -1,33 +1,39 @@
-// src/Context/OrderContext.jsx
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 
 const OrderContext = createContext();
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
-const parseDate = (dateStr) => {
-    if (!dateStr || typeof dateStr !== 'string' || !dateStr.includes('/')) {
-        console.warn('Invalid orderDate:', dateStr);
-        return new Date(0); // fallback aman
-    }
-
-    const [day, month, year] = dateStr.split('/');
-    return new Date(`${year}-${month}-${day}`);
+/* Ubah format backend jadi DD/MM/YYYY */
+const toUiDate = (str) => {
+    if (!str) return '';
+    const d = new Date(str.replace(' ', 'T'));
+    return isNaN(d) ? '' : d.toLocaleDateString('id-ID');
 };
 
+/* Normalisasi status dari backend */
+const normalizeStatus = (status) => {
+    const map = {
+        'Menunggu Validasi': 'pending',
+        'Tertunda': 'approved',
+        'Disetujui': 'approved',
+        'Diproses': 'processed',
+        'Dikirim': 'shipped',
+        'Selesai': 'received',
+        'Ditolak': 'cancelled',
+    };
+    return map[status] || status?.toLowerCase();
+};
+
+/* Sorting orders terbaru */
 const sortOrders = (orders) => {
-    return [...orders]
-        .filter(order => order?.orderDate && typeof order.orderDate === 'string' && order.orderDate.includes('/')) // hanya order valid
-        .sort((a, b) => {
-            const dateA = parseDate(a.orderDate);
-            const dateB = parseDate(b.orderDate);
-
-            if (dateB - dateA !== 0) return dateB - dateA;
-
-            const idA = parseInt((a.orderId || '').split('-')[1]) || 0;
-            const idB = parseInt((b.orderId || '').split('-')[1]) || 0;
-
-            return idB - idA;
-        });
+    return [...orders].sort((a, b) => {
+        const dateA = a.orderDate ? new Date(a.orderDate.split('/').reverse().join('-')) : new Date(0);
+        const dateB = b.orderDate ? new Date(b.orderDate.split('/').reverse().join('-')) : new Date(0);
+        if (dateB - dateA !== 0) return dateB - dateA;
+        const idA = parseInt((a.orderId || '').split('-')[1]) || 0;
+        const idB = parseInt((b.orderId || '').split('-')[1]) || 0;
+        return idB - idA;
+    });
 };
 
 export const OrderProvider = ({ children }) => {
@@ -39,30 +45,60 @@ export const OrderProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([]);
 
     const fetchOrders = useCallback(async () => {
+        console.log("📥 fetchOrders() dipanggil");
+
+        let response;
         try {
             const token = localStorage.getItem('token');
-            const response = await fetch(`${API_BASE}/orders`, {
+            response = await fetch(`${API_BASE}/orders`, {
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${token}`,
                 },
             });
-            if (!response.ok) throw new Error("Gagal fetch orders");
-            const data = await response.json();
 
-            const sorted = sortOrders(data);
+            console.log("📡 Status response:", response.status);
+
+            if (!response.ok) throw new Error("Gagal fetch orders");
+
+            const data = await response.json();
+            const ordersRaw = data.data || data;
+
+            const normalized = ordersRaw.map(order => ({
+                ...order,
+                status: normalizeStatus(order.status),
+                orderDate: toUiDate(order.order_date || order.orderDate),
+                orderId: order.orderId || order.order_code || `ORD-${order.id}`,
+                products: (order.items || []).map(p => ({
+                    ...p,
+                    product_name: p.product_name || p.name || "Produk",
+                    unit_price: p.unit_price ?? p.unitPrice ?? 0,
+                    quantity: p.quantity ?? p.jumlah ?? 0,
+                })),
+            }));
+
+            const sorted = sortOrders(normalized);
             setOrders(sorted);
-            setValidasiOrders(sorted.filter(order => order.status === 'Menunggu Validasi'));
-            setMonitoringOrders(sorted.filter(order => order.status === 'Diproses'));
-            setOrdersMasukPabrik(sorted.filter(order => order.status === 'Tertunda'));
+            setValidasiOrders(sorted.filter(order => order.status === 'pending'));
+            setMonitoringOrders(
+                sorted.filter(order =>
+                    ['approved', 'processed', 'shipped', 'received'].includes(order.status)
+                )
+            );
+            setOrdersMasukPabrik(sorted.filter(order => order.status === 'approved'));
+
         } catch (error) {
             console.error("Fetch orders error:", error);
         }
     }, []);
 
     useEffect(() => {
-        fetchOrders();
+        const token = localStorage.getItem("token");
+        if (token) {
+            fetchOrders();
+        }
     }, [fetchOrders]);
+
 
     const updateOrder = (orderId, updater) => {
         setOrders(prev => sortOrders(
@@ -73,7 +109,7 @@ export const OrderProvider = ({ children }) => {
     const markAsCompleted = (orderId) => {
         updateOrder(orderId, order => ({
             ...order,
-            status: 'Selesai',
+            status: 'received',
             receivedDate: new Date().toLocaleDateString('id-ID')
         }));
     };
@@ -93,36 +129,35 @@ export const OrderProvider = ({ children }) => {
     };
 
     const approveOrder = (orderId) => {
-        updateOrder(orderId, order => ({ ...order, status: 'Disetujui' }));
+        updateOrder(orderId, order => ({ ...order, status: 'approved' }));
     };
 
     const updateOrderStatus = (orderId, newStatus) => {
         const today = new Date().toLocaleDateString('id-ID');
-
         updateOrder(orderId, order => {
-            const updatedOrder = {
+            const updated = {
                 ...order,
                 status: newStatus,
-                shippingDate: newStatus === 'Tertunda' ? today : order.shippingDate,
+                shippingDate: newStatus === 'pending' ? today : order.shippingDate,
             };
 
-            if (newStatus === 'Tertunda') {
+            if (newStatus === 'pending') {
                 setOrdersMasukPabrik(prev => {
                     const exists = prev.some(o => o.orderId === orderId);
-                    return exists ? prev : [...prev, structuredClone(updatedOrder)];
+                    return exists ? prev : [...prev, structuredClone(updated)];
                 });
             }
 
-            return updatedOrder;
+            return updated;
         });
     };
 
     const addNewOrder = (newOrder) => {
         const today = new Date().toLocaleDateString('id-ID');
-
         const adjustedOrder = {
             ...newOrder,
             orderDate: newOrder.orderDate || today,
+            status: normalizeStatus(newOrder.status || 'pending'),
             address: newOrder.address || newOrder.alamat || '',
             products: newOrder.products.map(p => ({
                 ...p,
@@ -147,48 +182,48 @@ export const OrderProvider = ({ children }) => {
 
     const sendToMonitoringOrder = (orderId) => {
         updateOrder(orderId, order => {
-            const updatedOrder = {
+            const updated = {
                 ...order,
-                status: 'Diproses',
+                status: 'processed',
                 shippingDate: new Date().toLocaleDateString('id-ID'),
             };
             setMonitoringOrders(prev => {
                 const exists = prev.some(o => o.orderId === orderId);
-                return exists ? prev : [...prev, structuredClone(updatedOrder)];
+                return exists ? prev : [...prev, structuredClone(updated)];
             });
             addNotification(`Order ${orderId} berhasil dikirim ke monitoring.`);
-            return updatedOrder;
+            return updated;
         });
     };
 
     const moveToHistory = (orderId) => {
         updateOrder(orderId, order => {
-            if (order.status !== 'Dikirim') return order;
+            if (order.status !== 'shipped') return order;
             const total = (order.products || []).reduce((sum, item) => {
                 const price = item.unitPrice || 0;
                 const qty = item.quantity || 0;
                 return sum + price * qty;
             }, 0);
-
             return {
                 ...order,
-                status: 'Selesai',
+                status: 'received',
                 receivedDate: new Date().toLocaleDateString('id-ID'),
                 total,
             };
         });
     };
 
-    const setOrderToApproved = (orderId) => {
+    const markAsProcessed = (orderId) => {
         updateOrder(orderId, order =>
-            order.status === 'Tertunda' ? { ...order, status: 'Disetujui' } : order
+            order.status === 'approved' ? { ...order, status: 'processed' } : order
         );
     };
 
-    const markAsProcessed = (orderId) => {
-        updateOrder(orderId, order =>
-            order.status === 'Disetujui' ? { ...order, status: 'Diproses' } : order
-        );
+    const updateOrderStatusInContext = (orderId, newStatus) => {
+        updateOrder(orderId, (order) => ({
+            ...order,
+            status: newStatus
+        }));
     };
 
     return (
@@ -206,7 +241,6 @@ export const OrderProvider = ({ children }) => {
                 updateProductPrice,
                 deleteOrder,
                 approveOrder,
-                setOrderToApproved,
                 updateOrderStatus,
                 addNewOrder,
                 notifications,
@@ -215,6 +249,7 @@ export const OrderProvider = ({ children }) => {
                 historyOrders,
                 moveToHistory,
                 markAsProcessed,
+                updateOrderStatusInContext,
             }}
         >
             {children}

@@ -1,25 +1,39 @@
 // src/hooks/Distributor/Monitoring/useMonitoringAgenPage.js
 import { useEffect, useState } from 'react';
-import { fetchAgents, updateAgent, deleteAgent, setActiveAgent } from '../../../services/distributor/UserAgenApi';
+import {
+    fetchAgentsByDistributor,
+    updateAgent,
+    deleteAgent,
+    setActiveAgent,
+} from '../../../services/distributor/UserAgenApi';
+
+
 import { useAuth } from '../../../Context/AuthContext';
 import Swal from 'sweetalert2';
 
 export const useMonitoringAgenPage = () => {
-    const { token: ctxToken } = useAuth();
+    const { token: ctxToken, user } = useAuth(); // <-- pastikan user punya id (distributor_id)
+    const distributorId = user?.id;
     const [searchTerm, setSearchTerm] = useState('');
     const [agenList, setAgenList] = useState([]);
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
     const token = ctxToken || localStorage.getItem('token');
 
     useEffect(() => {
+        console.log('🧪 user (from AuthContext):', user);
+        console.log('🧪 distributorId:', distributorId);
+        console.log('🧪 token:', token);
         const loadAgents = async () => {
+            if (!token || !distributorId) return;
             try {
                 setLoading(true);
                 setError(null);
-                const result = await fetchAgents(token);
+
+                const result = await fetchAgentsByDistributor(distributorId, token);
+
+
                 setAgenList(result.map(user => ({
                     id: user.id,
                     name: user.name,
@@ -29,7 +43,13 @@ export const useMonitoringAgenPage = () => {
                     namaRekening: user.nama_rekening,
                     namaBank: user.nama_bank,
                     alamat: user.alamat,
-                    terakhirOrder: '-',
+                    terakhirOrder: user.last_order_date
+                        ? new Date(user.last_order_date).toLocaleDateString('id-ID', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                        })
+                        : '-',
                     aktif: !!user.is_active,
                 })));
             } catch (err) {
@@ -40,8 +60,8 @@ export const useMonitoringAgenPage = () => {
             }
         };
 
-        if (token) loadAgents();
-    }, [token]);
+        loadAgents();
+    }, [token, distributorId]);
 
     const toggleAktif = async (id) => {
         const target = agenList.find(a => a.id === id);

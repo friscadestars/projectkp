@@ -12,12 +12,13 @@ export const useKirimOrderPage = () => {
     const { orders } = useOrder();
 
     const approvedOrders = orders
-        .filter(order => order.status === 'Disetujui')
+        .filter(order => order.status === 'approved') // ✅ Sudah dinormalisasi dari context
         .filter(order =>
-            order.orderId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            order.orderId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.agentId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
             order.distributor?.toLowerCase().includes(searchTerm.toLowerCase())
         );
+
 
     return {
         searchTerm,

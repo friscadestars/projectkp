@@ -1,22 +1,23 @@
 import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
-import StatusBadge from '../../Common/StatusBadge'; 
+import StatusBadge from '../../Common/StatusBadge';
 
 const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, handleTolak }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia</p>;
 
     // === Order Info Table Columns ===
     const orderColumns = [
-        { header: 'Order ID', key: 'orderId' },
         {
-            header: 'Agen ID',
-            key: 'agenId',
-            render: () => 'AG-001', 
+            header: 'Order ID', key: 'orderCode',
+            render: (val) => (val || '').toUpperCase()
+        },
+        {
+            header: 'Agen',
+            key: 'agenId', // ambil dari backend (sudah dimap dari fetched data)
         },
         {
             header: 'Alamat',
-            key: 'alamat',
-            render: () => 'Jl. Melati no.20 Jakarta', 
+            key: 'alamat', // ambil dari backend (note/order.note)
         },
         { header: 'Tanggal Order', key: 'orderDate' },
         {
@@ -98,7 +99,6 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
                     }
                 />
             </div>
-
         </div>
     );
 };

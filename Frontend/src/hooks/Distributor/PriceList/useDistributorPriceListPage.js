@@ -1,7 +1,7 @@
 // src/hooks/Distributor/PriceList/useDistributorPriceListPage.js
 import iconHarga from '../../../assets/IconHeader/HargaIcon.png';
 import { useNavigation } from '../../useNavigation';
-import { distributorMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import { useDistributorPriceList } from './useDistributorPriceList';
 
 export const useDistributorPriceListPage = () => {

@@ -2,16 +2,22 @@ import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import DetailOrderContent from '../../components/ComponentsDashboard/Distributor/Monitoring/MonitoringOrder/DetailOrderContent';
 import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
-import { useOrderDetail } from '../../hooks/Distributor/DetailOrder/useOrderDetail';
+import { useMonitoringOrderDetail } from '../../hooks/Distributor/Monitoring/useMonitoringOrderDetail';
 import { useNavigation } from '../../hooks/useNavigation';
 import iconMonitoring from '../../assets/IconHeader/MonitoringIcon.png';
 
 const DetailMonitoringOrder = () => {
     const [showDropdown, setShowDropdown] = useState(false);
-    const { order } = useOrderDetail();
+    const { order, loading } = useMonitoringOrderDetail(); // ✅ ganti hook-nya
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
-    if (!order) return <div className="p-8 text-red-500">Order tidak ditemukan.</div>;
+    if (loading) {
+        return <div className="p-8 text-gray-500">Memuat detail order...</div>;
+    }
+
+    if (!order) {
+        return <div className="p-8 text-red-500">Order tidak ditemukan.</div>;
+    }
 
     return (
         <Layout
@@ -20,7 +26,7 @@ const DetailMonitoringOrder = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(!showDropdown)}
-            role="distributor" 
+            role="distributor"
         >
             <DetailOrderContent
                 order={order}
