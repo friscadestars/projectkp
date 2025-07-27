@@ -34,7 +34,7 @@ export const useMonitoringOrderPage = () => {
                 orderCode: o.orderCode || o.order_code || `ORD-${o.id}`,
                 agenId: o.agenId || o.agen_id || o.agenName || o.agen || '-',
                 pabrikId: o.pabrikId || o.pabrik_id || '-',
-                pabrikName: o.pabrikName || o.pabrik_name || 'Pabrik tidak diketahui', // ✅ TAMBAH INI
+                pabrikName: o.pabrikName || o.pabrik_name || 'Pabrik tidak diketahui',
                 orderDate: o.orderDate || o.order_date?.split(' ')[0] || '-',
                 estimatedDate: o.estimatedDate || o.delivery_date || '-',
                 status: o.status,
