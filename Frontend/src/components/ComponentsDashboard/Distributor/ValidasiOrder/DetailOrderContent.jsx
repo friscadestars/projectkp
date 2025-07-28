@@ -1,14 +1,14 @@
 // src/Components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderContent.jsx
 import React from 'react';
 import PageTitle from '../../Common/PageHeader';
-import DetailOrderSection from './DetailOrderSection'; 
+import DetailOrderSection from './DetailOrderSection';
 import ValidasiActions from '../../Common/ValidasiActions';
 
 const DetailOrderContent = ({
     order,
     inputPrices,
     handleSetHarga,
-    handleTerima,
+    handleKirim,
     handleTolak,
     pageTitleProps
 }) => {
@@ -22,8 +22,8 @@ const DetailOrderContent = ({
                     handleSetHarga={handleSetHarga}
                 />
                 <ValidasiActions
-                    orderId={order?.orderId} 
-                    handleTerima={handleTerima}
+                    orderId={order?.orderId}
+                    onKirim={handleKirim}
                     handleTolak={handleTolak}
                 />
             </div>

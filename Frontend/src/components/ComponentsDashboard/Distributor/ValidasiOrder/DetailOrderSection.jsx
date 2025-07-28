@@ -19,7 +19,16 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
             header: 'Alamat',
             key: 'alamat', // ambil dari backend (note/order.note)
         },
-        { header: 'Tanggal Order', key: 'orderDate' },
+        {
+            header: 'Tanggal Order',
+            key: 'orderDate',
+            render: (val) =>
+                new Date(val).toLocaleDateString('id-ID', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                }),
+        },
         {
             header: 'Jumlah Produk',
             key: 'products',

@@ -66,7 +66,7 @@ export const useValidasiOrderPage = () => {
         setInputPrices(updated);
     };
 
-    const handleTerima = async () => {
+    const handleKirim = async () => {
         try {
             // Update harga tiap item
             for (let i = 0; i < inputPrices.length; i++) {
@@ -85,7 +85,7 @@ export const useValidasiOrderPage = () => {
                 text: `Order ${orderId} disetujui.`,
                 confirmButtonColor: '#3085d6',
             }).then(() => {
-                navigate('/distributor/kirim-order');
+                navigate('/distributor/monitoring-order');
             });
         } catch (e) {
             Swal.fire('Gagal', e?.message ?? 'Terjadi kesalahan', 'error');
@@ -112,7 +112,7 @@ export const useValidasiOrderPage = () => {
         order,
         inputPrices,
         handleSetHarga,
-        handleTerima,
+        handleKirim,
         handleTolak,
         layoutProps: {
             menuItems: distributorMenuItems,

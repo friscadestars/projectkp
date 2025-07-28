@@ -3,7 +3,7 @@ import React from 'react';
 import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 
-const ValidasiActions = ({ orderId, handleTerima, handleTolak }) => {
+const ValidasiActions = ({ orderId, onKirim, handleTolak }) => {
     const navigate = useNavigate();
 
     const showConfirmation = async (title, text, onConfirm, redirectPath) => {
@@ -29,25 +29,28 @@ const ValidasiActions = ({ orderId, handleTerima, handleTolak }) => {
 
     return (
         <div className="mt-6 flex gap-4">
+            {/* TOMBOL KIRIM */}
             <button
-                className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-1 rounded font-bold"
+                className="bg-blue-800 hover:bg-blue-900 text-white px-6 py-1 rounded font-bold"
                 onClick={() =>
                     showConfirmation(
-                        'Konfirmasi Validasi',
-                        'Apakah Anda yakin ingin menyetujui order ini dan mengirimkannya ke pabrik?',
-                        handleTerima
+                        'Kirim Order',
+                        'Apakah Anda yakin ingin mengirim order ini ke pabrik dan menyetujui order?',
+                        onKirim
                     )
                 }
             >
-                Terima
+                Kirim
             </button>
+
+            {/* TOMBOL TOLAK */}
             <button
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-1 rounded font-bold"
                 onClick={() =>
                     showConfirmation(
                         'Tolak Order',
                         'Apakah Anda yakin ingin menolak order ini? Tindakan ini tidak dapat dibatalkan.',
-                        handleTolak,
+                        handleTolak
                     )
                 }
             >

@@ -1,7 +1,10 @@
+// src/Components/ComponentsDashboard/Distributor/ValidasiOrder/ValidasiOrderPage.jsx
 import React, { useState } from 'react';
+import Swal from 'sweetalert2';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '../../../../Context/OrderContext';
 import ValidasiOrderContent from './DetailOrderContent';
+import { updateOrderStatus } from '../../../../services/ordersApi'; // pastikan ini ada
 
 const ValidasiOrderPage = () => {
     const { orderId } = useParams();
@@ -15,13 +18,27 @@ const ValidasiOrderPage = () => {
         setInputPrices(prev => ({ ...prev, [productName]: price }));
     };
 
-    const handleTerima = () => {
-        approveOrder(orderId);
-        navigate('/distributor/kirim-ke-pabrik');
+    const handleKirim = async () => {
+        try {
+            await updateOrderStatus(orderId, 'approved');
+            await approveOrder(orderId);
+
+            await Swal.fire({
+                icon: 'success',
+                title: 'Order Disetujui',
+                text: `Order ${orderId} berhasil dikirim ke pabrik dan status berubah menjadi approved.`,
+                confirmButtonColor: '#2563eb',
+            });
+
+            navigate('/distributor/monitoring-order');
+        } catch (e) {
+            console.error(e);
+            Swal.fire('Gagal', 'Terjadi kesalahan saat mengirim order.', 'error');
+        }
     };
 
     const handleTolak = () => {
-
+        Swal.fire('Fitur belum tersedia', 'Penolakan order belum diimplementasikan.', 'info');
     };
 
     return (
@@ -29,7 +46,7 @@ const ValidasiOrderPage = () => {
             order={order}
             inputPrices={inputPrices}
             handleSetHarga={handleSetHarga}
-            handleTerima={handleTerima}
+            handleKirim={handleKirim}
             handleTolak={handleTolak}
             pageTitleProps={{ title: 'Validasi Order', icon: '📦' }}
         />

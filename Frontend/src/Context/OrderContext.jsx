@@ -68,6 +68,9 @@ export const OrderProvider = ({ children }) => {
                 ...order,
                 status: normalizeStatus(order.status),
                 orderDate: toUiDate(order.order_date || order.orderDate),
+                deliveryEstimate: toUiDate(order.delivery_date),
+                noResi: order.resi || '-',
+                agenName: order.agen || order.agen_name || '-',
                 orderId: order.orderId || order.order_code || `ORD-${order.id}`,
                 products: (order.items || []).map(p => ({
                     ...p,

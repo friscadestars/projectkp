@@ -78,7 +78,7 @@ class OrderController extends ResourceController
             $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0);
 
             // Hapus ID karena sudah diganti dengan nama
-            unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
+            // unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
         }
 
         return $this->respond($orders);

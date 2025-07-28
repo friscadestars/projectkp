@@ -36,7 +36,11 @@ const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClas
 
     const columns = [
         { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
-        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Order ID',
+            key: 'orderId',
+            render: (value) => value?.toUpperCase(),
+        },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Tanggal Order', key: 'orderDate' },
         { header: 'Estimasi Sampai', key: 'deliveryEstimate', render: (_, row) => getEstimatedDate(row) },

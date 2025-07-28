@@ -27,13 +27,7 @@ export const agenMenuItems = [
 export const distributorMenuItems = [
     { label: 'Dashboard', icon: dashboardIcon, path: '/distributor/dashboard-distributor' },
 
-    {
-        label: 'Validasi Order', icon: validasiIcon, subItems: [
-            { label: 'Validasi Order', path: '/distributor/validasi-order' },
-            { label: 'Kirim Order ke Pabrik', path: '/distributor/kirim-order' }
-        ]
-    },
-
+    { label: 'Validasi Order', icon: validasiIcon, path: '/distributor/validasi-order' },
     {
         label: 'Monitoring', icon: monitoringIcon, subItems: [
             { label: 'Monitoring Order', path: '/distributor/monitoring-order' },

@@ -56,7 +56,8 @@ class AgentDistributorController extends ResourceController
 
         // Ambil data agen dari tabel users
         $userModel = new UserModel();
-        $agents    = $userModel
+        $agents = $userModel
+            ->select('id, name, email, no_telp, rekening, nama_rekening, nama_bank, alamat, is_active')
             ->whereIn('id', $agentIds)
             ->where('role', 'agen')
             ->findAll();
