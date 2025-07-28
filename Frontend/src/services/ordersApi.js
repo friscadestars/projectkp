@@ -135,7 +135,6 @@ export async function fetchOrdersForDashboard() {
     const raw = json.data || json;
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    console.log("🧾 User from localStorage:", user);
     const agenId = user?.id;
 
     // Pastikan array & filter hanya milik agen yang login
