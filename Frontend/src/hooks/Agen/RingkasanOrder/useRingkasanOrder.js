@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
 // Ubah sesuai alamat API kamu
@@ -77,7 +77,7 @@ const useRingkasanOrder = () => {
     };
 
     const handleDetail = (order) => {
-        navigate('/agen/detail-order', { state: { order, from: 'ringkasan' } });
+        navigate('/agen/detail-order', { state: { order } });
     };
 
     const handleConfirm = (id) => {

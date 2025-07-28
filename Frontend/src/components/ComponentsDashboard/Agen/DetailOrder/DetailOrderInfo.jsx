@@ -1,41 +1,34 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // sesuaikan path
-
-const getStatusClass = (status) => {
-    switch (status) {
-        case 'Tertunda': return 'status-badge status-pending';
-        case 'Disetujui': return 'status-badge status-approved';
-        case 'Diproses': return 'status-badge status-processing';
-        case 'Ditolak': return 'status-badge status-rejected';
-        case 'Dikirim': return 'status-badge status-shipped';
-        case 'Selesai': return 'status-badge button-confirm active';
-        default: return 'status-badge status-default';
-    }
-};
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
 const DetailOrderInfo = ({ order }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
     const columns = [
-        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Order ID',
+            key: 'orderCode',
+            render: (val) => (val || '').toUpperCase(),
+        },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Alamat', key: 'address' },
         { header: 'Tanggal Order', key: 'orderDate' },
-        { header: 'Estimasi Sampai', key: 'deliveryEstimate' },
+        { header: 'Estimasi Sampai', key: 'deliveryDate' },
         {
             header: 'Status Order',
             key: 'status',
-            render: (value) => <span className={getStatusClass(value)}>{value}</span>,
+            render: (value) => <StatusBadge status={value} />,
         },
     ];
 
     const data = [
         {
-            orderId: order.orderId,
-            distributor: order.distributor || 'Tidak tersedia',
-            address: order.address || 'Alamat tidak tersedia',
+            orderCode: order.orderCode || '-',
+            distributor: order.distributorName || 'Tidak tersedia',
+            address: order.alamat || 'Alamat tidak tersedia',
             orderDate: order.orderDate,
-            deliveryEstimate: order.deliveryEstimate || '-',
+            deliveryDate: order.deliveryDate || '-',
             status: order.status,
         },
     ];

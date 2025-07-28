@@ -1,11 +1,15 @@
-import { useOrder } from '../../../Context/OrderContext';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { useEffect, useState } from 'react';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import iconTagihan from '../../../assets/IconHeader/IconTagihan.png';
 import { useNavigation } from '../../useNavigation';
 import useTagihanPage from './useTagihanPage';
+import { fetchOrdersForBilling } from '../../../services/ordersApi';
 
 export const useTagihanPageProps = () => {
-    const { orders, updateOrderStatus } = useOrder(); // pastikan fungsi ini ada di context
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const {
         showDropdown,
         toggleDropdown,
@@ -15,10 +19,21 @@ export const useTagihanPageProps = () => {
 
     const { handleNavigation } = useNavigation(agenMenuItems);
 
-    // Fungsi untuk handle perubahan status (misal: dari "Belum Bayar" ke "Lunas")
-    const handleStatusChange = (orderId, newStatus) => {
-        updateOrderStatus(orderId, newStatus);
-    };
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                setLoading(true);
+                const data = await fetchOrdersForBilling();
+                if (mounted) setOrders(data);
+            } catch (e) {
+                if (mounted) setError(e);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
     return {
         layoutProps: {
@@ -35,12 +50,14 @@ export const useTagihanPageProps = () => {
         searchInputProps: {
             value: searchTerm,
             onChange: (e) => setSearchTerm(e.target.value),
-            placeholder: 'Cari Order ID'
+            placeholder: 'Cari Order ID / Distributor / Status'
         },
         tagihanTableProps: {
             orders,
             searchTerm,
-            onStatusChange: handleStatusChange // 🟢 Tambahkan handler ke props table
-        }
+            role: 'agen'
+        },
+        loading,
+        error
     };
 };

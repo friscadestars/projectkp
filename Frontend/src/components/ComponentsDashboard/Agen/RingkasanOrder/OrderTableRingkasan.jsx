@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import { useOrder } from '../../../../Context/OrderContext';
 
-const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClasses }) => {
+const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => {
     const { moveToHistory, setOrderToApproved } = useOrder();
     const navigate = useNavigate();
 
@@ -34,6 +34,15 @@ const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClas
         }
     };
 
+    const onDetail = (row) => {
+        if (!row?.orderId) {
+            console.warn('Order ID tidak ditemukan:', row);
+            return;
+        }
+
+        navigate(`/agen/ringkasan-order/${row.orderId}`);
+    };
+
     const columns = [
         { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
         {
@@ -43,8 +52,16 @@ const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClas
         },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Tanggal Order', key: 'orderDate' },
-        { header: 'Estimasi Sampai', key: 'deliveryEstimate', render: (_, row) => getEstimatedDate(row) },
-        { header: 'No. Resi', key: 'noResi', render: (value) => value || '-' },
+        {
+            header: 'Estimasi Sampai',
+            key: 'deliveryEstimate',
+            render: (_, row) => getEstimatedDate(row),
+        },
+        {
+            header: 'No. Resi',
+            key: 'noResi',
+            render: (value) => value || '-',
+        },
         {
             header: 'Status Order',
             key: 'status',

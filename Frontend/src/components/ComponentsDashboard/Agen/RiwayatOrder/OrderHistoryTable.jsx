@@ -1,52 +1,39 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path ini sesuai
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
+
+const formatDate = (date) => {
+    if (!date) return '-';
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')
+        }/${d.getFullYear()}`;
+};
+
+const formatPrice = (value) => value ? `Rp ${value.toLocaleString('id-ID')}` : '-';
 
 const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
     const columns = [
-        {
-            header: 'No',
-            key: 'no',
-            render: (_, __, rowIndex) => rowIndex + 1,
-        },
-        { header: 'Order ID', key: 'orderId' },
-        { header: 'Distributor', key: 'distributor' },
-        { header: 'Tanggal Order', key: 'orderDate' },
-        {
-            header: 'Tanggal Terima',
-            key: 'receivedDate',
-            render: (value) => value || '-',
-        },
-        {
-            header: 'No. Resi',
-            key: 'noResi',
-            render: (value) => value || '-',
-        },
-        {
-            header: 'Total Harga',
-            key: 'total',
-            render: (value) =>
-                value ? `Rp ${value.toLocaleString('id-ID')}` : '-',
-        },
+        { header: 'No', key: 'no', render: (_, __, i) => i + 1 },
+        { header: 'Order ID', key: 'orderCode' },
+        { header: 'Distributor', key: 'distributorName' },
+        { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
+        { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
+        { header: 'No. Resi', key: 'trackingNumber', render: (v) => v || '-' },
+        { header: 'Total Harga', key: 'totalPrice', render: formatPrice },
         {
             header: 'Status Order',
             key: 'status',
-            render: () => <span className="status-finished">Selesai</span>,
+            render: (v) => <StatusBadge status={v} />,
         },
         {
             header: 'Aksi',
             key: 'aksi',
             render: (_, row) => (
                 <div className="flex justify-center gap-2">
-                    <button
-                        onClick={() => onDetail(row)}
-                        className="button-detail"
-                    >
+                    <button onClick={() => onDetail(row)} className="button-detail">
                         Detail
                     </button>
-                    <button
-                        onClick={() => onDelete(row.id)}
-                        className="button-delete"
-                    >
+                    <button onClick={() => onDelete(row.orderId)} className="button-delete">
                         Hapus
                     </button>
                 </div>
@@ -60,17 +47,13 @@ const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
             data={orders}
             footer={
                 <tr>
-                    <td
-                        colSpan={columns.length}
-                        className="px-4 py-3 text-right text-gray-600 font-medium"
-                    >
+                    <td colSpan={columns.length} className="px-4 py-3 text-right font-medium text-gray-600">
                         Total Riwayat Order: {orders.length}
                     </td>
                 </tr>
             }
         />
     );
-
 };
 
 export default OrderHistoryTable;

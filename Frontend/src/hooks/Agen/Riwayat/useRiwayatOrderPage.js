@@ -1,5 +1,5 @@
 import useRiwayatOrder from './useRiwayatOrder';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import Iconriwayat from '../../../assets/IconHeader/IconRiwayat.png';
 import { useNavigation } from '../../useNavigation';
 

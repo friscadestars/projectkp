@@ -1,11 +1,14 @@
-// src/Components/ComponentsDashboard/Agen/Detail/DetailOrderContent.jsx
 import React from 'react';
 import DetailOrderInfo from './DetailOrderInfo';
 import RincianProdukTable from './RincianProdukTable';
 
 const DetailOrderContent = ({ order, titleText, icon }) => {
-    if (!order) {
-        return <div className="detail-order-error">Order tidak ditemukan.</div>;
+    if (!order || !Array.isArray(order.products)) {
+        return (
+            <div className="detail-order-error p-4 text-center text-red-500">
+
+            </div>
+        );
     }
 
     return (
@@ -15,9 +18,12 @@ const DetailOrderContent = ({ order, titleText, icon }) => {
                 <h1 className="detail-order-title">{titleText}</h1>
             </div>
 
-            <div className="detail-order-container">
+            <div className="detail-order-container max-w-screen-xl w-full mx-auto px-4 sm:px-6 lg:px-8">
                 <DetailOrderInfo order={order} />
-                <RincianProdukTable products={order.products} status={order.status} />
+                <RincianProdukTable
+                    products={order.products}
+                    status={order.status}
+                />
             </div>
         </>
     );
