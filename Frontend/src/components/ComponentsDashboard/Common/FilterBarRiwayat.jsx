@@ -1,15 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 
-const FilterBarRiwayat = ({ entries, onEntriesChange }) => {
+const FilterBarRiwayat = ({
+    entries,
+    onEntriesChange,
+    onExportExcel,
+    onFilterDate
+}) => {
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+
+    const handleFilter = () => {
+        onFilterDate(startDate, endDate);
+    };
+
     return (
         <div className="mb-4">
             {/* Filter by date */}
             <div className="flex items-center gap-2 mb-2">
-                <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
+                <input
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                />
                 <span>-</span>
-                <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
-                <button className="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold">Filter</button>
-                <button className="bg-blue-900 text-white px-3 py-1 rounded text-sm font-bold">Export Excel</button>
+                <input
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="border border-gray-300 rounded px-2 py-1 text-sm"
+                />
+                <button
+                    onClick={handleFilter}
+                    className="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold"
+                >
+                    Filter
+                </button>
+                <button
+                    onClick={onExportExcel}
+                    className="bg-blue-900 text-white px-3 py-1 rounded text-sm font-bold"
+                >
+                    Export Excel
+                </button>
             </div>
 
             {/* Show entries */}

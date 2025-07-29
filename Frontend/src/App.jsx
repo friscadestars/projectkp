@@ -27,6 +27,7 @@ import DashboardAgen from './pages/Agen/DashboardAgen.jsx';
 import RingkasanOrder from './pages/Agen/RingkasanOrder.jsx';
 import FormPermintaanOrder from './pages/Agen/FormPermintaanOrder.jsx';
 import RiwayatOrder from './pages/Agen/RiwayatOrder.jsx';
+import DetailRiwayatOrderAgen from "./pages/Agen/DetailRiwayatOrder.jsx";
 import DetailOrder from './pages/Agen/DetailOrder.jsx';
 import TagihanOrder from './pages/Agen/Tagihan.jsx';
 import InvoiceTagihan from './pages/Agen/InvoiceTagihan.jsx';
@@ -84,6 +85,7 @@ function App() {
         <Route path="/agen/ringkasan-order/:orderId" element={<DetailOrder />} />
         <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
         <Route path="/agen/riwayat-order" element={<RiwayatOrder />} />
+        <Route path="/agen/detail-riwayat-order/:orderId" element={<DetailRiwayatOrderAgen />} />
         {/* <Route path="/agen/detail-order" element={<DetailOrder />} /> */}
         <Route path="/agen/tagihan" element={<TagihanOrder />} />
         <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />

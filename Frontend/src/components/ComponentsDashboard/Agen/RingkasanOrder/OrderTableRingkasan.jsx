@@ -21,16 +21,23 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => 
         });
 
         if (result.isConfirmed) {
-            setOrderToApproved(orderId);
-            moveToHistory(orderId);
-            Swal.fire({
-                title: 'Berhasil!',
-                text: `Order ${orderId} telah dikonfirmasi diterima.`,
-                icon: 'success',
-                confirmButtonColor: '#2563eb',
-            }).then(() => {
-                navigate('/agen/riwayat-order');
-            });
+            try {
+                Swal.showLoading(); // tampilkan loading
+                await setOrderToApproved(orderId); // update status jadi 'received'
+                moveToHistory(orderId); // pindah ke riwayat (opsional jika memang diperlukan)
+
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: `Order ${orderId} telah dikonfirmasi diterima.`,
+                    icon: 'success',
+                    confirmButtonColor: '#2563eb',
+                }).then(() => {
+                    navigate('/agen/riwayat-order');
+                });
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Gagal!', 'Terjadi kesalahan saat mengupdate status.', 'error');
+            }
         }
     };
 
@@ -53,7 +60,7 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => 
         { header: 'Distributor', key: 'distributor' },
         { header: 'Tanggal Order', key: 'orderDate' },
         {
-            header: 'Estimasi Sampai',
+            header: 'Tanggal Pengiriman',
             key: 'deliveryEstimate',
             render: (_, row) => getEstimatedDate(row),
         },
@@ -75,6 +82,7 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => 
             header: 'Aksi',
             key: 'aksi',
             render: (_, row) => (
+                console.log("DEBUG status:", row.orderId, row.status),
                 <div className="flex flex-wrap justify-center gap-2">
                     <button onClick={() => onDetail(row)} className="button-detail">
                         Detail

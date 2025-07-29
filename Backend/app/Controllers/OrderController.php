@@ -221,14 +221,14 @@ class OrderController extends ResourceController
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
         $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        // hapus id karena sudah diganti dengan nama
-        unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
-
+        // JANGAN hapus pabrik_id karena FE butuh saat update
+        unset($order['agen_id'], $order['distributor_id']);
         return $this->respond($order);
     }
 
     public function update($id = null)
     {
+
         if (!$id) {
             return $this->failValidationErrors('ID diperlukan');
         }
@@ -242,6 +242,7 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('Payload tidak valid');
         }
 
+        log_message('debug', 'Payload: ' . json_encode($payload));
         $allowed = [
             'agen_id',
             'distributor_id',
@@ -254,6 +255,8 @@ class OrderController extends ResourceController
             'note'
         ];
         $orderData = array_intersect_key($payload, array_flip($allowed));
+
+        log_message('debug', 'OrderData: ' . json_encode($orderData));
 
         $this->model->update($id, $orderData);
 

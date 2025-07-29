@@ -2,8 +2,16 @@ import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
-const DetailOrderInfo = ({ order }) => {
+const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
+
+    const isRiwayat = mode === 'riwayat';
+
+    const formatDate = (val) => {
+        if (!val) return '-';
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? val : date.toLocaleDateString('id-ID');
+    };
 
     const columns = [
         {
@@ -13,8 +21,18 @@ const DetailOrderInfo = ({ order }) => {
         },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Alamat', key: 'address' },
-        { header: 'Tanggal Order', key: 'orderDate' },
-        { header: 'Estimasi Sampai', key: 'deliveryDate' },
+        {
+            header: 'Tanggal Order',
+            key: 'orderDate',
+            render: (val) => {
+                if (!val) return '-';
+                const [year, month, day] = val.split('-');
+                return `${day}/${month}/${year}`;
+            }
+        },
+        isRiwayat
+            ? { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate }
+            : { header: 'Tanggal Pengiriman', key: 'deliveryDate' },
         {
             header: 'Status Order',
             key: 'status',
@@ -27,8 +45,9 @@ const DetailOrderInfo = ({ order }) => {
             orderCode: order.orderCode || '-',
             distributor: order.distributorName || 'Tidak tersedia',
             address: order.alamat || 'Alamat tidak tersedia',
-            orderDate: order.orderDate,
+            orderDate: order.orderDate || '-',
             deliveryDate: order.deliveryDate || '-',
+            receivedDate: order.receivedDate || '-',
             status: order.status,
         },
     ];

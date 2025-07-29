@@ -17,19 +17,18 @@ const mapOrder = (o) => ({
     deliveryDate: o.delivery_date,
     status: o.status,
     note: o.note ?? '-',
+    pabrik_id: o.pabrik_id ?? null,
     pabrikName: o.pabrik_name ?? 'Tidak diketahui',
-    receivedDate: o.received_date ?? o.receivedDate ?? '-',
-    trackingNumber: o.no_resi ?? o.noResi ?? '-',
+    receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
+    trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
 
     products: (o.items || []).map(i => ({
         id: i.id,
         name: i.product_name,
-        quantity: Number(i.quantity),
+        quantity: Number(i.quantity ?? 0),
         requestedPrice: Number(i.requested_price ?? i.unit_price ?? 0),
-        // Harga pabrik
         unitPrice: Number(i.unit_price ?? 0),
-
-        address: i.address,
+        address: i.address ?? o.note ?? '',
     })),
 });
 
@@ -53,16 +52,38 @@ export async function fetchOrderById(idOrCode) {
 }
 
 // Update status by ID (PUT /orders/:id)
+// ordersApi.js
 export async function updateOrderStatus(id, status) {
+    const order = await fetchOrderById(id); // Ambil dulu data lengkap order-nya
+
+    // Cek apakah statusnya delivered
+    const isDelivered = status.toLowerCase() === 'delivered';
+
+    // Format waktu saat ini untuk accepted_at (format: YYYY-MM-DD HH:mm:ss)
+    const now = new Date();
+    const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:mm:ss"
+
+    const payload = {
+        agen_id: order.agentId,
+        distributor_id: order.distributorId,
+        pabrik_id: order.pabrik_id ?? null,
+        order_date: order.orderDate + ' 00:00:00',
+        note: order.alamat,
+        status: status,
+        ...(isDelivered && { accepted_at: acceptedAt }) // hanya kirim accepted_at jika status = delivered
+    };
+
     const res = await fetch(`${API_BASE}/orders/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
-            ...getAuthHeader()
+            ...getAuthHeader(),
         },
-        body: JSON.stringify({ status })
+        body: JSON.stringify(payload),
     });
+
     if (!res.ok) throw new Error('Gagal update status order');
+
     return res.json();
 }
 
@@ -152,21 +173,46 @@ export async function fetchCompletedOrdersForHistory() {
             ...getAuthHeader(),
         },
     });
-
     if (!res.ok) throw new Error('Gagal mengambil data orders');
 
     const json = await res.json();
     const raw = json.data || json;
+
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const agenId = user?.id;
+    const agenId = Number(user?.id);
+
+    // status selesai yang kita terima dari BE (seragamkan ke lower-case)
+    const DONE = new Set(['delivered', 'selesai']);
 
     return (Array.isArray(raw) ? raw : [])
-        .filter((o) => {
-            const status = (o.status || '').toLowerCase();
-            return Number(o.agen_id) === Number(agenId) &&
-                (status === 'received' || status === 'Selesai');
-        })
-        .map(mapOrder);
+        .filter((o) => Number(o.agen_id) === agenId && DONE.has(String(o.status || '').toLowerCase()))
+        .map((o) => {
+            const items = Array.isArray(o.items) ? o.items : [];
+            const subtotalPabrik = items.reduce(
+                (sum, i) => sum + Number(i.unit_price ?? 0) * Number(i.quantity ?? 0), 0
+            );
+            const subtotalJual = items.reduce(
+                (sum, i) => sum + Number((i.requested_price ?? i.unit_price) ?? 0) * Number(i.quantity ?? 0), 0
+            );
+
+            return {
+                id: String(o.id),
+                orderId: o.id,
+                orderCode: o.order_code ?? `ORD-${String(o.id).padStart(3, '0')}`,
+                distributorName: o.distributor ?? '-',
+                orderDate: (o.order_date || '').split(' ')[0] || '-',
+                receivedDate: (o.accepted_at || o.received_date || '').split(' ')[0] || '-',
+                trackingNumber: o.resi ?? '-',
+                totalPrice: subtotalJual,
+                status: o.status ?? '-',
+                products: items.map(i => ({
+                    nama: i.product_name,
+                    jumlah: i.quantity,
+                    hargaAgen: i.requested_price ?? i.unit_price,
+                    hargaPabrik: i.unit_price,
+                })),
+            };
+        });
 }
 
 export async function fetchOrdersForBilling() {
@@ -188,14 +234,27 @@ export async function fetchOrdersForBilling() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const agenId = user?.id;
 
-    const ALLOWED = new Set([
-        'disetujui', 'approved',
-        'dikirim', 'shipped',
-        'selesai', 'received'
-    ]);
+    const ALLOWED = new Set(['disetujui', 'approved', 'dikirim', 'shipped', 'selesai', 'delivered']);
 
     return (Array.isArray(raw) ? raw : [])
         .filter((o) => Number(o.agen_id) === Number(agenId))
         .map(mapOrder)
         .filter((o) => ALLOWED.has((o.status || '').toLowerCase()));
+}
+
+export async function deleteOrderById(id) {
+    const res = await fetch(`${API_BASE}/orders/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+        },
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Gagal menghapus order');
+    }
+
+    return res.json();
 }

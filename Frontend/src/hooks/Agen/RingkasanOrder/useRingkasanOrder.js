@@ -89,7 +89,7 @@ const useRingkasanOrder = () => {
                 const total = order.products.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
                 return {
                     ...order,
-                    status: 'Selesai',
+                    status: 'delivered',
                     receivedDate: new Date().toLocaleDateString('id-ID'),
                     total,
                 };

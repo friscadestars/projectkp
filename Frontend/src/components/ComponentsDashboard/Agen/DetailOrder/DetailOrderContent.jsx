@@ -2,7 +2,7 @@ import React from 'react';
 import DetailOrderInfo from './DetailOrderInfo';
 import RincianProdukTable from './RincianProdukTable';
 
-const DetailOrderContent = ({ order, titleText, icon }) => {
+const DetailOrderContent = ({ order, titleText, icon, mode = 'ringkasan' }) => {
     if (!order || !Array.isArray(order.products)) {
         return (
             <div className="detail-order-error p-4 text-center text-red-500">
@@ -18,8 +18,8 @@ const DetailOrderContent = ({ order, titleText, icon }) => {
                 <h1 className="detail-order-title">{titleText}</h1>
             </div>
 
-            <div className="detail-order-container max-w-screen-xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-                <DetailOrderInfo order={order} />
+            <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
+                <DetailOrderInfo order={order} mode={mode} />
                 <RincianProdukTable
                     products={order.products}
                     status={order.status}

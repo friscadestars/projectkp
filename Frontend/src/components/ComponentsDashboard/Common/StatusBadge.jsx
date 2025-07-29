@@ -7,7 +7,7 @@ const StatusBadge = ({ status }) => {
         'shipped': 'bg-cyan-600',
         'processed': 'bg-blue-500',
         'cancelled': 'bg-red-500',
-        'received': 'bg-teal-600',
+        'delivered': 'bg-green-700',
     };
 
     const labelMap = {
@@ -16,7 +16,7 @@ const StatusBadge = ({ status }) => {
         'shipped': 'Dikirim',
         'processed': 'Diproses',
         'cancelled': 'Ditolak',
-        'received': 'Diterima',
+        'delivered': 'Diterima',
     };
 
     const key = (status || '').toLowerCase();

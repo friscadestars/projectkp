@@ -1,10 +1,12 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable';
 
 const RincianProdukTable = ({ products = [], status = '', showTotal = true }) => {
     const total = products.reduce((sum, p) => {
         const hargaSatuan = status === 'Tertunda' ? p.requestedPrice : p.unitPrice;
-        return sum + hargaSatuan * p.quantity;
+        const validHarga = typeof hargaSatuan === 'number' ? hargaSatuan : 0;
+        const validQty = typeof p.quantity === 'number' ? p.quantity : 0;
+        return sum + validHarga * validQty;
     }, 0);
 
     if (products.length === 0) {
@@ -19,7 +21,9 @@ const RincianProdukTable = ({ products = [], status = '', showTotal = true }) =>
             key: 'unitPrice',
             render: (_, row) => {
                 const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
-                return `Rp. ${harga.toLocaleString('id-ID')}`;
+                return typeof harga === 'number'
+                    ? `Rp. ${harga.toLocaleString('id-ID')}`
+                    : '-';
             }
         },
         {
@@ -27,7 +31,9 @@ const RincianProdukTable = ({ products = [], status = '', showTotal = true }) =>
             key: 'subtotal',
             render: (_, row) => {
                 const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
-                const subtotal = harga * row.quantity;
+                const qty = row.quantity;
+                if (typeof harga !== 'number' || typeof qty !== 'number') return '-';
+                const subtotal = harga * qty;
                 return `Rp. ${subtotal.toLocaleString('id-ID')}`;
             }
         }
@@ -42,7 +48,9 @@ const RincianProdukTable = ({ products = [], status = '', showTotal = true }) =>
                 footer={showTotal ? (
                     <tr className="font-bold bg-gray-100">
                         <td colSpan={3} className="text-left px-4 py-2">Total</td>
-                        <td className="px-4 py-2">Rp. {total.toLocaleString('id-ID')}</td>
+                        <td className="px-4 py-2">
+                            Rp. {typeof total === 'number' ? total.toLocaleString('id-ID') : '-'}
+                        </td>
                     </tr>
                 ) : null}
             />

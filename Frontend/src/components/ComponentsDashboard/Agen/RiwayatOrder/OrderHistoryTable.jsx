@@ -14,7 +14,11 @@ const formatPrice = (value) => value ? `Rp ${value.toLocaleString('id-ID')}` : '
 const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
     const columns = [
         { header: 'No', key: 'no', render: (_, __, i) => i + 1 },
-        { header: 'Order ID', key: 'orderCode' },
+        {
+            header: 'Order ID',
+            key: 'orderCode',
+            render: (value) => value?.toUpperCase(),
+        },
         { header: 'Distributor', key: 'distributorName' },
         { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
         { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },

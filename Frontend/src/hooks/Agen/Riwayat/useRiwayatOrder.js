@@ -1,10 +1,13 @@
 // src/hooks/Agen/useRiwayatOrder.js
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
+import { deleteOrderById } from '../../../services/ordersApi';
+import Swal from 'sweetalert2';
 
 const useRiwayatOrder = () => {
     const [orders, setOrders] = useState([]);
+    const [entries, setEntries] = useState(10);
     const [showDropdown, setShowDropdown] = useState(false);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -27,14 +30,43 @@ const useRiwayatOrder = () => {
         return () => { mounted = false; };
     }, []);
 
-    const handleDelete = (id) => {
-        if (confirm("Hapus riwayat order ini?")) {
-            setOrders((prev) => prev.filter((o) => o.orderId !== id));
+    const handleDelete = async (id) => {
+        const result = await Swal.fire({
+            title: 'Apakah kamu yakin?',
+            text: "Riwayat order akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteOrderById(id);
+                setOrders((prev) => prev.filter((o) => o.orderId !== id));
+
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Order berhasil dihapus.',
+                    icon: 'success',
+                    timer: 1500,
+                    confirmButtonColor: '#2563eb',
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat menghapus order.',
+                    icon: 'error'
+                });
+            }
         }
     };
 
     const handleDetail = (order) => {
-        navigate('/agen/detail-order', { state: { order, from: 'riwayat' } });
+        navigate(`/agen/detail-riwayat-order/${order.orderId}`);
     };
 
     return {
@@ -44,7 +76,9 @@ const useRiwayatOrder = () => {
         handleDetail,
         completedOrders: orders,
         loading,
-        error
+        error,
+        entries,
+        setEntries,
     };
 };
 
