@@ -2,11 +2,19 @@ import React from 'react';
 import DetailOrderInfo from './DetailOrderInfo';
 import RincianProdukTable from './RincianProdukTable';
 
-const DetailOrderContent = ({ order, titleText, icon, mode = 'ringkasan' }) => {
+const DetailOrderContent = ({ order, error, titleText, icon, mode = 'ringkasan' }) => {
+    if (error) {
+        return (
+            <div className="p-4 text-center text-red-600">
+                {error.message || 'Terjadi kesalahan saat mengambil detail order.'}
+            </div>
+        );
+    }
+
     if (!order || !Array.isArray(order.products)) {
         return (
-            <div className="detail-order-error p-4 text-center text-red-500">
-
+            <div className="p-4 text-center text-gray-500 italic">
+                Data order tidak tersedia.
             </div>
         );
     }

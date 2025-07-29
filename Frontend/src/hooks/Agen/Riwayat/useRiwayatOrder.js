@@ -66,7 +66,7 @@ const useRiwayatOrder = () => {
     };
 
     const handleDetail = (order) => {
-        navigate(`/agen/detail-riwayat-order/${order.orderId}`);
+        navigate(`/agen/detail-riwayat-order/${order.id}`);
     };
 
     return {

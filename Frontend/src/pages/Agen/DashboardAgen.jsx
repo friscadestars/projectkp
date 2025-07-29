@@ -8,7 +8,6 @@ const DashboardAgenPage = () => {
     const {
         layoutProps,
         orders,
-        loading,
         error,
         stats,
         recentOrders,
@@ -20,7 +19,6 @@ const DashboardAgenPage = () => {
         <AgenLayout {...layoutProps} role="agen">
             <DashboardAgenContent
                 orders={orders}
-                loading={loading}
                 error={error}
                 stats={stats}
                 recentOrders={recentOrders}

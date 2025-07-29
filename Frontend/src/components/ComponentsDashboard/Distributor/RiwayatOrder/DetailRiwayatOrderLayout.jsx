@@ -1,5 +1,6 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // Pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
 const OrderInfoTable = ({ order }) => {
     if (!order) return null;
@@ -19,13 +20,9 @@ const OrderInfoTable = ({ order }) => {
             ),
         },
         {
-            key: 'statusOrder',
-            label: 'Status Order',
-            render: (value) => (
-                <span className="text-white text-sm px-3 py-1 rounded bg-blue-600 font-bold">
-                    {value}
-                </span>
-            ),
+            header: 'Status Order',
+            key: 'status',
+            render: (v) => <StatusBadge status={v} />,
         },
     ];
 

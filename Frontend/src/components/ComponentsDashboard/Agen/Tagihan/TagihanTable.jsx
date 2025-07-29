@@ -20,7 +20,7 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
     const filtered = orders
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'received'];
+            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||

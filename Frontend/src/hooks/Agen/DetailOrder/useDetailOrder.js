@@ -1,13 +1,12 @@
-// src/hooks/Agen/DetailOrder/useDetailOrderPage.js
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useNavigation } from '../../useNavigation';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import { getOrderPageInfo } from '../../../utils/Agen/InfoDetailOrder';
-import { fetchOrderDetailById } from '../../../services/ordersApi'; // PAKAI YANG INI
+import { fetchOrderDetailById } from '../../../services/ordersApi';
 
 export const useDetailOrderPage = () => {
-    const { orderId } = useParams(); // ambil ID dari URL
+    const { id } = useParams(); // ✅ Ganti dari orderId ke id
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
@@ -21,17 +20,34 @@ export const useDetailOrderPage = () => {
         const load = async () => {
             try {
                 setLoading(true);
-                const result = await fetchOrderDetailById(orderId);
+
+                const result = await fetchOrderDetailById(id); // ✅ ambil dari ID global
+
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const agenId = user?.id;
+
+                console.log('DEBUG: agentId dari order:', result.agentId);
+                console.log('DEBUG: agenId dari localStorage:', agenId);
+                console.log('🎯 result dari fetchOrderDetailById:', result);
+
+                // ✅ Validasi: hanya agen yang memiliki ID sesuai yang bisa akses
+                if (Number(result.agentId) !== Number(agenId)) {
+                    throw new Error('Anda tidak memiliki akses ke order ini.');
+                }
+
                 if (mounted) setOrder(result);
             } catch (e) {
-                if (mounted) setErr(e);
+                if (mounted) {
+                    setErr(e);
+                    setOrder(null);
+                }
             } finally {
                 if (mounted) setLoading(false);
             }
         };
         load();
         return () => { mounted = false; };
-    }, [orderId]);
+    }, [id]);
 
     return {
         order,
@@ -41,7 +57,7 @@ export const useDetailOrderPage = () => {
         icon,
         activeLabel,
         showDropdown,
-        toggleDropdown: () => setShowDropdown(prev => !prev),
+        toggleDropdown: () => setShowDropdown((prev) => !prev),
         handleNavigation,
         agenMenuItems,
     };

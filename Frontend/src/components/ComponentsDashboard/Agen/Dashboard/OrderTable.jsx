@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
+const parseDate = (dateString) => {
+    if (!dateString) return '-';
+    const [d, m, y] = dateString.split('/').map(Number);
+    const date = new Date(y, m - 1, d);
+    return isNaN(date) ? '-' : `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+};
+
 const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
     const navigate = useNavigate();
 
@@ -14,35 +21,25 @@ const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
         },
         {
             header: 'Order ID',
-            key: 'orderCode',
+            key: 'orderId',
             render: (value) => value?.toUpperCase(),
         },
-        {
-            header: 'Distributor',
-            key: 'distributorName',
-        },
+        { header: 'Distributor', key: 'distributor' },
         {
             header: 'Tanggal Order',
             key: 'orderDate',
-            render: (value) => {
-                if (!value) return '-';
-                const date = new Date(value);
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                return `${day}/${month}/${year}`;
-            },
+            render: parseDate,
         },
         {
-            header: 'Estimasi Pengiriman',
-            key: 'deliveryDate',
+            header: 'Tanggal Pengiriman',
+            key: 'deliveryEstimate',
             render: (value) => value || '-',
         },
         {
             header: 'Jumlah Produk',
             key: 'products',
             render: (products) =>
-                products?.reduce((sum, p) => sum + p.quantity, 0) || 0,
+                Number(products?.reduce((sum, p) => sum + p.quantity, 0)) || 0
         },
         {
             header: 'Status Order',

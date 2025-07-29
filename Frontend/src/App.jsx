@@ -82,10 +82,10 @@ function App() {
         {/* Agen */}
         <Route path="/agen/dashboard-agen" element={<DashboardAgen />} />
         <Route path="/agen/ringkasan-order" element={<RingkasanOrder />} />
-        <Route path="/agen/ringkasan-order/:orderId" element={<DetailOrder />} />
+        <Route path="/agen/ringkasan-order/:id" element={<DetailOrder />} />
         <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
         <Route path="/agen/riwayat-order" element={<RiwayatOrder />} />
-        <Route path="/agen/detail-riwayat-order/:orderId" element={<DetailRiwayatOrderAgen />} />
+        <Route path="/agen/detail-riwayat-order/:id" element={<DetailRiwayatOrderAgen />} />
         {/* <Route path="/agen/detail-order" element={<DetailOrder />} /> */}
         <Route path="/agen/tagihan" element={<TagihanOrder />} />
         <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />

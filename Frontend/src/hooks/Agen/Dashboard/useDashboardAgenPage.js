@@ -1,91 +1,94 @@
 // src/hooks/Agen/Dashboard/useDashboardAgenPage.js
-import { useEffect, useMemo, useState } from 'react';
-import { fetchOrdersForDashboard } from '../../../services/ordersApi';
+import { useMemo, useState } from 'react';
 import { useNavigation } from '../../useNavigation';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { useOrder } from '../../../Context/OrderContext';
 
 const parseDate = (dateString) => {
-    const [d, m, y] = (dateString || '').split('/').map(Number);
-    return new Date(y || 0, (m || 1) - 1, d || 1);
+    if (!dateString) return new Date(0);
+    const [d, m, y] = dateString.split(/[/-]/).map(Number);
+    return new Date(y, m - 1, d);
 };
 
+const normalize = (status) => (status || '').toLowerCase();
+
 export const useDashboardAgenPage = () => {
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [err, setErr] = useState(null);
-
-    const [showDropdown, setShowDropdown] = useState(false);
+    const { orders } = useOrder();
     const { handleNavigation } = useNavigation(agenMenuItems);
+    const [showDropdown, setShowDropdown] = useState(false);
 
-    useEffect(() => {
-        let mounted = true;
+    let user = {};
+    try {
+        const stored = localStorage.getItem('user');
+        user = stored ? JSON.parse(stored) : {};
+    } catch {
+        user = {};
+    }
 
-        (async () => {
-            try {
-                setLoading(true);
-                const data = await fetchOrdersForDashboard();
-                if (!mounted) return;
+    const agenId = Number(user?.id);
 
-                const sorted = [...data].sort((a, b) => {
-                    const da = parseDate(a.orderDate);
-                    const db = parseDate(b.orderDate);
-                    if (db - da !== 0) return db - da;
-                    const ida = parseInt(String(a.orderId).split('-')[1]) || 0;
-                    const idb = parseInt(String(b.orderId).split('-')[1]) || 0;
-                    return idb - ida;
-                });
+    // Filter orders hanya milik agen
+    const agenOrders = useMemo(() => {
+        return (orders || []).filter(order =>
+            Number(order.agentId) === agenId // ✅ hanya pakai agentId dari mapOrder
+        );
+    }, [orders, agenId]);
 
-                setOrders(sorted);
-            } catch (e) {
-                if (mounted) setErr(e);
-            } finally {
-                if (mounted) setLoading(false);
-            }
-        })();
-
-        return () => {
-            mounted = false;
-        };
-    }, []);
-
-    // Sekarang status sudah "Tertunda", "Dikirim", dll dari mapStatusToID()
-    const stats = useMemo(() => {
-        const pending = orders.filter((o) =>
-            ['tertunda', 'pending'].includes(o.status.toLowerCase())
-        ).length;
-        const shipped = orders.filter((o) => o.status === 'Dikirim').length;
-        return {
-            total: orders.length,
-            pending,
-            shipped,
-        };
-    }, [orders]);
-
-    const recentOrders = useMemo(
-        () => orders.filter((o) =>
-            ['tertunda', 'pending'].includes(o.status.toLowerCase())
-        ),
-        [orders]
+    const orderMasuk = agenOrders.filter((o) =>
+        normalize(o.status) === 'pending'
     );
 
 
-    console.log("ORDERS:", orders);
+    const orderDikirim = agenOrders.filter((o) =>
+        normalize(o.status) === 'shipped'
+    );
+
+    const orderSelesai = agenOrders.filter((o) => {
+        const status = normalize(o.status);
+        return ['delivered', 'diterima'].includes(status);
+    });
+
+    const sortedOrders = [...orderDikirim].sort(
+        (a, b) => parseDate(b.orderDate) - parseDate(a.orderDate)
+    );
+
+    const summaryCards = [
+        { title: 'Order Masuk', value: orderMasuk.length },
+        { title: 'Pengiriman', value: orderDikirim.length },
+        { title: 'Order Selesai', value: orderSelesai.length },
+    ];
+
+    const totalAktif = agenOrders.filter((o) => {
+        const status = normalize(o.status);
+        return !['delivered', 'diterima'].includes(status);
+    }).length;
+
+    const stats = {
+        total: totalAktif,
+        pending: orderMasuk.length,
+        shipped: orderDikirim.length,
+    };
+
+    const recentOrders = [...agenOrders]
+        .filter(o => normalize(o.status) === 'pending')
+        .sort((a, b) => parseDate(b.orderDate) - parseDate(a.orderDate));
+
+    console.log('🧾 orders dari context:', orders);
+    console.log('🔑 agenId dari user login:', agenId);
 
     return {
-        // dipakai di Page
         layoutProps: {
             menuItems: agenMenuItems,
             activeLabel: 'Dashboard',
             onNavigate: handleNavigation,
             showDropdown,
-            toggleDropdown: () => setShowDropdown((p) => !p),
+            toggleDropdown: () => setShowDropdown((prev) => !prev),
         },
-
-        // dipakai di Content
-        orders,
-        loading,
-        error: err,
+        orders: agenOrders,
+        summaryCards,
         stats,
         recentOrders,
+        loading: false,
+        error: null,
     };
 };

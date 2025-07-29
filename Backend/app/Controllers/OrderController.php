@@ -192,7 +192,6 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('ID / order_code diperlukan');
         }
 
-        // cari berdasarkan ID numerik atau order_code string
         if (ctype_digit((string) $idOrCode)) {
             $order = $this->model->find((int) $idOrCode);
         } else {
@@ -203,28 +202,26 @@ class OrderController extends ResourceController
             return $this->failNotFound('Order tidak ditemukan');
         }
 
-        // ambil detail item
         $order['items'] = $this->orderItemModel
             ->where('order_id', $order['id'])
             ->findAll();
 
         $userModel = new UserModel();
 
-        // ambil nama agen & distributor
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
-
-        // ambil nama pabrik
         $pabrik = $userModel->find($order['pabrik_id']);
 
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
         $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        // JANGAN hapus pabrik_id karena FE butuh saat update
-        unset($order['agen_id'], $order['distributor_id']);
+        // 🚨 Tetap kirim agen_id ke FE
+        // unset($order['agen_id']); // <-- jangan hapus ini
+
         return $this->respond($order);
     }
+
 
     public function update($id = null)
     {

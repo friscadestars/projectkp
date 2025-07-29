@@ -9,6 +9,7 @@ const mapOrder = (o) => ({
     orderId: String(o.id),
     orderCode: o.order_code ?? `ORD-${String(o.agent_order_no || 0).padStart(3, '0')}`,
     agentId: o.agen_id,
+    id: Number(o.id),
     agenName: o.agen,
     distributorId: o.distributor_id,
     distributorName: o.distributor,
@@ -35,9 +36,25 @@ const mapOrder = (o) => ({
 export async function fetchOrders() {
     const res = await fetch(`${API_BASE}/orders`, { headers: { ...getAuthHeader() } });
     if (!res.ok) throw new Error('Gagal mengambil orders');
+
     const json = await res.json();
     const data = json.data || json;
-    return data.map(mapOrder);
+
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const role = user?.role?.toLowerCase?.() || 'unknown';
+    const userId = Number(user?.id);
+
+    return (Array.isArray(data) ? data : [])
+        .filter((o) => {
+            if (role === 'agen') {
+                return Number(o.agen_id) === userId;
+            } else if (role === 'distributor') {
+                return Number(o.distributor_id) === userId;
+            } else {
+                return true; // admin atau role lain: akses semua
+            }
+        })
+        .map(mapOrder);
 }
 
 // idOrCode bisa numeric (3) atau ord-001, tapi dari FE kita kirim id numerik
@@ -136,6 +153,7 @@ export async function fetchOrderDetailById(id) {
     if (!res.ok) throw new Error('Gagal mengambil detail order');
     const json = await res.json();
     const data = json.data || json;
+    console.log('🔥 RAW order detail from API:', data);
     return mapOrder(data);
 }
 
@@ -166,53 +184,69 @@ export async function fetchOrdersForDashboard() {
         .map(mapOrder);
 }
 
-export async function fetchCompletedOrdersForHistory() {
+export async function fetchCompletedOrdersForHistory(role = 'agen') {
     const res = await fetch(`${API_BASE}/orders`, {
         headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
         },
     });
+
     if (!res.ok) throw new Error('Gagal mengambil data orders');
 
     const json = await res.json();
     const raw = json.data || json;
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const agenId = Number(user?.id);
-
-    // status selesai yang kita terima dari BE (seragamkan ke lower-case)
+    const userId = Number(user?.id);
     const DONE = new Set(['delivered', 'selesai']);
 
-    return (Array.isArray(raw) ? raw : [])
-        .filter((o) => Number(o.agen_id) === agenId && DONE.has(String(o.status || '').toLowerCase()))
-        .map((o) => {
-            const items = Array.isArray(o.items) ? o.items : [];
-            const subtotalPabrik = items.reduce(
-                (sum, i) => sum + Number(i.unit_price ?? 0) * Number(i.quantity ?? 0), 0
-            );
-            const subtotalJual = items.reduce(
-                (sum, i) => sum + Number((i.requested_price ?? i.unit_price) ?? 0) * Number(i.quantity ?? 0), 0
-            );
+    // Tentukan filter berdasarkan role
+    const filtered = (Array.isArray(raw) ? raw : []).filter((o) => {
+        const statusMatch = DONE.has(String(o.status || '').toLowerCase());
 
-            return {
-                id: String(o.id),
-                orderId: o.id,
-                orderCode: o.order_code ?? `ORD-${String(o.id).padStart(3, '0')}`,
-                distributorName: o.distributor ?? '-',
-                orderDate: (o.order_date || '').split(' ')[0] || '-',
-                receivedDate: (o.accepted_at || o.received_date || '').split(' ')[0] || '-',
-                trackingNumber: o.resi ?? '-',
-                totalPrice: subtotalJual,
-                status: o.status ?? '-',
-                products: items.map(i => ({
-                    nama: i.product_name,
-                    jumlah: i.quantity,
-                    hargaAgen: i.requested_price ?? i.unit_price,
-                    hargaPabrik: i.unit_price,
-                })),
-            };
-        });
+        if (role === 'agen') {
+            return Number(o.agen_id) === userId && statusMatch;
+        } else if (role === 'distributor') {
+            return Number(o.distributor_id) === userId && statusMatch;
+        }
+
+        return false; // fallback
+    });
+
+    return filtered.map((o) => {
+        const items = Array.isArray(o.items) ? o.items : [];
+
+        const subtotalPabrik = items.reduce(
+            (sum, i) => sum + Number(i.unit_price ?? 0) * Number(i.quantity ?? 0), 0
+        );
+
+        const subtotalJual = items.reduce(
+            (sum, i) => sum + Number((i.requested_price ?? i.unit_price) ?? 0) * Number(i.quantity ?? 0), 0
+        );
+
+        return {
+            id: String(o.id),
+            orderId: o.id,
+            agenName: o.agen,
+            orderCode: o.order_code ?? `ORD-${String(o.id).padStart(3, '0')}`,
+            distributorName: o.distributor ?? '-',
+            orderDate: (o.order_date || '').split(' ')[0] || '-',
+            receivedDate: (o.accepted_at || o.received_date || '').split(' ')[0] || '-',
+            trackingNumber: o.resi ?? '-',
+            totalPrice: subtotalJual,
+            statusPembayaran: o.status_pembayaran ?? 'Belum Lunas',
+            hargaJual: subtotalJual,
+            hargaPabrik: subtotalPabrik,
+            status: o.status ?? '-',
+            products: items.map(i => ({
+                nama: i.product_name,
+                jumlah: i.quantity,
+                hargaAgen: i.requested_price ?? i.unit_price,
+                hargaPabrik: i.unit_price,
+            })),
+        };
+    });
 }
 
 export async function fetchOrdersForBilling() {

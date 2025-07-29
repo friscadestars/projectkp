@@ -59,16 +59,22 @@ export const OrderProvider = ({ children }) => {
             });
 
             console.log("📡 Status response:", response.status);
-
             if (!response.ok) throw new Error("Gagal fetch orders");
 
-            const data = await response.json();
+            const data = await response.json(); // ✅ ini harus di atas
             const ordersRaw = data.data || data;
+
+            console.log("📦 Raw orders dari backend:", ordersRaw[0]);
+
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userId = Number(user?.id);
 
             const normalized = ordersRaw.map(order => ({
                 ...order,
                 id: order.id,
                 status: normalizeStatus(order.status),
+                distributorId: order.distributor_id,
+                agentId: order.agen_id,
                 orderDate: toUiDate(order.order_date || order.orderDate),
                 deliveryEstimate: toUiDate(order.delivery_date),
                 noResi: order.resi || '-',
@@ -80,22 +86,41 @@ export const OrderProvider = ({ children }) => {
                     unit_price: p.unit_price ?? p.unitPrice ?? 0,
                     quantity: p.quantity ?? p.jumlah ?? 0,
                 })),
-            }));
+            }))
+            // ✨ Filter hanya milik distributor yang login
+            // .filter(order => String(order.distributorId) === String(userId));
+            const filtered = normalized.filter(order => {
+                const role = (user.role || '').toLowerCase();
+                const idStr = String(userId);
 
-            const sorted = sortOrders(normalized);
+                if (role === 'agen') return String(order.agentId) === idStr;
+                if (role === 'distributor') return String(order.distributorId) === idStr;
+                if (role === 'pabrik') return String(order.pabrikId) === idStr;
+
+                return true; // admin/unknown role, lihat semua
+            });
+
+            const sorted = sortOrders(filtered);
             setOrders(sorted);
-            setValidasiOrders(sorted.filter(order => order.status === 'pending'));
-            setMonitoringOrders(
-                sorted.filter(order =>
-                    ['approved', 'processing', 'shipped', 'delivered'].includes(order.status)
-                )
-            );
-            setOrdersMasukPabrik(sorted.filter(order => order.status === 'approved'));
+
+            // ✅ Pisahkan berdasarkan status
+            setValidasiOrders(sorted.filter(order =>
+                ['pending'].includes(order.status)
+            ));
+
+            setMonitoringOrders(sorted.filter(order =>
+                ['approved', 'processing', 'shipped'].includes(order.status)
+            ));
+
+            setOrdersMasukPabrik(sorted.filter(order =>
+                ['approved'].includes(order.status)
+            ));
 
         } catch (error) {
             console.error("Fetch orders error:", error);
         }
     }, []);
+
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -280,6 +305,7 @@ export const OrderProvider = ({ children }) => {
                 markAsProcessed,
                 updateOrderStatusInContext,
                 setOrderToApproved,
+                fetchOrders,
             }}
         >
             {children}
@@ -287,4 +313,11 @@ export const OrderProvider = ({ children }) => {
     );
 };
 
-export const useOrder = () => useContext(OrderContext);
+export const useOrder = () => {
+    const context = useContext(OrderContext);
+    if (!context) {
+        throw new Error('useOrder harus digunakan di dalam OrderProvider');
+    }
+    return context;
+};
+

@@ -1,10 +1,8 @@
-// src/Components/ComponentsDashboard/Agen/Dashboard/DashboardAgenContent.jsx
 import React from 'react';
 import DashboardWelcomeHeader from '../../Common/PageHeader';
 import DashboardSummary from '../../Card/DashboardSummary';
 import RecentOrders from './RecentOrders';
 import IconWelcome from '../../../../assets/IconHeader/IconWelcome.png';
-
 
 const DashboardAgenContent = ({ orders, loading, error, stats, recentOrders }) => {
     if (loading) {
