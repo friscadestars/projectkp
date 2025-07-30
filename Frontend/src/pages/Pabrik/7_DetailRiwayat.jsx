@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
-import { pabrikMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems';
+import { pabrikMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../hooks/useNavigation';
-import PageHeader from '../../Components/ComponentsDashboard/Common/PageHeader';
+import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader';
 import TabelRiwayatDetail from '../../components/ComponentsDashboard/Pabrik/4_Riwayat/TabelRiwayatDetail';
 import iconRiwayat from '../../assets/IconHeader/IconRiwayat.png';
 

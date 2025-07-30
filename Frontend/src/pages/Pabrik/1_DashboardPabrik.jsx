@@ -3,7 +3,7 @@ import Layout from '../../Components/ComponentsDashboard/Layout/Layout.jsx';
 import { pabrikMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems.js';
 import { useDashboardPabrik } from '../../hooks/Pabrik/useDashboardPabrik.js';
 import { useNavigation } from '../../hooks/useNavigation.js';
-import DashboardWelcomeHeader from '../../Components/ComponentsDashboard/Common/PageHeader.jsx';
+import DashboardWelcomeHeader from '../../components/ComponentsDashboard/Common/PageHeader.jsx';
 import DashboardSummary from '../../Components/ComponentsDashboard/Card/DashboardSummary.jsx';
 import TableDaftarPengirimanAktif from '../../Components/ComponentsDashboard/Pabrik/Dashboard/TableDaftarPengirimanAktif.jsx';
 import IconWelcome from '../../assets/IconHeader/IconWelcome.png';

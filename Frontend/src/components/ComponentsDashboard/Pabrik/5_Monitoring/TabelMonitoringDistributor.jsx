@@ -1,7 +1,7 @@
 import React from "react";
 
-const TabelMonitoringDistributor = ({ orders }) => {
-  console.log('Orders (distributor list) received by table:', orders);
+const TabelMonitoringDistributor = ({ orders = [], toggleAktif }) => {
+  console.log("Orders (distributor list) received by table:", orders);
 
   return (
     <div className="order-table-container">
@@ -20,32 +20,40 @@ const TabelMonitoringDistributor = ({ orders }) => {
           </tr>
         </thead>
         <tbody>
-          {orders.map((order, index) => (
-            <tr key={order.distributorId}>
-              <td>{index + 1}</td>
-              <td>{order.distributorId}</td>
-              <td>{order.distributor}</td>
-              <td>{order.email || "-"}</td>
-              <td>{order.noRek || "-"}</td>
-              <td>{order.address || "-"}</td>
-              <td>{order.lastOrder || "-"}</td>
-              <td>
-                <span className={`status-badge ${order.isActive ? "status-approved" : "status-default"}`}>
-                  {order.isActive ? "Aktif" : "Tidak Aktif"}
-                </span>
-              </td>
-              <td>
-                <button
-                  className={`agen-button-toggle ${order.isActive ? "btn-hentikan" : "btn-aktifkan"}`}
-                >
-                  {order.isActive ? "Hentikan" : "Aktifkan"}
-                </button>
-              </td>
-            </tr>
-          ))}
-          {orders.length === 0 && (
+          {orders.length > 0 ? (
+            orders.map((distributor, index) => (
+              <tr key={distributor?.distributorId || index}>
+                <td>{index + 1}</td>
+                <td>{distributor?.distributorId || "-"}</td>
+                <td>{distributor?.distributor || "-"}</td>
+                <td>{distributor?.email || "-"}</td>
+                <td>{distributor?.noRek || "-"}</td>
+                <td>{distributor?.address || "-"}</td>
+                <td>{distributor?.lastOrder || "-"}</td>
+                <td>
+                  <span
+                    className={`status-badge ${
+                      distributor?.isActive ? "status-approved" : "status-default"
+                    }`}
+                  >
+                    {distributor?.isActive ? "Aktif" : "Tidak Aktif"}
+                  </span>
+                </td>
+                <td>
+                  <button
+                    onClick={() => toggleAktif && toggleAktif(distributor?.distributorId)}
+                    className={`agen-button-toggle ${
+                      distributor?.isActive ? "btn-hentikan" : "btn-aktifkan"
+                    }`}
+                  >
+                    {distributor?.isActive ? "Hentikan" : "Aktifkan"}
+                  </button>
+                </td>
+              </tr>
+            ))
+          ) : (
             <tr>
-              <td colSpan="9" className="py-4 text-gray-500">
+              <td colSpan="9" className="py-4 text-gray-500 text-center">
                 Tidak ada data ditemukan.
               </td>
             </tr>
