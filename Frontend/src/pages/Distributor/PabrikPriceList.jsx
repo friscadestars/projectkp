@@ -1,25 +1,25 @@
+// src/pages/Distributor/PabrikPriceList.jsx
 import React from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout';
 import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader';
 import PriceListSection from '../../Components/ComponentsDashboard/Distributor/PriceList/PriceListSection';
-import iconHarga from '../../assets/IconHeader/HargaIcon.png';
-import { distributorMenuItems } from '../../components/ComponentsDashboard/Constants/menuItems';
-import { useNavigation } from '../../hooks/useNavigation';
-import { usePabrikPriceListPage } from '../../hooks/Distributor/PriceList/usePabrikPriceListPage';
+import { usePabrikPriceListForDistributorPage } from '../../hooks/Distributor/PriceList/usePabrikPriceListForDistributorPage';
 
 const PabrikPriceList = () => {
-    const { handleNavigation } = useNavigation(distributorMenuItems);
-    const priceListProps = usePabrikPriceListPage();
+    const {
+        layoutProps,
+        pageTitleProps,
+        ...restProps
+    } = usePabrikPriceListForDistributorPage();
 
     return (
-        <Layout
-            menuItems={distributorMenuItems}
-            activeLabel="Daftar Harga Pabrik"
-            onNavigate={handleNavigation}
-            role="distributor" 
-        >
-            <PageHeader icon={iconHarga} title="Daftar Harga Pabrik" />
-            <PriceListSection {...priceListProps} />
+        <Layout {...layoutProps} role="distributor">
+            <PageHeader {...pageTitleProps} />
+            <PriceListSection
+                {...restProps}
+                hargaLabel="Harga Pabrik"
+                hargaHeader="Harga Pabrik"
+            />
         </Layout>
     );
 };

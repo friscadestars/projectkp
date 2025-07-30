@@ -1,39 +1,84 @@
 // src/hooks/Agen/useRiwayatOrder.js
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOrder } from '../../../Context/OrderContext';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
-import { useNavigation } from '../../useNavigation';
+import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
+import { deleteOrderById } from '../../../services/ordersApi';
+import Swal from 'sweetalert2';
 
 const useRiwayatOrder = () => {
+    const [orders, setOrders] = useState([]);
+    const [entries, setEntries] = useState(10);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
     const navigate = useNavigate();
-    const { orders, setOrders } = useOrder();
 
-    const { handleNavigation } = useNavigation(agenMenuItems);
+    useEffect(() => {
+        let mounted = true;
+        (async () => {
+            try {
+                setLoading(true);
+                const data = await fetchCompletedOrdersForHistory();
+                if (mounted) setOrders(data);
+            } catch (e) {
+                if (mounted) setError(e);
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        })();
+        return () => { mounted = false; };
+    }, []);
 
-    const handleDelete = (id) => {
-        const confirmed = window.confirm("Apakah Anda yakin ingin menghapus riwayat order ini?");
-        if (confirmed) {
-            const updatedOrders = orders.filter(order => order.id !== id);
-            setOrders(updatedOrders);
+    const handleDelete = async (id) => {
+        const result = await Swal.fire({
+            title: 'Apakah kamu yakin?',
+            text: "Riwayat order akan dihapus secara permanen!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal'
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await deleteOrderById(id);
+                setOrders((prev) => prev.filter((o) => o.orderId !== id));
+
+                await Swal.fire({
+                    title: 'Berhasil!',
+                    text: 'Order berhasil dihapus.',
+                    icon: 'success',
+                    timer: 1500,
+                    confirmButtonColor: '#2563eb',
+                });
+            } catch (error) {
+                console.error(error);
+                Swal.fire({
+                    title: 'Gagal!',
+                    text: 'Terjadi kesalahan saat menghapus order.',
+                    icon: 'error'
+                });
+            }
         }
     };
 
     const handleDetail = (order) => {
-        navigate('/agen/detail-order', { state: { order, from: 'riwayat' } });
+        navigate(`/agen/detail-riwayat-order/${order.id}`);
     };
-
-    const completedOrders = orders.filter(order => order.status === 'Selesai');
 
     return {
         showDropdown,
         setShowDropdown,
-        handleNavigation,
         handleDelete,
         handleDetail,
-        completedOrders
+        completedOrders: orders,
+        loading,
+        error,
+        entries,
+        setEntries,
     };
 };
 

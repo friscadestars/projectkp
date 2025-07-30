@@ -19,7 +19,7 @@ const ShippingStatusTable = ({ orders }) => {
             render: (_, __, rowIndex) => rowIndex + 1,
         },
         { header: 'Order ID', key: 'orderId' },
-        { header: 'Distributor', key: 'distributor' },
+        { header: 'Agen', key: 'agenName', render: (val) => val || '-' },
         { header: 'Tanggal Kirim', key: 'orderDate' },
         {
             header: 'Estimasi Sampai',

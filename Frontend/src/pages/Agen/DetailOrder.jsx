@@ -4,22 +4,38 @@ import DetailOrderContent from '../../components/ComponentsDashboard/Agen/Detail
 import { useDetailOrderPage } from '../../hooks/Agen/DetailOrder/useDetailOrder';
 
 const DetailOrder = () => {
-    const props = useDetailOrderPage();
+    const {
+        order,
+        loading,
+        error,
+        titleText,
+        icon,
+        activeLabel,
+        showDropdown,
+        toggleDropdown,
+        handleNavigation,
+        agenMenuItems,
+    } = useDetailOrderPage();
 
     return (
         <Layout
-            menuItems={props.agenMenuItems}
-            activeLabel={props.activeLabel}
-            onNavigate={props.handleNavigation}
-            showDropdown={props.showDropdown}
-            toggleDropdown={props.toggleDropdown}
-            role="agen" 
+            menuItems={agenMenuItems}
+            activeLabel={activeLabel}
+            onNavigate={handleNavigation}
+            showDropdown={showDropdown}
+            toggleDropdown={toggleDropdown}
+            role="agen"
         >
-            <DetailOrderContent
-                order={props.order}
-                titleText={props.titleText}
-                icon={props.icon}
-            />
+            {loading ? (
+                <p className="p-4 text-center text-gray-500">Memuat data order...</p>
+            ) : (
+                <DetailOrderContent
+                    order={order}
+                    error={error}
+                    titleText={titleText}
+                    icon={icon}
+                />
+            )}
         </Layout>
     );
 };

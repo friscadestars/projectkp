@@ -1,56 +1,73 @@
 // src/hooks/Distributor/Monitoring/useMonitoringOrderPage.js
-import { useMemo, useState } from 'react';
-import { useOrder } from '../../../Context/OrderContext';
+import { useEffect, useMemo, useState } from 'react';
+import { fetchOrders } from '../../../services/ordersApi';
 
-const allowedStatuses = ['approved', 'processed', 'shipped', 'received'];
+// Hapus 'delivered' agar tidak ditampilkan di monitoring
+const allowedStatuses = ['approved', 'processing', 'shipped'];
 
-const toLabel = (status) => {
+export const toLabel = (status) => {
     const map = {
         approved: 'Disetujui',
-        processed: 'Diproses',
+        processing: 'Diproses',
         shipped: 'Dikirim',
-        received: 'Diterima',
+        delivered: 'Diterima',
+        cancelled: 'Dibatalkan',
+        pending: 'Menunggu',
     };
     return map[status?.toLowerCase()] || status;
 };
 
 export const useMonitoringOrderPage = () => {
     const [search, setSearch] = useState('');
-    const { orders } = useOrder();
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [err, setErr] = useState(null);
 
-    // Ambil order yang status-nya untuk monitoring
-    const monitoringOrders = useMemo(
-        () => orders.filter(o => allowedStatuses.includes((o.status || '').toLowerCase())),
-        [orders]
-    );
+    useEffect(() => {
+        (async () => {
+            try {
+                const allOrders = await fetchOrders();
+                setOrders(
+                    allOrders.filter((o) =>
+                        allowedStatuses.includes((o.status || '').toLowerCase())
+                    )
+                );
+            } catch (e) {
+                setErr(e.message || 'Gagal memuat orders');
+            } finally {
+                setLoading(false);
+            }
+        })();
+    }, []);
 
-    // Cari berdasarkan orderCode / orderId
     const filteredOrders = useMemo(() => {
         const q = search.toLowerCase();
-        return monitoringOrders
-            .map(o => ({
-                id: o.id,
-                orderId: o.orderId || o.id,
-                orderCode: o.orderCode || o.order_code || `ORD-${o.id}`,
-                agenId: o.agenId || o.agen_id || o.agenName || o.agen || '-',
-                pabrikId: o.pabrikId || o.pabrik_id || '-',
-                pabrikName: o.pabrikName || o.pabrik_name || 'Pabrik tidak diketahui',
-                orderDate: o.orderDate || o.order_date?.split(' ')[0] || '-',
-                estimatedDate: o.estimatedDate || o.delivery_date || '-',
+        return orders
+            .map((o) => ({
+                id: o.orderId,
+                orderId: o.orderId,
+                orderCode: o.orderCode,
+                agenName: o.agenName ?? o.agen ?? '-',
+                pabrikName: o.pabrikName ?? 'Pabrik tidak diketahui',
+                orderDate: o.orderDate ?? '-',
+                deliveryDate: o.deliveryDate ?? '-',
                 status: o.status,
-                products: o.products || o.items || [],
+                products: o.products ?? [],
             }))
-            .filter(o =>
-                (o.orderCode || '').toLowerCase().includes(q) ||
-                (o.orderId || '').toLowerCase().includes(q) ||
-                (o.agenId || '').toLowerCase().includes(q)
+            .filter(
+                (o) =>
+                    (o.orderCode || '').toLowerCase().includes(q) ||
+                    (o.orderId || '').toLowerCase().includes(q) ||
+                    (o.agenName || '').toLowerCase().includes(q)
             );
-    }, [monitoringOrders, search]);
+    }, [orders, search]);
 
     return {
         search,
         setSearch,
         filteredOrders,
-        toLabel, // jika mau dipakai di tempat lain
+        loading,
+        err,
+        toLabel,
     };
 };

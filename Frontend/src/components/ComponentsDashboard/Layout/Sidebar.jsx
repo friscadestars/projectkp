@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import iconDropdown from '../../../assets/IconSidebar/Dropdown.png'; 
+import iconDropdown from '../../../assets/IconSidebar/Dropdown.png';
 import { FaTimes } from 'react-icons/fa';
 
 const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSidebarOpen }) => {
@@ -35,10 +35,13 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
 
             {/* Sidebar */}
             <aside
-                className={`fixed md:static z-40 bg-blue-900 text-white w-64 px-4 py-3 transform transition-transform duration-300
-                ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-                md:translate-x-0
-                h-full md:h-screen overflow-y-auto`}
+                className={`
+                    fixed md:static z-40 bg-blue-900 text-white w-64 transform transition-transform duration-300
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    md:translate-x-0
+                    h-full md:h-screen overflow-y-auto
+                    px-4 py-3
+                `}
             >
                 {/* Close button untuk mobile */}
                 <div className="flex justify-end md:hidden mb-4">
@@ -65,13 +68,13 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                             toggleMenu(item.label);
                                         } else {
                                             onNavigate(item.label);
-                                            setIsSidebarOpen(false); 
+                                            setIsSidebarOpen(false); // Tutup sidebar di mobile
                                         }
                                     }}
                                 >
-                                    <div className="flex items-center space-x-2">
-                                        <img src={item.icon} alt={item.label} className="w-16 h-19" />
-                                        <span className="font-semibold">{item.label}</span>
+                                    <div className="flex items-center space-x-3">
+                                        <img src={item.icon} alt={item.label} className="w-16 h-19 object-contain" />
+                                        <span className="font-medium text-sm md:text-base">{item.label}</span>
                                     </div>
 
                                     {item.subItems && (
@@ -84,11 +87,11 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                 </div>
 
                                 {item.subItems && openMenus[item.label] && (
-                                    <ul className="ml-8 mt-1 space-y-1">
+                                    <ul className="ml-6 mt-1 space-y-1">
                                         {item.subItems.map((subItem, subIndex) => (
                                             <li
                                                 key={subIndex}
-                                                className={`cursor-pointer px-9 py-1 rounded hover:bg-blue-700 text-sm ${subItem.label === activeLabel
+                                                className={`cursor-pointer px-4 py-1 rounded hover:bg-blue-700 text-sm md:text-base ${subItem.label === activeLabel
                                                     ? 'bg-blue-700 font-semibold'
                                                     : ''
                                                     }`}

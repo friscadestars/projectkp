@@ -1,8 +1,8 @@
 // src/hooks/Distributor/PriceList/useDistributorPriceListPage.js
+import { usePriceListByRole } from './usePriceListByRole'; // path disesuaikan
 import iconHarga from '../../../assets/IconHeader/HargaIcon.png';
 import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
-import { useDistributorPriceList } from './useDistributorPriceList';
 
 export const useDistributorPriceListPage = () => {
     const {
@@ -10,7 +10,7 @@ export const useDistributorPriceListPage = () => {
         searchTerm, setSearchTerm,
         filteredProduk,
         handleAdd, handleEdit, handleSave, handleDelete
-    } = useDistributorPriceList();
+    } = usePriceListByRole('distributor');
 
     const { handleNavigation } = useNavigation(distributorMenuItems);
 

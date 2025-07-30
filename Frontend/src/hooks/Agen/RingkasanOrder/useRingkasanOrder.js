@@ -1,23 +1,82 @@
-// src/hooks/Agen/useRingkasanOrder.js
-
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useOrder } from '../../../Context/OrderContext';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
+// Ubah sesuai alamat API kamu
+const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
+
 const useRingkasanOrder = () => {
+    const [orders, setOrders] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [showModal, setShowModal] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
 
-    const { orders, setOrders } = useOrder();
     const navigate = useNavigate();
     const { handleNavigation } = useNavigation(agenMenuItems);
 
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    const agenId = user.id;
+
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const token = localStorage.getItem('token'); // atau ambil dari user.token jika kamu simpan di situ
+
+                const response = await fetch(`${API_BASE_URL}/orders`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.message || 'Gagal mengambil data');
+                }
+
+                if (!Array.isArray(data)) {
+                    throw new Error('Data dari server tidak dalam bentuk array');
+                }
+
+                const filtered = data.filter(order => order.agen && order.agen_id === agenId);
+
+                const transformed = filtered.map(order => ({
+                    id: order.id,
+                    orderId: order.order_code,
+                    distributor: order.distributor,
+                    orderDate: new Date(order.order_date).toLocaleDateString('id-ID'),
+                    noResi: order.resi || '-',
+                    status: mapStatus(order.status),
+                    products: order.items || [],
+                }));
+
+                setOrders(transformed);
+            } catch (error) {
+                console.error('Gagal mengambil data order:', error);
+            }
+        };
+
+        if (agenId) {
+            fetchOrders();
+        }
+    }, [agenId]);
+
+    const mapStatus = (status) => {
+        const mapping = {
+            pending: 'Tertunda',
+            approved: 'Disetujui',
+            processing: 'Diproses',
+            cancelled: 'Ditolak',
+            shipped: 'Dikirim',
+            delivered: 'Selesai'
+        };
+        return mapping[status] || status;
+    };
+
     const handleDetail = (order) => {
-        navigate('/agen/detail-order', { state: { order, from: 'ringkasan' } });
+        navigate(`/agen/ringkasan-order/${order.id}`);
     };
 
     const handleConfirm = (id) => {
@@ -27,11 +86,11 @@ const useRingkasanOrder = () => {
 
     const confirmReceipt = () => {
         const updated = orders.map(order => {
-            if (order.id === selectedId && order.status === 'Dikirim') {
+            if (order.orderId === selectedId && order.status === 'Dikirim') {
                 const total = order.products.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0);
                 return {
                     ...order,
-                    status: 'Selesai',
+                    status: 'delivered',
                     receivedDate: new Date().toLocaleDateString('id-ID'),
                     total,
                 };
@@ -52,9 +111,9 @@ const useRingkasanOrder = () => {
     const getStatusClasses = (status) => {
         switch (status) {
             case 'Tertunda':
-                return 'bg-yellow-400 text-white font-bold';
+                return 'bg-yellow-500 text-white font-bold';
             case 'Disetujui':
-                return 'bg-green-500 text-white font-bold';
+                return 'bg-green-600 text-white font-bold';
             case 'Diproses':
                 return 'bg-blue-500 text-white font-bold';
             case 'Ditolak':
@@ -82,7 +141,6 @@ const useRingkasanOrder = () => {
         return new Date(y, m - 1, d);
     };
 
-    // Filter status yang diizinkan ditampilkan
     const allowedStatuses = ['Tertunda', 'Disetujui', 'Diproses', 'Ditolak', 'Dikirim'];
 
     const filteredOrders = orders

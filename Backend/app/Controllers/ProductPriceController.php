@@ -13,7 +13,15 @@ class ProductPriceController extends ResourceController
     // GET /api/prices
     public function index()
     {
-        $data = $this->model->findAll();
+        $role = $this->request->getGet('role'); // dari query string: ?role=distributor
+
+        $query = $this->model->orderBy('id', 'DESC');
+
+        if ($role) {
+            $query->where('role', $role);
+        }
+
+        $data = $query->findAll();
         return $this->respond($data);
     }
 
@@ -21,9 +29,25 @@ class ProductPriceController extends ResourceController
     public function create()
     {
         $data = $this->request->getJSON(true);
+
+        // Map jika frontend kirim 'nama' dan 'kode'
+        if (isset($data['nama'])) {
+            $data['nama_produk'] = $data['nama'];
+            unset($data['nama']);
+        }
+        if (isset($data['kode'])) {
+            $data['kode_produk'] = $data['kode'];
+            unset($data['kode']);
+        }
+
+        if (!isset($data['role'])) {
+            $data['role'] = 'distributor'; // default kalau tidak dikirim
+        }
+
         if ($this->model->insert($data)) {
             return $this->respondCreated(['message' => 'Harga produk berhasil ditambahkan']);
         }
+
         return $this->failValidationErrors($this->model->errors());
     }
 
@@ -38,9 +62,20 @@ class ProductPriceController extends ResourceController
     public function update($id = null)
     {
         $data = $this->request->getJSON(true);
+
+        if (isset($data['nama'])) {
+            $data['nama_produk'] = $data['nama'];
+            unset($data['nama']);
+        }
+        if (isset($data['kode'])) {
+            $data['kode_produk'] = $data['kode'];
+            unset($data['kode']);
+        }
+
         if ($this->model->update($id, $data)) {
             return $this->respond(['message' => 'Data berhasil diperbarui']);
         }
+
         return $this->failValidationErrors($this->model->errors());
     }
 

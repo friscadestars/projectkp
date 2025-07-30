@@ -1,25 +1,50 @@
 import { useOrder } from '../../../Context/OrderContext';
+import { useAuth } from '../../../Context/AuthContext';
 
 export const useDashboardData = () => {
     const { orders } = useOrder();
+    const { user } = useAuth();
 
-    const parseDate = (dateString) => {
-        const [day, month, year] = dateString.split('/').map(Number);
-        return new Date(year, month - 1, day);
-    };
+    if (!user) return { summaryCards: [], sortedOrders: [] };
 
-    const filteredOrders = orders.filter(order =>
-        order.status === 'Dikirim' || order.status === 'Diterima'
+    const distributorOrders = orders.filter(
+        (o) => String(o.distributorId) === String(user.id)
     );
 
-    const sortedOrders = [...filteredOrders].sort((a, b) => {
-        return parseDate(b.orderDate) - parseDate(a.orderDate);
-    });
+    const parseDate = (dateString) => {
+        if (!dateString) return new Date(0);
+        const parts = dateString.split(/[/-]/);
+        if (parts[0].length === 4) {
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    };
+
+    // Standarisasi status
+    const normalize = (status) => (status || '').toLowerCase();
+
+    const orderMasuk = distributorOrders.filter((o) =>
+        normalize(o.status) === 'pending'
+    );
+
+    // Pengiriman: hanya shipped
+    const orderDikirim = distributorOrders.filter(
+        (o) => normalize(o.status) === 'shipped'
+    );
+
+    // Order Selesai: delivered atau diterima
+    const orderSelesai = distributorOrders.filter((o) =>
+        ['delivered', 'diterima'].includes(normalize(o.status))
+    );
+
+    const sortedOrders = [...orderDikirim].sort(
+        (a, b) => parseDate(b.orderDate) - parseDate(a.orderDate)
+    );
 
     const summaryCards = [
-        { title: 'Order Masuk', value: orders.filter(o => o.status === 'Tertunda').length },
-        { title: 'Pengiriman', value: orders.filter(o => o.status === 'Dikirim').length },
-        { title: 'Order Selesai', value: orders.filter(o => o.status === 'Diterima').length },
+        { title: 'Order Masuk', value: orderMasuk.length },
+        { title: 'Pengiriman', value: orderDikirim.length },
+        { title: 'Order Selesai', value: orderSelesai.length },
     ];
 
     return { sortedOrders, summaryCards };

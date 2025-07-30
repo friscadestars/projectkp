@@ -1,33 +1,40 @@
-// hooks/useRiwayatOrderDistributor.js
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi'; // pastikan path benar
 
 export const useRiwayatOrderDistributor = () => {
-    const [orders, setOrders] = useState([
-        {
-            id: 'ORD-002',
-            agenId: 'AG-001',
-            tanggalOrder: '24/06/2025',
-            tanggalTerima: '26/06/2025',
-            hargaPabrik: 'Rp 200.000',
-            hargaJual: 'Rp 250.000',
-            statusPembayaran: 'Belum Dibayar',
-            statusOrder: 'Diterima',
-        },
-        {
-            id: 'ORD-001',
-            agenId: 'AG-001',
-            tanggalOrder: '24/06/2025',
-            tanggalTerima: '26/06/2025',
-            hargaPabrik: 'Rp 200.000',
-            hargaJual: 'Rp 250.000',
-            statusPembayaran: 'Lunas',
-            statusOrder: 'Diterima',
-        },
-    ]);
+    const [orders, setOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
-    const handleDelete = (id) => {
-        setOrders((prevOrders) => prevOrders.filter((order) => order.id !== id));
+    useEffect(() => {
+        const fetchOrders = async () => {
+            try {
+                const result = await fetchCompletedOrdersForHistory('distributor'); // ✅ Diperbaiki
+                setOrders(result);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchOrders();
+    }, []);
+
+    const handleDelete = async (id) => {
+        try {
+            await fetch(`${API_BASE}/orders/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                }
+            });
+            setOrders((prev) => prev.filter((order) => order.id !== String(id)));
+        } catch (err) {
+            console.error('Gagal menghapus order:', err);
+        }
     };
 
-    return { orders, handleDelete };
+    return { orders, loading, error, handleDelete };
 };

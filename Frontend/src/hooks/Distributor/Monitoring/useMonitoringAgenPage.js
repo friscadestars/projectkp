@@ -5,7 +5,7 @@ import {
     updateAgent,
     deleteAgent,
     setActiveAgent,
-} from '../../../services/distributor/UserAgenApi';
+} from '../../../services/UserAgenApi';
 
 
 import { useAuth } from '../../../Context/AuthContext';
@@ -32,6 +32,7 @@ export const useMonitoringAgenPage = () => {
                 setError(null);
 
                 const result = await fetchAgentsByDistributor(distributorId, token);
+                console.log("🔥 result from API:", result);
 
 
                 setAgenList(result.map(user => ({
@@ -50,7 +51,7 @@ export const useMonitoringAgenPage = () => {
                             year: 'numeric',
                         })
                         : '-',
-                    aktif: !!user.is_active,
+                    aktif: String(user.is_active) === '1',
                 })));
             } catch (err) {
                 console.error('Gagal mengambil data agen:', err);

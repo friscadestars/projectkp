@@ -7,15 +7,14 @@ use App\Models\OrderItemModel;
 use CodeIgniter\RESTful\ResourceController;
 use CodeIgniter\Database\Exceptions\DatabaseException;
 use App\Models\UserModel;
+use \Firebase\JWT\JWT;
+use \Firebase\JWT\Key;
 
 class OrderController extends ResourceController
 {
     protected $modelName = OrderModel::class;
     protected $format    = 'json';
 
-    /**
-     * @var OrderItemModel
-     */
     protected $orderItemModel;
 
     public function __construct()
@@ -25,7 +24,35 @@ class OrderController extends ResourceController
 
     public function index()
     {
-        $orders = $this->model->orderBy('id', 'DESC')->findAll();
+        // 🔐 Ambil user dari token
+        $authHeader = $this->request->getHeaderLine('Authorization');
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            return $this->failUnauthorized('Token tidak ditemukan.');
+        }
+
+        $token = $matches[1];
+        $secretKey = getenv('JWT_SECRET') ?: 'default_key';
+
+        try {
+            $decoded = JWT::decode($token, new Key($secretKey, 'HS256'));
+            $userId = $decoded->data->id;
+            $userRole = $decoded->data->role;
+        } catch (\Exception $e) {
+            return $this->failUnauthorized('Token tidak valid');
+        }
+
+        // 🔍 Filter berdasarkan role
+        $builder = $this->model->orderBy('id', 'DESC');
+
+        if ($userRole === 'agen') {
+            $builder->where('agen_id', $userId);
+        } elseif ($userRole === 'distributor') {
+            $builder->where('distributor_id', $userId);
+        } elseif ($userRole === 'pabrik') {
+            $builder->where('pabrik_id', $userId);
+        }
+
+        $orders = $builder->findAll();
 
         if (!$orders) {
             return $this->respond([]);
@@ -42,32 +69,24 @@ class OrderController extends ResourceController
             $grouped[$item['order_id']][] = $item;
         }
 
-        // Kumpulkan semua user id (agen, distributor, dan pabrik) dari list order
+        // Ambil semua user id dari list order
         $userIds = [];
         foreach ($orders as $order) {
-            if (!empty($order['agen_id'])) {
-                $userIds[] = (int) $order['agen_id'];
-            }
-            if (!empty($order['distributor_id'])) {
-                $userIds[] = (int) $order['distributor_id'];
-            }
-            if (!empty($order['pabrik_id'])) {
-                $userIds[] = (int) $order['pabrik_id'];
-            }
+            if (!empty($order['agen_id'])) $userIds[] = (int) $order['agen_id'];
+            if (!empty($order['distributor_id'])) $userIds[] = (int) $order['distributor_id'];
+            if (!empty($order['pabrik_id'])) $userIds[] = (int) $order['pabrik_id'];
         }
 
-        // Ambil nama user2 tsb (agen, distributor, pabrik)
         $userMap = [];
         if (!empty($userIds)) {
             $userModel = new UserModel();
             $users = $userModel->whereIn('id', array_unique($userIds))->findAll();
-
             foreach ($users as $u) {
                 $userMap[(int) $u['id']] = $u['name'];
             }
         }
 
-        // Bentuk response final
+        // Bentuk response akhir
         foreach ($orders as &$order) {
             $order['items'] = $grouped[$order['id']] ?? [];
 
@@ -76,9 +95,6 @@ class OrderController extends ResourceController
             $order['pabrik_name'] = $userMap[(int) $order['pabrik_id']] ?? 'Pabrik tidak dikenal';
 
             $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0);
-
-            // Hapus ID karena sudah diganti dengan nama
-            unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
         }
 
         return $this->respond($orders);
@@ -176,7 +192,6 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('ID / order_code diperlukan');
         }
 
-        // cari berdasarkan ID numerik atau order_code string
         if (ctype_digit((string) $idOrCode)) {
             $order = $this->model->find((int) $idOrCode);
         } else {
@@ -187,32 +202,30 @@ class OrderController extends ResourceController
             return $this->failNotFound('Order tidak ditemukan');
         }
 
-        // ambil detail item
         $order['items'] = $this->orderItemModel
             ->where('order_id', $order['id'])
             ->findAll();
 
         $userModel = new UserModel();
 
-        // ambil nama agen & distributor
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
-
-        // ambil nama pabrik
         $pabrik = $userModel->find($order['pabrik_id']);
 
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
         $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        // hapus id karena sudah diganti dengan nama
-        unset($order['agen_id'], $order['distributor_id'], $order['pabrik_id']);
+        // 🚨 Tetap kirim agen_id ke FE
+        // unset($order['agen_id']); // <-- jangan hapus ini
 
         return $this->respond($order);
     }
 
+
     public function update($id = null)
     {
+
         if (!$id) {
             return $this->failValidationErrors('ID diperlukan');
         }
@@ -226,6 +239,7 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('Payload tidak valid');
         }
 
+        log_message('debug', 'Payload: ' . json_encode($payload));
         $allowed = [
             'agen_id',
             'distributor_id',
@@ -238,6 +252,8 @@ class OrderController extends ResourceController
             'note'
         ];
         $orderData = array_intersect_key($payload, array_flip($allowed));
+
+        log_message('debug', 'OrderData: ' . json_encode($orderData));
 
         $this->model->update($id, $orderData);
 

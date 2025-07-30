@@ -1,21 +1,16 @@
-// src/hooks/distributor/useRiwayatOrderData.js
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useEffect, useState } from 'react';
+import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
 
-const useRiwayatOrderData = (orderId) => {
-    const [orderInfo, setOrderInfo] = useState(null);
-    const [produkList, setProdukList] = useState([]);
+export const useRiwayatOrderDistributor = () => {
+    const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchOrderDetail = async () => {
+        const fetchOrders = async () => {
             try {
-                const res = await axios.get(`/api/orders/${orderId}`);
-                const { order, products } = res.data;
-
-                setOrderInfo(order);
-                setProdukList(products);
+                const result = await fetchCompletedOrdersForHistory('distributor');
+                setOrders(result);
             } catch (err) {
                 setError(err);
             } finally {
@@ -23,10 +18,23 @@ const useRiwayatOrderData = (orderId) => {
             }
         };
 
-        fetchOrderDetail();
-    }, [orderId]);
+        fetchOrders();
+    }, []);
 
-    return { orderInfo, produkList, loading, error };
+    const handleDelete = async (id) => {
+        try {
+            await fetch(`${API_BASE}/orders/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...getAuthHeader()
+                }
+            });
+            setOrders((prev) => prev.filter((order) => order.id !== String(id)));
+        } catch (err) {
+            console.error('Gagal menghapus order:', err);
+        }
+    };
+
+    return { orders, loading, error, handleDelete };
 };
-
-export default useRiwayatOrderData;

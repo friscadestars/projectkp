@@ -13,17 +13,28 @@ const PriceListSection = ({
     filteredProduk,
     handleEdit,
     handleSave,
-    handleDelete
+    handleDelete,
+    hargaLabel = "Harga",
+    hargaHeader = "Harga"
 }) => {
     return (
         <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-            <PriceListForm form={form} setForm={setForm} handleAdd={handleAdd} />
-            <PriceListSearch searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+            <PriceListForm
+                form={form}
+                setForm={setForm}
+                handleAdd={handleAdd}
+                hargaLabel={hargaLabel}
+            />
+            <PriceListSearch
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm}
+            />
             <PriceListTable
                 filteredProduk={filteredProduk}
                 handleEdit={handleEdit}
                 handleSave={handleSave}
                 handleDelete={handleDelete}
+                hargaHeader={hargaHeader}
             />
         </div>
     );

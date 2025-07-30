@@ -1,4 +1,5 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
+import { updateOrderStatus } from '../services/ordersApi';
 
 const OrderContext = createContext();
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -16,9 +17,9 @@ const normalizeStatus = (status) => {
         'Menunggu Validasi': 'pending',
         'Tertunda': 'approved',
         'Disetujui': 'approved',
-        'Diproses': 'processed',
+        'Diproses': 'processing',
         'Dikirim': 'shipped',
-        'Selesai': 'received',
+        'Selesai': 'delivered',
         'Ditolak': 'cancelled',
     };
     return map[status] || status?.toLowerCase();
@@ -58,16 +59,26 @@ export const OrderProvider = ({ children }) => {
             });
 
             console.log("📡 Status response:", response.status);
-
             if (!response.ok) throw new Error("Gagal fetch orders");
 
-            const data = await response.json();
+            const data = await response.json(); // ✅ ini harus di atas
             const ordersRaw = data.data || data;
+
+            console.log("📦 Raw orders dari backend:", ordersRaw[0]);
+
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            const userId = Number(user?.id);
 
             const normalized = ordersRaw.map(order => ({
                 ...order,
+                id: order.id,
                 status: normalizeStatus(order.status),
+                distributorId: order.distributor_id,
+                agentId: order.agen_id,
                 orderDate: toUiDate(order.order_date || order.orderDate),
+                deliveryEstimate: toUiDate(order.delivery_date),
+                noResi: order.resi || '-',
+                agenName: order.agen || order.agen_name || '-',
                 orderId: order.orderId || order.order_code || `ORD-${order.id}`,
                 products: (order.items || []).map(p => ({
                     ...p,
@@ -75,22 +86,41 @@ export const OrderProvider = ({ children }) => {
                     unit_price: p.unit_price ?? p.unitPrice ?? 0,
                     quantity: p.quantity ?? p.jumlah ?? 0,
                 })),
-            }));
+            }))
+            // ✨ Filter hanya milik distributor yang login
+            // .filter(order => String(order.distributorId) === String(userId));
+            const filtered = normalized.filter(order => {
+                const role = (user.role || '').toLowerCase();
+                const idStr = String(userId);
 
-            const sorted = sortOrders(normalized);
+                if (role === 'agen') return String(order.agentId) === idStr;
+                if (role === 'distributor') return String(order.distributorId) === idStr;
+                if (role === 'pabrik') return String(order.pabrikId) === idStr;
+
+                return true; // admin/unknown role, lihat semua
+            });
+
+            const sorted = sortOrders(filtered);
             setOrders(sorted);
-            setValidasiOrders(sorted.filter(order => order.status === 'pending'));
-            setMonitoringOrders(
-                sorted.filter(order =>
-                    ['approved', 'processed', 'shipped', 'received'].includes(order.status)
-                )
-            );
-            setOrdersMasukPabrik(sorted.filter(order => order.status === 'approved'));
+
+            // ✅ Pisahkan berdasarkan status
+            setValidasiOrders(sorted.filter(order =>
+                ['pending'].includes(order.status)
+            ));
+
+            setMonitoringOrders(sorted.filter(order =>
+                ['approved', 'processing', 'shipped'].includes(order.status)
+            ));
+
+            setOrdersMasukPabrik(sorted.filter(order =>
+                ['approved'].includes(order.status)
+            ));
 
         } catch (error) {
             console.error("Fetch orders error:", error);
         }
     }, []);
+
 
     useEffect(() => {
         const token = localStorage.getItem("token");
@@ -109,7 +139,7 @@ export const OrderProvider = ({ children }) => {
     const markAsCompleted = (orderId) => {
         updateOrder(orderId, order => ({
             ...order,
-            status: 'received',
+            status: 'delivered',
             receivedDate: new Date().toLocaleDateString('id-ID')
         }));
     };
@@ -132,7 +162,7 @@ export const OrderProvider = ({ children }) => {
         updateOrder(orderId, order => ({ ...order, status: 'approved' }));
     };
 
-    const updateOrderStatus = (orderId, newStatus) => {
+    const updateOrderStatusInState = (orderId, newStatus) => {
         const today = new Date().toLocaleDateString('id-ID');
         updateOrder(orderId, order => {
             const updated = {
@@ -184,7 +214,7 @@ export const OrderProvider = ({ children }) => {
         updateOrder(orderId, order => {
             const updated = {
                 ...order,
-                status: 'processed',
+                status: 'processing',
                 shippingDate: new Date().toLocaleDateString('id-ID'),
             };
             setMonitoringOrders(prev => {
@@ -206,7 +236,7 @@ export const OrderProvider = ({ children }) => {
             }, 0);
             return {
                 ...order,
-                status: 'received',
+                status: 'delivered',
                 receivedDate: new Date().toLocaleDateString('id-ID'),
                 total,
             };
@@ -215,16 +245,40 @@ export const OrderProvider = ({ children }) => {
 
     const markAsProcessed = (orderId) => {
         updateOrder(orderId, order =>
-            order.status === 'approved' ? { ...order, status: 'processed' } : order
+            order.status === 'approved' ? { ...order, status: 'processing' } : order
         );
+    };
+
+    const setOrderToApproved = async (orderId) => {
+        try {
+            // Cari objek order dari state berdasarkan orderId
+            const order = orders.find(o => o.orderId === orderId);
+            if (!order) throw new Error("Order tidak ditemukan");
+
+            const id = order.id; // ✅ ID asli dari backend
+
+            await updateOrderStatus(id, 'delivered'); // 🔄 Kirim ke API
+
+            updateOrder(orderId, (order) => ({
+                ...order,
+                status: 'delivered',
+                receivedDate: new Date().toLocaleDateString('id-ID'),
+            }));
+
+            await fetchOrders();
+        } catch (error) {
+            console.error("Gagal mengubah status order:", error);
+            throw error;
+        }
     };
 
     const updateOrderStatusInContext = (orderId, newStatus) => {
         updateOrder(orderId, (order) => ({
             ...order,
-            status: newStatus
+            status: newStatus,
         }));
     };
+
 
     return (
         <OrderContext.Provider
@@ -241,7 +295,7 @@ export const OrderProvider = ({ children }) => {
                 updateProductPrice,
                 deleteOrder,
                 approveOrder,
-                updateOrderStatus,
+                updateOrderStatusInState,
                 addNewOrder,
                 notifications,
                 setNotifications,
@@ -250,6 +304,8 @@ export const OrderProvider = ({ children }) => {
                 moveToHistory,
                 markAsProcessed,
                 updateOrderStatusInContext,
+                setOrderToApproved,
+                fetchOrders,
             }}
         >
             {children}
@@ -257,4 +313,11 @@ export const OrderProvider = ({ children }) => {
     );
 };
 
-export const useOrder = () => useContext(OrderContext);
+export const useOrder = () => {
+    const context = useContext(OrderContext);
+    if (!context) {
+        throw new Error('useOrder harus digunakan di dalam OrderProvider');
+    }
+    return context;
+};
+

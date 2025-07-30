@@ -1,41 +1,53 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // sesuaikan path
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
-const getStatusClass = (status) => {
-    switch (status) {
-        case 'Tertunda': return 'status-badge status-pending';
-        case 'Disetujui': return 'status-badge status-approved';
-        case 'Diproses': return 'status-badge status-processing';
-        case 'Ditolak': return 'status-badge status-rejected';
-        case 'Dikirim': return 'status-badge status-shipped';
-        case 'Selesai': return 'status-badge button-confirm active';
-        default: return 'status-badge status-default';
-    }
-};
-
-const DetailOrderInfo = ({ order }) => {
+const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
+    const isRiwayat = mode === 'riwayat';
+
+    const formatDate = (val) => {
+        if (!val) return '-';
+        const date = new Date(val);
+        return isNaN(date.getTime()) ? val : date.toLocaleDateString('id-ID');
+    };
+
     const columns = [
-        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Order ID',
+            key: 'orderCode',
+            render: (val) => (val || '').toUpperCase(),
+        },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Alamat', key: 'address' },
-        { header: 'Tanggal Order', key: 'orderDate' },
-        { header: 'Estimasi Sampai', key: 'deliveryEstimate' },
+        {
+            header: 'Tanggal Order',
+            key: 'orderDate',
+            render: (val) => {
+                if (!val) return '-';
+                const [year, month, day] = val.split('-');
+                return `${day}/${month}/${year}`;
+            }
+        },
+        isRiwayat
+            ? { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate }
+            : { header: 'Tanggal Pengiriman', key: 'deliveryDate' },
         {
             header: 'Status Order',
             key: 'status',
-            render: (value) => <span className={getStatusClass(value)}>{value}</span>,
+            render: (value) => <StatusBadge status={value} />,
         },
     ];
 
     const data = [
         {
-            orderId: order.orderId,
-            distributor: order.distributor || 'Tidak tersedia',
-            address: order.address || 'Alamat tidak tersedia',
-            orderDate: order.orderDate,
-            deliveryEstimate: order.deliveryEstimate || '-',
+            orderCode: order.orderCode || '-',
+            distributor: order.distributorName || 'Tidak tersedia',
+            address: order.alamat || 'Alamat tidak tersedia',
+            orderDate: order.orderDate || '-',
+            deliveryDate: order.deliveryDate || '-',
+            receivedDate: order.receivedDate || '-',
             status: order.status,
         },
     ];

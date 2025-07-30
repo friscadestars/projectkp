@@ -33,8 +33,9 @@ const ValidasiOrder = () => {
         try {
             await updateOrderStatus(orderId, 'approved');
             setOrders(prev => prev.filter(o => o.orderId !== orderId));
+            Swal.fire('Berhasil', 'Order disetujui dan siap dikirim ke pabrik.', 'success');
         } catch (e) {
-            alert('Gagal menyetujui order: ' + e.message);
+            Swal.fire('Gagal', 'Gagal menyetujui order: ' + e.message, 'error');
         }
     };
 

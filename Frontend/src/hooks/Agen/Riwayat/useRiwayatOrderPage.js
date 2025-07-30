@@ -1,5 +1,5 @@
 import useRiwayatOrder from './useRiwayatOrder';
-import { agenMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import Iconriwayat from '../../../assets/IconHeader/IconRiwayat.png';
 import { useNavigation } from '../../useNavigation';
 
@@ -9,7 +9,9 @@ export const useRiwayatOrderPage = () => {
         setShowDropdown,
         handleDelete,
         handleDetail,
-        completedOrders
+        completedOrders,
+        entries,
+        setEntries
     } = useRiwayatOrder();
 
     const { handleNavigation } = useNavigation(agenMenuItems);
@@ -29,7 +31,9 @@ export const useRiwayatOrderPage = () => {
         orderTableProps: {
             orders: completedOrders,
             onDelete: handleDelete,
-            onDetail: handleDetail
+            onDetail: handleDetail,
+            entries,
+            onEntriesChange: setEntries
         }
     };
 };

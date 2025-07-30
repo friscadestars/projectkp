@@ -5,7 +5,6 @@
 @tailwind components;
 @tailwind utilities;
 
-/* CSS variables (hanya untuk referensi manual, tidak otomatis masuk ke Tailwind theme) */
 :root {
   --color-primary-darkest: #141414;
   --color-primary-dark: #122786;
@@ -14,29 +13,19 @@
   --color-secondary-light: #EFF9FF;
 
   --color-btn-primary: #007BFF;
-  /* Biru tombol utama */
   --color-btn-success: #4EA63A;
-  /* Hijau: Selesai Produksi */
   --color-btn-info: #17A2B8;
-  /* Cyan: Dikirim */
   --color-btn-confirm: #009970;
-  /* Hijau: Diterima */
   --color-btn-warning: #FF2F00;
-  /* Merah: Belum Dikirim */
   --color-btn-danger: #FB0004;
-  /* Merah terang: status kritis */
   --color-btn-disabled: #9CAFC8;
-  /* Abu: Tombol nonaktif */
   --color-btn-dark: #122786;
-  /* Biru gelap: secondary */
   --color-btn-light: #FFFAFA;
-  /* Putih */
 
   --font-lato: "Lato", sans-serif;
   --font-inter: "Inter", sans-serif;
 }
 
-/* Semua custom class menggunakan @layer components */
 @layer components {
   .bg-btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white;
@@ -75,11 +64,11 @@
   }
 
   .dashboard-container {
-    @apply bg-white border border-gray-200 rounded-lg p-6 shadow-md;
+    @apply bg-white border border-gray-200 rounded-lg p-4 sm:p-6 md:p-8 shadow-md;
   }
 
   .order-table-container {
-    @apply overflow-x-auto;
+    @apply w-full overflow-x-auto;
   }
 
   .order-table {
@@ -93,11 +82,6 @@
   .order-table th,
   .order-table td {
     @apply px-4 py-2;
-  }
-
-  .order-table thead th:first-child,
-  .order-table thead th:last-child {
-    border-radius: 0;
   }
 
   .order-table tbody tr {
@@ -185,11 +169,11 @@
   }
 
   .detail-order-container {
-    @apply bg-white border-2 border-gray-200 shadow-lg rounded-xl p-6 mx-auto space-y-6 max-w-[96rem];
+    @apply bg-white border-2 border-gray-200 shadow-lg rounded-xl p-4 sm:p-6 md:p-8 mx-auto space-y-6 w-full max-w-screen-xl;
   }
 
   .detail-order-title {
-    @apply text-xl font-semibold text-blue-900;
+    @apply text-lg sm:text-xl md:text-2xl font-semibold text-blue-900;
   }
 
   .agen-table {
@@ -251,7 +235,7 @@
   }
 
   .button-group {
-    @apply flex justify-center gap-2;
+    @apply flex flex-col sm:flex-row justify-center gap-2;
   }
 
   .btn-detail {
@@ -296,11 +280,11 @@
   }
 
   .form-input-group {
-    @apply flex flex-wrap gap-4 mb-4;
+    @apply flex flex-col sm:flex-row flex-wrap gap-4 mb-4;
   }
 
   .form-input {
-    @apply border border-gray-300 rounded-md px-3 py-2 text-sm w-1/4;
+    @apply border border-gray-300 rounded-md px-3 py-2 text-sm w-full sm:w-1/2 md:w-1/4;
   }
 
   .form-submit-button {

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import { useOrder } from '../../../../Context/OrderContext';
 
-const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClasses }) => {
+const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDetail }) => {
     const { moveToHistory, setOrderToApproved } = useOrder();
     const navigate = useNavigate();
 
@@ -21,26 +21,54 @@ const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClas
         });
 
         if (result.isConfirmed) {
-            setOrderToApproved(orderId);
-            moveToHistory(orderId);
-            Swal.fire({
-                title: 'Berhasil!',
-                text: `Order ${orderId} telah dikonfirmasi diterima.`,
-                icon: 'success',
-                confirmButtonColor: '#2563eb',
-            }).then(() => {
-                navigate('/agen/riwayat-order');
-            });
+            try {
+                Swal.showLoading(); // tampilkan loading
+                await setOrderToApproved(orderId); // update status jadi 'received'
+                moveToHistory(orderId); // pindah ke riwayat (opsional jika memang diperlukan)
+
+                Swal.fire({
+                    title: 'Berhasil!',
+                    text: `Order ${orderId} telah dikonfirmasi diterima.`,
+                    icon: 'success',
+                    confirmButtonColor: '#2563eb',
+                }).then(() => {
+                    navigate('/agen/riwayat-order');
+                });
+            } catch (err) {
+                console.error(err);
+                Swal.fire('Gagal!', 'Terjadi kesalahan saat mengupdate status.', 'error');
+            }
         }
     };
 
+    // const onDetail = (row) => {
+    //     if (!row?.id) {
+    //         console.warn('ID asli tidak ditemukan:', row);
+    //         return;
+    //     }
+
+    //     navigate(`/agen/ringkasan-order/${row.id}`);
+    // };
+
     const columns = [
         { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
-        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Order ID',
+            key: 'orderId',
+            render: (value) => value?.toUpperCase(),
+        },
         { header: 'Distributor', key: 'distributor' },
         { header: 'Tanggal Order', key: 'orderDate' },
-        { header: 'Estimasi Sampai', key: 'deliveryEstimate', render: (_, row) => getEstimatedDate(row) },
-        { header: 'No. Resi', key: 'noResi', render: (value) => value || '-' },
+        {
+            header: 'Tanggal Pengiriman',
+            key: 'deliveryEstimate',
+            render: (_, row) => getEstimatedDate(row),
+        },
+        {
+            header: 'No. Resi',
+            key: 'noResi',
+            render: (value) => value || '-',
+        },
         {
             header: 'Status Order',
             key: 'status',
@@ -53,20 +81,22 @@ const OrderTableRingkasan = ({ orders, onDetail, getEstimatedDate, getStatusClas
         {
             header: 'Aksi',
             key: 'aksi',
-            render: (_, row) => (
-                <div className="flex flex-wrap justify-center gap-2">
-                    <button onClick={() => onDetail(row)} className="button-detail">
-                        Detail
-                    </button>
-                    <button
-                        onClick={() => showConfirmation(row.orderId)}
-                        disabled={row.status !== 'Dikirim'}
-                        className={`button-confirm ${row.status === 'Dikirim' ? 'active' : 'disabled cursor-not-allowed'}`}
-                    >
-                        Diterima
-                    </button>
-                </div>
-            ),
+            render: (_, row) => {
+                return (
+                    <div className="flex flex-wrap justify-center gap-2">
+                        <button onClick={() => onDetail(row)} className="button-detail">
+                            Detail
+                        </button>
+                        <button
+                            onClick={() => showConfirmation(row.id)}
+                            disabled={row.status !== 'Dikirim'}
+                            className={`button-confirm ${row.status === 'Dikirim' ? 'active' : 'disabled cursor-not-allowed'}`}
+                        >
+                            Diterima
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 

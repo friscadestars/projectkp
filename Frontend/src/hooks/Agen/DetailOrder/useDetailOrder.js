@@ -1,26 +1,64 @@
-// src/hooks/Agen/useDetailOrderPage.js
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { useNavigation } from '../../useNavigation';
-import { getOrderPageInfo } from '../../../utils/Agen/InfoDetailOrder';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
+import { getOrderPageInfo } from '../../../utils/Agen/InfoDetailOrder';
+import { fetchOrderDetailById } from '../../../services/ordersApi';
 
 export const useDetailOrderPage = () => {
-    const location = useLocation();
-    const { order, from } = location.state || {};
+    const { id } = useParams(); // ✅ Ganti dari orderId ke id
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [err, setErr] = useState(null);
 
     const [showDropdown, setShowDropdown] = useState(false);
     const { handleNavigation } = useNavigation(agenMenuItems);
-    const { titleText, icon, activeLabel } = getOrderPageInfo(from);
+    const { titleText, icon, activeLabel } = getOrderPageInfo('ringkasan-order');
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            try {
+                setLoading(true);
+
+                const result = await fetchOrderDetailById(id); // ✅ ambil dari ID global
+
+                const user = JSON.parse(localStorage.getItem('user') || '{}');
+                const agenId = user?.id;
+
+                console.log('DEBUG: agentId dari order:', result.agentId);
+                console.log('DEBUG: agenId dari localStorage:', agenId);
+                console.log('🎯 result dari fetchOrderDetailById:', result);
+
+                // ✅ Validasi: hanya agen yang memiliki ID sesuai yang bisa akses
+                if (Number(result.agentId) !== Number(agenId)) {
+                    throw new Error('Anda tidak memiliki akses ke order ini.');
+                }
+
+                if (mounted) setOrder(result);
+            } catch (e) {
+                if (mounted) {
+                    setErr(e);
+                    setOrder(null);
+                }
+            } finally {
+                if (mounted) setLoading(false);
+            }
+        };
+        load();
+        return () => { mounted = false; };
+    }, [id]);
 
     return {
         order,
+        loading,
+        error: err,
         titleText,
         icon,
         activeLabel,
         showDropdown,
-        toggleDropdown: () => setShowDropdown(prev => !prev),
+        toggleDropdown: () => setShowDropdown((prev) => !prev),
         handleNavigation,
-        agenMenuItems 
+        agenMenuItems,
     };
 };
