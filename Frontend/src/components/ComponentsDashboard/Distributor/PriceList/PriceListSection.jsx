@@ -15,26 +15,30 @@ const PriceListSection = ({
     handleSave,
     handleDelete,
     hargaLabel = "Harga",
-    hargaHeader = "Harga"
+    hargaHeader = "Harga",
+    canEdit = true
 }) => {
     return (
         <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-            <PriceListForm
-                form={form}
-                setForm={setForm}
-                handleAdd={handleAdd}
-                hargaLabel={hargaLabel}
-            />
+            {canEdit && (
+                <PriceListForm
+                    form={form}
+                    setForm={setForm}
+                    handleAdd={handleAdd}
+                    hargaLabel={hargaLabel}
+                />
+            )}
             <PriceListSearch
-                searchTerm={searchTerm}
-                setSearchTerm={setSearchTerm}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
             />
             <PriceListTable
                 filteredProduk={filteredProduk}
-                handleEdit={handleEdit}
-                handleSave={handleSave}
-                handleDelete={handleDelete}
+                handleEdit={canEdit ? handleEdit : undefined}
+                handleSave={canEdit ? handleSave : undefined}
+                handleDelete={canEdit ? handleDelete : undefined}
                 hargaHeader={hargaHeader}
+                canEdit={canEdit}
             />
         </div>
     );

@@ -1,5 +1,4 @@
-// src/hooks/Agen/Dashboard/useDashboardAgenPage.js
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigation } from '../../useNavigation';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import { useOrder } from '../../../Context/OrderContext';
@@ -13,9 +12,12 @@ const parseDate = (dateString) => {
 const normalize = (status) => (status || '').toLowerCase();
 
 export const useDashboardAgenPage = () => {
-    const { orders } = useOrder();
+    const { orders, fetchOrders } = useOrder();
+    // const { orders } = useOrder();
     const { handleNavigation } = useNavigation(agenMenuItems);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [filteredOrders, setFilteredOrders] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     let user = {};
     try {
@@ -27,23 +29,29 @@ export const useDashboardAgenPage = () => {
 
     const agenId = Number(user?.id);
 
-    // Filter orders hanya milik agen
-    const agenOrders = useMemo(() => {
-        return (orders || []).filter(order =>
-            Number(order.agentId) === agenId // ✅ hanya pakai agentId dari mapOrder
-        );
+    useEffect(() => {
+        if (!orders || orders.length === 0) {
+            fetchOrders();
+        }
+    }, [orders, fetchOrders]);
+
+    useEffect(() => {
+        if (orders.length > 0 && agenId) {
+            const agenOrders = orders.filter(order => Number(order.agentId) === agenId);
+            setFilteredOrders(agenOrders);
+            setLoading(false);
+        }
     }, [orders, agenId]);
 
-    const orderMasuk = agenOrders.filter((o) =>
+    const orderMasuk = filteredOrders.filter((o) =>
         normalize(o.status) === 'pending'
     );
 
-
-    const orderDikirim = agenOrders.filter((o) =>
+    const orderDikirim = filteredOrders.filter((o) =>
         normalize(o.status) === 'shipped'
     );
 
-    const orderSelesai = agenOrders.filter((o) => {
+    const orderSelesai = filteredOrders.filter((o) => {
         const status = normalize(o.status);
         return ['delivered', 'diterima'].includes(status);
     });
@@ -58,7 +66,7 @@ export const useDashboardAgenPage = () => {
         { title: 'Order Selesai', value: orderSelesai.length },
     ];
 
-    const totalAktif = agenOrders.filter((o) => {
+    const totalAktif = filteredOrders.filter((o) => {
         const status = normalize(o.status);
         return !['delivered', 'diterima'].includes(status);
     }).length;
@@ -69,12 +77,9 @@ export const useDashboardAgenPage = () => {
         shipped: orderDikirim.length,
     };
 
-    const recentOrders = [...agenOrders]
+    const recentOrders = [...filteredOrders]
         .filter(o => normalize(o.status) === 'pending')
         .sort((a, b) => parseDate(b.orderDate) - parseDate(a.orderDate));
-
-    console.log('🧾 orders dari context:', orders);
-    console.log('🔑 agenId dari user login:', agenId);
 
     return {
         layoutProps: {
@@ -84,11 +89,11 @@ export const useDashboardAgenPage = () => {
             showDropdown,
             toggleDropdown: () => setShowDropdown((prev) => !prev),
         },
-        orders: agenOrders,
+        orders: filteredOrders,
         summaryCards,
         stats,
         recentOrders,
-        loading: false,
+        loading,
         error: null,
     };
 };

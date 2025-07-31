@@ -13,10 +13,13 @@ export const useDistributorPriceList = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [loading, setLoading] = useState(true);
 
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const distributorId = user?.id;
+
     const loadData = async () => {
         setLoading(true);
         try {
-            const data = await fetchPrices('distributor'); // ✅ per role
+            const data = await fetchPrices('distributor', distributorId);
             setProdukList(
                 data.map(p => ({
                     id: p.id,
@@ -43,13 +46,16 @@ export const useDistributorPriceList = () => {
             Swal.fire('Ops', 'Semua field harus diisi', 'warning');
             return;
         }
+
         try {
             const payload = {
                 nama_produk: form.nama,
                 kode_produk: form.kode,
-                harga: Number(String(form.harga).replace(/[^\d]/g, ''))
+                harga: Number(String(form.harga).replace(/[^\d]/g, '')),
+                role: 'distributor',
+                distributor_id: distributorId,
             };
-            await createPrice(payload, 'distributor'); // ✅ per role
+            await createPrice(payload, 'distributor');
             setForm({ nama: '', kode: '', harga: '' });
             await loadData();
             Swal.fire('Berhasil', 'Produk berhasil ditambahkan', 'success');
@@ -59,18 +65,30 @@ export const useDistributorPriceList = () => {
     };
 
     const handleEdit = (id) => {
-        setProdukList(prev =>
-            prev.map(p => (p.id === id ? { ...p, isEditing: true } : p))
-        );
+        const produk = produkList.find(p => p.id === id);
+        if (produk) {
+            setForm({
+                nama: produk.nama,
+                kode: produk.kode,
+                harga: produk.harga
+            });
+            setProdukList(prev =>
+                prev.map(p => ({
+                    ...p,
+                    isEditing: p.id === id
+                }))
+            );
+        }
     };
 
-    const handleSave = async (id, updatedData) => {
+    const handleSave = async (id, updatedData = form) => {
         try {
             await updatePrice(id, {
-                nama_produk: updatedData.nama_produk,
-                kode_produk: updatedData.kode_produk,
-                harga: updatedData.harga
+                nama_produk: updatedData.nama || form.nama,
+                kode_produk: updatedData.kode || form.kode,
+                harga: Number(String(updatedData.harga || form.harga).replace(/[^\d]/g, '')),
             });
+            setForm({ nama: '', kode: '', harga: '' });
             await loadData();
             Swal.fire('Tersimpan', 'Produk berhasil diperbarui', 'success');
         } catch (e) {
@@ -90,7 +108,7 @@ export const useDistributorPriceList = () => {
         if (!confirm.isConfirmed) return;
 
         try {
-            await deletePrice(id); // ✅ nama fungsi disesuaikan
+            await deletePrice(id);
             await loadData();
             Swal.fire('Terhapus', 'Produk berhasil dihapus', 'success');
         } catch (e) {

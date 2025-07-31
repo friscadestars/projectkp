@@ -19,6 +19,7 @@ const PabrikPriceList = () => {
                 {...restProps}
                 hargaLabel="Harga Pabrik"
                 hargaHeader="Harga Pabrik"
+                canEdit={false}
             />
         </Layout>
     );

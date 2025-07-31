@@ -14,10 +14,11 @@ const DistributorPriceList = () => {
             {...layoutProps}
             showDropdown={showDropdown}
             toggleDropdown={toggleDropdown}
-            role="distributor" 
+            role="distributor"
         >
             <PageHeader {...pageTitleProps} />
-            <PriceListSection {...restProps} />
+            <PriceListSection {...restProps}
+                canEdit={true} />
         </Layout>
     );
 };

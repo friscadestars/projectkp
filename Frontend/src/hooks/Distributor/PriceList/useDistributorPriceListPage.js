@@ -5,14 +5,18 @@ import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 
 export const useDistributorPriceListPage = () => {
+    const { handleNavigation } = useNavigation(distributorMenuItems);
+
+    // Ambil user login dari localStorage atau context auth
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const distributorId = user?.id; // Pastikan ini adalah distributor_id dari user login
+
     const {
         form, setForm,
         searchTerm, setSearchTerm,
         filteredProduk,
         handleAdd, handleEdit, handleSave, handleDelete
-    } = usePriceListByRole('distributor');
-
-    const { handleNavigation } = useNavigation(distributorMenuItems);
+    } = usePriceListByRole('distributor', distributorId); // ✅ kirim userId
 
     return {
         form,

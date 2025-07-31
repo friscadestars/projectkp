@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { updateOrderStatus } from '../services/ordersApi';
+import { useAuth } from './AuthContext';
 
 const OrderContext = createContext();
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
@@ -44,9 +45,10 @@ export const OrderProvider = ({ children }) => {
     const [validasiOrders, setValidasiOrders] = useState([]);
     const [monitoringOrders, setMonitoringOrders] = useState([]);
     const [notifications, setNotifications] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     const fetchOrders = useCallback(async () => {
-        console.log("📥 fetchOrders() dipanggil");
+        setLoading(true);
 
         let response;
         try {
@@ -63,9 +65,6 @@ export const OrderProvider = ({ children }) => {
 
             const data = await response.json(); // ✅ ini harus di atas
             const ordersRaw = data.data || data;
-
-            console.log("📦 Raw orders dari backend:", ordersRaw[0]);
-
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const userId = Number(user?.id);
 
@@ -121,13 +120,13 @@ export const OrderProvider = ({ children }) => {
         }
     }, []);
 
+    const { user } = useAuth();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
+        if (user && user.id) {
             fetchOrders();
         }
-    }, [fetchOrders]);
+    }, [user, fetchOrders]);
 
 
     const updateOrder = (orderId, updater) => {
@@ -306,6 +305,7 @@ export const OrderProvider = ({ children }) => {
                 updateOrderStatusInContext,
                 setOrderToApproved,
                 fetchOrders,
+                loading,
             }}
         >
             {children}

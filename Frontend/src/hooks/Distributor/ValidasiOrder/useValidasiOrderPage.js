@@ -41,7 +41,7 @@ export const useValidasiOrderPage = () => {
                         name: p.name,
                         quantity: p.quantity,
                         requestedPrice: p.requestedPrice ?? 0,
-                        unitPrice: pabrikPrices[p.name] ?? 0, // Ganti jadi dari daftar harga pabrik
+                        unitPrice: pabrikPrices[p.name.toLowerCase().trim()] ?? 0, // Ganti jadi dari daftar harga pabrik
                     })),
                 };
 
@@ -62,6 +62,9 @@ export const useValidasiOrderPage = () => {
 
     const handleSetHarga = (index, value) => {
         const updated = [...inputPrices];
+        if (!updated[index]) {
+            updated[index] = {}; // inisialisasi jika belum ada
+        }
         updated[index].price = value;
         setInputPrices(updated);
     };

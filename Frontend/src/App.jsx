@@ -102,7 +102,7 @@ function App() {
         <Route path="/distributor/daftar-harga-pabrik" element={<DaftarHargaPabrik />} />
         <Route path="/distributor/daftar-harga-distributor" element={<DaftarHargaDistributor />} />
         <Route path="/distributor/riwayat-order" element={<RiwayatOrderDistributor />} />
-        <Route path="/distributor/riwayat-order/detail/:orderId" element={<DetailRiwayatOrder />} />
+        <Route path="/distributor/detail-riwayat-order/:orderId" element={<DetailRiwayatOrder />} />
         <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
         <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
 

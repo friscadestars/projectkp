@@ -69,7 +69,6 @@ export async function fetchOrderById(idOrCode) {
 }
 
 // Update status by ID (PUT /orders/:id)
-// ordersApi.js
 export async function updateOrderStatus(id, status) {
     const order = await fetchOrderById(id); // Ambil dulu data lengkap order-nya
 
@@ -83,7 +82,7 @@ export async function updateOrderStatus(id, status) {
     const payload = {
         agen_id: order.agentId,
         distributor_id: order.distributorId,
-        pabrik_id: order.pabrik_id ?? null,
+        pabrik_id: 1,
         order_date: order.orderDate + ' 00:00:00',
         note: order.alamat,
         status: status,
@@ -127,20 +126,30 @@ export async function updateOrderItemPrice(id, productName, price) {
 }
 
 export async function fetchPabrikPrices() {
-    const res = await fetch(`${API_BASE}/prices`, {
-        headers: {
-            ...getAuthHeader()
-        }
-    });
-    if (!res.ok) throw new Error('Gagal mengambil harga pabrik');
-    const json = await res.json();
-    const data = json.data || json;
+    try {
+        const res = await fetch(`${API_BASE}/prices`, {
+            headers: {
+                ...getAuthHeader()
+            }
+        });
 
-    // Buat jadi { 'Produk A': 10000, 'Produk B': 20000 }
-    return data.reduce((acc, item) => {
-        acc[item.nama_produk] = item.harga;
-        return acc;
-    }, {});
+        if (!res.ok) throw new Error('Gagal mengambil harga pabrik');
+
+        const json = await res.json();
+        const data = json.data || json;
+
+        // Filter hanya data dengan role 'pabrik'
+        const pabrikOnly = data.filter((item) => item.role === 'pabrik');
+
+        // Ubah menjadi format { 'produk a': harga }
+        return pabrikOnly.reduce((acc, item) => {
+            acc[item.nama_produk.toLowerCase().trim()] = item.harga;
+            return acc;
+        }, {});
+    } catch (error) {
+        console.error("Gagal memuat harga pabrik:", error);
+        return {};
+    }
 }
 
 export async function fetchOrderDetailById(id) {
@@ -292,3 +301,4 @@ export async function deleteOrderById(id) {
 
     return res.json();
 }
+

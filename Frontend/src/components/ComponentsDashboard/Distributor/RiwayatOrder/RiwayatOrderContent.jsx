@@ -86,13 +86,13 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
                 <div className="flex gap-2 justify-center">
                     <button
                         className="bg-blue-900 text-white px-3 py-1 text-sm rounded font-bold"
-                        onClick={() => navigate(`/distributor/riwayat-order/detail/${row.id}`)} // juga pastikan ini
+                        onClick={() => navigate(`/distributor/detail-riwayat-order/${row.id}`)}
                     >
                         Detail
                     </button>
                     <button
                         className="bg-red-600 text-white px-3 py-1 text-sm rounded font-bold"
-                        onClick={() => handleDelete(row.id)} // ✅ sudah benar
+                        onClick={() => handleDelete(row.id)}
                     >
                         Hapus
                     </button>

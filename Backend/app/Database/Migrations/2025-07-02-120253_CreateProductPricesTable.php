@@ -35,6 +35,12 @@ class CreateProductPricesTable extends Migration
                 'constraint' => ['pabrik', 'distributor'],
                 'null'       => false
             ],
+            'distributor_id' => [
+                'type'       => 'INT',
+                'constraint' => 11,
+                'unsigned'   => true,
+                'null'       => true,
+            ],
             'created_at' => [
                 'type' => 'DATETIME',
                 'null' => true

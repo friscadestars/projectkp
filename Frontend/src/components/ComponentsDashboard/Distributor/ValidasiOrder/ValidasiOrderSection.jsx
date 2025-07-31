@@ -3,7 +3,7 @@ import SearchInput from '../../Common/SearchInput';
 import ValidasiOrderTable from './ValidasiOrderTable';
 
 const ValidasiOrderSection = ({ orders, handleTerima, handleTolak }) => {
-    const [searchText, setSearchText] = useState(''); // ✅ FIXED
+    const [searchText, setSearchText] = useState('');
 
     return (
         <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">

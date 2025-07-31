@@ -1,15 +1,15 @@
+// src/Components/Distributor/PabrikPriceList/PriceListTable.jsx
 import React, { useState } from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 
 const formatRupiah = (value) => {
-    const numberString = value.replace(/[^,\d]/g, '');
-    const number = parseInt(numberString, 10);
-    if (isNaN(number)) return '';
+    if (!value) return 'Rp. 0';
+    const number = parseInt(value.toString().replace(/\D/g, ''), 10);
     return 'Rp. ' + number.toLocaleString('id-ID');
 };
 
 const parseRupiah = (value) => {
-    return value.replace(/[^0-9]/g, '');
+    return value.toString().replace(/[^0-9]/g, '') || '0';
 };
 
 const PriceListTable = ({
@@ -17,26 +17,35 @@ const PriceListTable = ({
     handleEdit,
     handleSave,
     handleDelete,
-    hargaHeader = "Harga Pabrik"
+    hargaHeader = "Harga Pabrik",
+    canEdit = true
 }) => {
     const [editedValues, setEditedValues] = useState({});
 
     const handleInputChange = (id, field, value) => {
-        setEditedValues(prev => ({
-            ...prev,
-            [id]: {
-                ...prev[id],
-                [field]: field === 'harga' ? formatRupiah(value) : value
-            }
-        }));
+        setEditedValues(prev => {
+            const existing = prev[id] || {};
+            return {
+                ...prev,
+                [id]: {
+                    ...existing,
+                    [field]: value
+                }
+            };
+        });
+
+        if (typeof handleEdit === 'function') {
+            handleEdit(id);
+        }
     };
 
     const handleSaveClick = (row) => {
         const edits = editedValues[row.id] || {};
+
         const updated = {
-            nama_produk: edits.nama ?? row.nama,
-            kode_produk: edits.kode ?? row.kode,
-            harga: parseInt(parseRupiah(edits.harga ?? row.harga), 10)
+            nama_produk: edits.nama_produk || row.nama_produk,
+            kode_produk: edits.kode_produk || row.kode_produk,
+            harga: parseInt(parseRupiah(edits.harga || row.harga), 10)
         };
 
         handleSave(row.id, updated);
@@ -57,34 +66,34 @@ const PriceListTable = ({
         {
             header: 'Nama Produk',
             key: 'nama',
-            render: (value, row) =>
-                row.isEditing ? (
+            render: (_, row) =>
+                row.isEditing && canEdit ? (
                     <input
                         type="text"
                         className="border border-gray-300 px-2 py-1 rounded text-sm w-32"
-                        value={editedValues[row.id]?.nama ?? value}
-                        onChange={(e) => handleInputChange(row.id, 'nama', e.target.value)}
+                        value={editedValues[row.id]?.nama_produk ?? row.nama_produk}
+                        onChange={(e) => handleInputChange(row.id, 'nama_produk', e.target.value)}
                     />
-                ) : value
+                ) : row.nama
         },
         {
             header: 'Kode Produk',
-            key: 'kode',
-            render: (value, row) =>
-                row.isEditing ? (
+            key: 'kode_produk',
+            render: (_, row) =>
+                row.isEditing && canEdit ? (
                     <input
                         type="text"
                         className="border border-gray-300 px-2 py-1 rounded text-sm w-24"
-                        value={editedValues[row.id]?.kode ?? value}
-                        onChange={(e) => handleInputChange(row.id, 'kode', e.target.value)}
+                        value={editedValues[row.id]?.kode_produk ?? row.kode_produk}
+                        onChange={(e) => handleInputChange(row.id, 'kode_produk', e.target.value)}
                     />
-                ) : value
+                ) : row.kode
         },
         {
             header: hargaHeader,
             key: 'harga',
             render: (value, row) =>
-                row.isEditing ? (
+                row.isEditing && canEdit ? (
                     <input
                         type="text"
                         className="border border-gray-300 px-2 py-1 rounded text-sm w-28 text-center"
@@ -94,8 +103,11 @@ const PriceListTable = ({
                 ) : (
                     `Rp. ${Number(value).toLocaleString('id-ID')}`
                 )
-        },
-        {
+        }
+    ];
+
+    if (canEdit) {
+        columns.push({
             header: 'Aksi',
             key: 'aksi',
             render: (_, row) => (
@@ -110,7 +122,17 @@ const PriceListTable = ({
                     ) : (
                         <button
                             className="bg-blue-800 text-white px-3 py-1 rounded text-sm font-bold"
-                            onClick={() => handleEdit(row.id)}
+                            onClick={() => {
+                                setEditedValues(prev => ({
+                                    ...prev,
+                                    [row.id]: {
+                                        nama_produk: row.nama,
+                                        kode_produk: row.kode,
+                                        harga: row.harga
+                                    }
+                                }));
+                                handleEdit(row.id);
+                            }}
                         >
                             Edit
                         </button>
@@ -123,8 +145,8 @@ const PriceListTable = ({
                     </button>
                 </div>
             )
-        }
-    ];
+        });
+    }
 
     return (
         <div className="mt-4">
