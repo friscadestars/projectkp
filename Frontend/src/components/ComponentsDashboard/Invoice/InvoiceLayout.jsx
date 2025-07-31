@@ -2,7 +2,7 @@ import React from 'react';
 import InvoiceDetails from './InvoiceDetails';
 import InvoiceTable from './InvoiceTable';
 import PaymentInstructions from './PaymentInstructions';
-import PaymentConfirmation from './PaymentConfirmation'; // ✅ Ganti ini
+import PaymentConfirmation from './PaymentConfirmation';
 
 const InvoiceLayout = ({
     invoiceData,

@@ -95,6 +95,8 @@ class OrderController extends ResourceController
             $order['pabrik_name'] = $userMap[(int) $order['pabrik_id']] ?? 'Pabrik tidak dikenal';
 
             $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0);
+            $order['agen_id'] = $order['agen_id'] ?? null;
+            $order['distributor_id'] = $order['distributor_id'] ?? null;
         }
 
         return $this->respond($orders);
@@ -174,7 +176,9 @@ class OrderController extends ResourceController
             // kembalikan nama, dan hapus id jika tidak ingin ditampilkan
             $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
             $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
-            unset($order['agen_id'], $order['distributor_id']);
+            $order['agen_id'] = $order['agen_id'];
+            $order['distributor_id'] = $order['distributor_id'];
+            // unset($order['agen_id'], $order['distributor_id']);
 
             return $this->respondCreated([
                 'message' => 'Order berhasil dibuat',

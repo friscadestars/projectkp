@@ -14,6 +14,19 @@ const getStatusPembayaranClass = (status) => {
     }
 };
 
+const formatDate = (value) => {
+    if (!value || value === 'Invalid Date') return '-';
+
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '-';
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+};
+
 const TagihanTable = ({ orders, searchTerm, role }) => {
     const navigate = useNavigate();
 
@@ -46,7 +59,7 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
         },
         ...(role === 'distributor'
             ? [
-                { header: 'Agen ID', key: 'agentId' },
+                { header: 'Agen', key: 'agenName' },
                 { header: 'Pabrik', key: 'pabrikName' }
             ] : [
                 { header: 'Distributor', key: 'distributorName' }
@@ -59,10 +72,7 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
                 return `${d}/${m}/${y}`;
             }
         },
-        {
-            header: 'Estimasi Sampai', key: 'deliveryDate',
-            render: (val) => val || '-'
-        },
+        { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
         {
             header: 'Status Order',
             key: 'status',

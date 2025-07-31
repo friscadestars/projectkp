@@ -5,10 +5,11 @@ const getAuthHeader = () => ({
 });
 
 // ordersApi.js
-const mapOrder = (o) => ({
+export const mapOrder = (o) => ({
     orderId: String(o.id),
     orderCode: o.order_code ?? `ORD-${String(o.agent_order_no || 0).padStart(3, '0')}`,
     agentId: o.agen_id,
+    agen_id: o.agen_id ?? o.agen?.id ?? null,
     id: Number(o.id),
     agenName: o.agen,
     distributorId: o.distributor_id,
