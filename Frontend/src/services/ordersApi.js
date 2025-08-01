@@ -1,38 +1,55 @@
-const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
+export const API_BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
 
 const getAuthHeader = () => ({
     Authorization: `Bearer ${localStorage.getItem('token')}`
 });
 
 // ordersApi.js
-export const mapOrder = (o) => ({
-    orderId: String(o.id),
-    orderCode: o.order_code ?? `ORD-${String(o.agent_order_no || 0).padStart(3, '0')}`,
-    agentId: o.agen_id,
-    agen_id: o.agen_id ?? o.agen?.id ?? null,
-    id: Number(o.id),
-    agenName: o.agen,
-    distributorId: o.distributor_id,
-    distributorName: o.distributor,
-    alamat: o.note,
-    orderDate: o.order_date?.split(' ')[0] ?? o.order_date,
-    deliveryDate: o.delivery_date,
-    status: o.status,
-    note: o.note ?? '-',
-    pabrik_id: o.pabrik_id ?? null,
-    pabrikName: o.pabrik_name ?? 'Tidak diketahui',
-    receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
-    trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
+export const mapOrder = async (o) => {
+    const base = {
+        orderId: String(o.id),
+        orderCode: o.order_code ?? `ORD-${String(o.agent_order_no || 0).padStart(3, '0')}`,
+        id: Number(o.id),
+        agenName: o.agen,
+        distributorId: o.distributor_id,
+        distributorName: o.distributor,
+        alamat: o.note,
+        orderDate: o.order_date?.split(' ')[0] ?? o.order_date,
+        deliveryDate: o.delivery_date,
+        status: o.status,
+        note: o.note ?? '-',
+        pabrik_id: o.pabrik_id ?? null,
+        pabrikName: o.pabrik_name ?? 'Tidak diketahui',
+        receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
+        trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
 
-    products: (o.items || []).map(i => ({
-        id: i.id,
-        name: i.product_name,
-        quantity: Number(i.quantity ?? 0),
-        requestedPrice: Number(i.requested_price ?? i.unit_price ?? 0),
-        unitPrice: Number(i.unit_price ?? 0),
-        address: i.address ?? o.note ?? '',
-    })),
-});
+        products: (o.items || []).map(i => ({
+            id: i.id,
+            name: i.product_name,
+            quantity: Number(i.quantity ?? 0),
+            requestedPrice: Number(i.requested_price ?? i.unit_price ?? 0),
+            unitPrice: Number(i.unit_price ?? 0),
+            address: i.address ?? o.note ?? '',
+        })),
+    };
+
+    if (o.agen_id) {
+        base.agentId = Number(o.agen_id);
+    } else if ((o.agen || o.agenName) && o.distributor_id) {
+        try {
+            const name = typeof o.agen === 'string' ? o.agen : o.agenName;
+            const agent = await fetchAgentIdByName(name, o.distributor_id);
+            base.agentId = agent;
+        } catch (err) {
+            console.warn('Gagal mendapatkan agentId:', err.message);
+            base.agentId = null;
+        }
+    } else {
+        base.agentId = null;
+    }
+
+    return base;
+};
 
 export async function fetchOrders() {
     const res = await fetch(`${API_BASE}/orders`, { headers: { ...getAuthHeader() } });
@@ -45,17 +62,20 @@ export async function fetchOrders() {
     const role = user?.role?.toLowerCase?.() || 'unknown';
     const userId = Number(user?.id);
 
-    return (Array.isArray(data) ? data : [])
-        .filter((o) => {
-            if (role === 'agen') {
-                return Number(o.agen_id) === userId;
-            } else if (role === 'distributor') {
-                return Number(o.distributor_id) === userId;
-            } else {
-                return true; // admin atau role lain: akses semua
-            }
-        })
-        .map(mapOrder);
+    // Filter dulu secara sync
+    const filtered = (Array.isArray(data) ? data : []).filter((o) => {
+        if (role === 'agen') {
+            return Number(o.agen_id) === userId;
+        } else if (role === 'distributor') {
+            return Number(o.distributor_id) === userId;
+        } else {
+            return true;
+        }
+    });
+
+    // Gunakan Promise.all untuk resolve semua mapping async
+    const orders = await Promise.all(filtered.map(mapOrder));
+    return orders;
 }
 
 // idOrCode bisa numeric (3) atau ord-001, tapi dari FE kita kirim id numerik
@@ -259,8 +279,15 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
     });
 }
 
-export async function fetchOrdersForBilling() {
-    const res = await fetch(`${API_BASE}/orders`, {
+export async function fetchInvoicesForAgent() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const agenId = user?.id;
+
+    if (!agenId) {
+        throw new Error('Agen ID tidak ditemukan');
+    }
+
+    const res = await fetch(`${API_BASE}/invoices/agent/${agenId}`, {
         headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
@@ -269,21 +296,13 @@ export async function fetchOrdersForBilling() {
 
     if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Gagal mengambil data orders');
+        throw new Error(err.message || 'Gagal mengambil data tagihan');
     }
 
     const json = await res.json();
     const raw = json.data || json;
 
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const agenId = user?.id;
-
-    const ALLOWED = new Set(['disetujui', 'approved', 'dikirim', 'shipped', 'selesai', 'delivered']);
-
-    return (Array.isArray(raw) ? raw : [])
-        .filter((o) => Number(o.agen_id) === Number(agenId))
-        .map(mapOrder)
-        .filter((o) => ALLOWED.has((o.status || '').toLowerCase()));
+    return Array.isArray(raw) ? raw : [];
 }
 
 export async function deleteOrderById(id) {
@@ -302,4 +321,20 @@ export async function deleteOrderById(id) {
 
     return res.json();
 }
+
+export const fetchAgentIdByName = async (agenName, distributorId) => {
+    const res = await fetch(`${API_BASE}/agents?name=${encodeURIComponent(agenName)}&distributor_id=${distributorId}`, {
+        headers: { ...getAuthHeader() }
+    });
+
+    if (!res.ok) throw new Error('Gagal mendapatkan agen');
+    const json = await res.json();
+    const data = json?.data || json;
+
+    if (Array.isArray(data)) {
+        return data.length > 0 ? data[0].id : null;
+    }
+
+    return data?.id ?? null;
+};
 

@@ -88,7 +88,7 @@ function App() {
         <Route path="/agen/detail-riwayat-order/:id" element={<DetailRiwayatOrderAgen />} />
         {/* <Route path="/agen/detail-order" element={<DetailOrder />} /> */}
         <Route path="/agen/tagihan" element={<TagihanOrder />} />
-        <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />
+        <Route path="/agen/invoice-tagihan/:id" element={<InvoiceTagihan />} />
 
         {/* Distributor */}
         <Route path="/distributor/dashboard-distributor" element={<DashboardDistributor />} />

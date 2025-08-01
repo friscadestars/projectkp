@@ -145,6 +145,7 @@ class OrderController extends ResourceController
         $db->transBegin();
 
         try {
+            log_message('debug', 'ORDER PAYLOAD: ' . json_encode($orderData));
             $orderId = $this->model->insert($orderData, true);
             if (!$orderId) {
                 throw new DatabaseException('Gagal menyimpan order');
@@ -271,7 +272,7 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        unset($order['agen_id'], $order['distributor_id']);
+        // unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond([
             'message' => 'Order berhasil diperbarui',
@@ -368,7 +369,7 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        unset($order['agen_id'], $order['distributor_id']);
+        // unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond($order);
     }

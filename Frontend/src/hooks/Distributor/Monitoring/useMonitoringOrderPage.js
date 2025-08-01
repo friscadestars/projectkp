@@ -47,6 +47,8 @@ export const useMonitoringOrderPage = () => {
                 id: o.orderId,
                 orderId: o.orderId,
                 orderCode: o.orderCode,
+                agentId: o.agentId, // <-- INI WAJIB!
+                agen_id: o.agentId ?? o.agen_id ?? null,
                 agenName: o.agenName ?? o.agen ?? '-',
                 pabrikName: o.pabrikName ?? 'Pabrik tidak diketahui',
                 orderDate: o.orderDate ?? '-',

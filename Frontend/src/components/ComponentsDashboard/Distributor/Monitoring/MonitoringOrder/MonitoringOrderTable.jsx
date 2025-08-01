@@ -3,10 +3,11 @@ import { useNavigate } from 'react-router-dom';
 import StatusBadge from '../../../Common/StatusBadge';
 import ReusableTable from '../../../Common/ReusableTable';
 import Modal from '../../../Common/Modal';
-import { fetchOrders } from '../../../../../services/ordersApi';
-import { mapOrder } from '../../../../../services/ordersApi';
+import { API_BASE } from '../../../../../services/ordersApi';
+import { useAuth } from '../../../../../Context/AuthContext';
 
 const MonitoringOrderTable = ({ orders }) => {
+    const { user, token } = useAuth();
     const navigate = useNavigate();
     const [showInvoiceModal, setShowInvoiceModal] = useState(false);
     const [selectedOrder, setSelectedOrder] = useState(null);
@@ -17,16 +18,6 @@ const MonitoringOrderTable = ({ orders }) => {
         due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0],
         notes: ''
     });
-
-    useEffect(() => {
-        const loadData = async () => {
-            const response = await fetchOrders();
-            const formatted = response.map(mapOrder);
-            setOrders(formatted);
-        };
-        loadData();
-    }, []);
-
     const formatDate = (val) =>
         val
             ? new Date(val).toLocaleDateString('id-ID', {
@@ -36,17 +27,42 @@ const MonitoringOrderTable = ({ orders }) => {
             })
             : '-';
 
-    const handleOpenInvoiceModal = (order) => {
-        console.log('RAW ORDER sebelum mapping:', order);
-        const mappedOrder = {
-            ...order,
-            agen_id: order.agen_id || order.agen?.id,
-            distributorId: order.distributorId || order.distributor_id,
-            products: order.products || [],
-        };
-        console.log('MAPPED ORDER setelah mapping:', mappedOrder);
-        setSelectedOrder(mappedOrder);
-        setShowInvoiceModal(true);
+    const handleOpenInvoiceModal = async (order) => {
+        console.log('ORDER YANG DIPILIH:', order);
+
+        const agenId = typeof order.agentId === 'number' && !isNaN(order.agentId)
+            ? order.agentId
+            : null;
+
+        if (!agenId) {
+            alert('Data agen tidak valid. Tidak dapat membuat invoice.');
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/orders/${order.orderId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const fullOrder = await res.json();
+
+            const mappedOrder = {
+                ...fullOrder,
+                distributorId: fullOrder.distributorId ?? fullOrder.distributor_id ?? user?.id,
+                order_items: fullOrder.order_items || fullOrder.items || [], // GANTI DARI: fullOrder.order_items
+            };
+
+            console.log('selectedOrder.order_items:', mappedOrder.order_items);
+
+            setSelectedOrder(mappedOrder);
+            setShowInvoiceModal(true);
+
+        } catch (err) {
+            console.error('Gagal ambil detail order:', err);
+            alert('Tidak bisa membuka invoice: gagal ambil data order.');
+        }
     };
 
 
@@ -108,55 +124,68 @@ const MonitoringOrderTable = ({ orders }) => {
     ];
 
     const handleCreateInvoice = async () => {
-        console.log('Mulai buat invoice...');
-        console.log("selectedOrder:", selectedOrder);
-        console.log("selectedOrder.agen_id:", selectedOrder?.agen_id);
-        console.log("selectedOrder.products:", selectedOrder?.products);
-        if (!selectedOrder || !selectedOrder.products || selectedOrder.products.length === 0) {
+        if (!selectedOrder || !selectedOrder.order_items || selectedOrder.order_items.length === 0) {
             alert('Data order tidak lengkap.');
             return;
         }
 
+        console.log('Mulai buat invoice...');
+        console.log('selectedOrder:', selectedOrder);
+        console.log('selectedOrder.products:', selectedOrder.products);
+        const orderItemIds = selectedOrder?.order_items
+            ?.map(item => Number(item.id))
+            .filter(id => !isNaN(id));
+
         const payload = {
-            order_id: selectedOrder.orderId,
-            order_item_ids: selectedOrder.products.map(p => p.id),
+            order_id: selectedOrder.id,
+            order_item_ids: selectedOrder.order_items.map((item) => item.id),
             agen_id: selectedOrder.agen_id,
-            distributor_id: selectedOrder.distributorId, // bisa juga dari context login
+            distributor_id: selectedOrder.distributorId,
             invoice_number: invoiceForm.invoice_number || `INV-${selectedOrder.orderCode}`,
             invoice_date: invoiceForm.invoice_date,
             due_date: invoiceForm.due_date,
             amount_total:
                 selectedOrder.totalAmount ||
-                selectedOrder.products.reduce((sum, p) => sum + (p.unitPrice || 0) * (p.quantity || 0), 0),
+                selectedOrder.order_items.reduce((sum, item) => sum + (item.unit_price || 0) * (item.quantity || 0), 0),
             tax_amount: 0,
             status: 'unpaid',
             notes: invoiceForm.notes
         };
 
+        console.log('Payload yang dikirim:', payload);
+
         try {
-            const response = await fetch(`/distributor/${selectedOrder.agen_id}/invoices`, {
+            const response = await fetch(`${API_BASE}/invoices`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
             });
 
-            const data = await response.json();
+            let data = {};
+            try {
+                data = await response.json();
+            } catch {
+                data = {};
+            }
 
             if (response.ok) {
                 alert('Invoice berhasil dibuat dan dikirim ke agen.');
                 setShowInvoiceModal(false);
             } else {
-                console.error(data);
-                alert('Gagal membuat invoice.');
+                console.error('Gagal membuat invoice:', data);
+                alert(`Gagal membuat invoice: ${data.message || 'Terjadi kesalahan'}`);
             }
         } catch (err) {
-            console.error(err);
+            console.error('Terjadi kesalahan saat mengirim invoice:', err);
             alert('Terjadi kesalahan saat mengirim invoice.');
+        } finally {
+            console.log('Selesai proses buat invoice.');
         }
-        console.log('Selesai proses buat invoice.');
     };
+
 
     return (
         <>

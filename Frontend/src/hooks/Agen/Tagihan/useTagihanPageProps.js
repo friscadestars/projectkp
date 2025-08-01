@@ -2,20 +2,14 @@ import { useEffect, useState } from 'react';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import iconTagihan from '../../../assets/IconHeader/IconTagihan.png';
 import { useNavigation } from '../../useNavigation';
-import useTagihanPage from './useTagihanPage';
-import { fetchOrdersForBilling } from '../../../services/ordersApi';
+import { fetchInvoicesForAgent, fetchOrderById } from '/src/services/ordersApi.js';
 
 export const useTagihanPageProps = () => {
-    const [orders, setOrders] = useState([]);
+    const [invoices, setInvoices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-
-    const {
-        showDropdown,
-        toggleDropdown,
-        searchTerm,
-        setSearchTerm
-    } = useTagihanPage();
+    const [searchTerm, setSearchTerm] = useState('');
+    const [showDropdown, setShowDropdown] = useState(false);
 
     const { handleNavigation } = useNavigation(agenMenuItems);
 
@@ -23,16 +17,40 @@ export const useTagihanPageProps = () => {
         let mounted = true;
         (async () => {
             try {
-                setLoading(true);
-                const data = await fetchOrdersForBilling();
-                if (mounted) setOrders(data);
+                const invoices = await fetchInvoicesForAgent();
+                console.log("📦 Invoices:", invoices);
+
+                const enrichedInvoices = await Promise.all(
+                    invoices.map(async (inv) => {
+                        let order = {};
+                        try {
+                            if (inv.order_id) {
+                                order = await fetchOrderById(inv.order_id);
+                            }
+                        } catch (e) {
+                            console.warn('Gagal ambil order untuk invoice:', inv.id, e.message);
+                        }
+
+                        return {
+                            ...order,
+                            tagihan: inv,
+                            statusPembayaran: inv.status || 'Belum Lunas'
+                        };
+                    })
+                );
+
+                if (mounted) setInvoices(enrichedInvoices);
             } catch (e) {
-                if (mounted) setError(e);
+                console.error('Gagal fetch invoices:', e.message);
+                if (mounted) setError('Gagal memuat tagihan');
             } finally {
                 if (mounted) setLoading(false);
             }
         })();
-        return () => { mounted = false; };
+
+        return () => {
+            mounted = false;
+        };
     }, []);
 
     return {
@@ -41,7 +59,7 @@ export const useTagihanPageProps = () => {
             activeLabel: 'Tagihan',
             onNavigate: handleNavigation,
             showDropdown,
-            toggleDropdown
+            toggleDropdown: () => setShowDropdown(prev => !prev),
         },
         pageHeaderProps: {
             icon: iconTagihan,
@@ -53,7 +71,7 @@ export const useTagihanPageProps = () => {
             placeholder: 'Cari Order ID / Distributor / Status'
         },
         tagihanTableProps: {
-            orders,
+            invoices,
             searchTerm,
             role: 'agen'
         },

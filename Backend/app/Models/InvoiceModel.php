@@ -9,7 +9,7 @@ class InvoiceModel extends Model
     protected $table            = 'invoices';
     protected $primaryKey       = 'id';
     protected $allowedFields    = [
-        'order_item_id',
+        'order_id',
         'invoice_number',
         'invoice_date',
         'due_date',
@@ -21,6 +21,8 @@ class InvoiceModel extends Model
         'notes',
         'created_at',
         'updated_at',
+        'agen_id',
+        'distributor_id',
     ];
     protected $useTimestamps = true;
 }
