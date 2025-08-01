@@ -1,4 +1,3 @@
-// src/components/ComponentsDashboard/Pabrik/5_Monitoring/EditDistributorModal.jsx
 import React, { useState, useEffect } from 'react';
 
 const EditDistributorModal = ({ distributor, onClose, onSave }) => {
@@ -18,77 +17,38 @@ const EditDistributorModal = ({ distributor, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-md w-full max-w-md">
-        <h2 className="text-xl font-bold mb-2 text-center">Edit Distributor</h2>
-
-        <p className="text-sm text-gray-600 mb-4">
-          Silakan ubah data distributor pada form di bawah ini, lalu klik <strong>Simpan</strong> untuk menyimpan perubahan.
-        </p>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="bg-white p-6 rounded-lg w-full max-w-xl max-h-[90vh] overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4 text-center">Edit Distributor</h2>
 
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nama</label>
-            <input
-              name="name"
-              value={formData.name || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>Nama Distributor</label>
+            <input name="distributor" value={formData.distributor || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Email</label>
-            <input
-              name="email"
-              value={formData.email || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>Email</label>
+            <input name="email" value={formData.email || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">No. Telepon</label>
-            <input
-              name="telepon"
-              value={formData.telepon || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>No. Telepon</label>
+            <input name="noTelepon" value={formData.noTelepon || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">No. Rekening</label>
-            <input
-              name="rekening"
-              value={formData.rekening || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>No. Rekening</label>
+            <input name="noRek" value={formData.noRek || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nama Rekening</label>
-            <input
-              name="namaRekening"
-              value={formData.namaRekening || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>Nama Rekening</label>
+            <input name="namaRekening" value={formData.namaRekening || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Nama Bank</label>
-            <input
-              name="namaBank"
-              value={formData.namaBank || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>Nama Bank</label>
+            <input name="namaBank" value={formData.namaBank || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Alamat</label>
-            <input
-              name="alamat"
-              value={formData.alamat || ''}
-              onChange={handleChange}
-              className="w-full border p-2 rounded"
-            />
+            <label>Alamat</label>
+            <input name="address" value={formData.address || ''} onChange={handleChange} className="w-full border p-2 rounded" />
           </div>
         </div>
 
