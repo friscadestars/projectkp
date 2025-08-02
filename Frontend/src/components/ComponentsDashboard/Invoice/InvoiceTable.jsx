@@ -2,41 +2,44 @@ import React from 'react';
 import ReusableTable from '../Common/ReusableTable';
 
 const InvoiceTable = ({ products = [] }) => {
+    console.log('products', products);
     const columns = [
         {
-            key: 'nama',
+            key: 'name',
             label: 'Nama Produk',
         },
         {
-            key: 'jumlah',
+            key: 'quantity',
             label: 'Jumlah',
-            render: (val) => (
-                <div className="text-right">{val || 0}</div>
-            ),
+            render: (val) => {
+                const numeric = parseInt(val, 10) || 0;
+                return <div className="text-center">{numeric}</div>;
+            },
         },
         {
-            key: 'harga',
+            key: 'unitPrice',
             label: 'Harga Satuan',
             render: (val) => {
-                const numeric = parseInt((val || '0').toString().replace(/[^\d]/g, ''));
-                return <div className="text-right">Rp {numeric.toLocaleString('id-ID')}</div>;
+                const numeric = parseInt((val || '0').toString().replace(/[^\d]/g, '')) || 0;
+                return <div className="text-center">Rp {numeric.toLocaleString('id-ID')}</div>;
             },
         },
         {
-            key: 'subtotal',
             label: 'Subtotal',
+            key: 'subtotal',
             render: (_, row) => {
-                const hargaAngka = parseInt((row.harga || '0').toString().replace(/[^\d]/g, ''));
-                const subtotal = (row.jumlah || 0) * hargaAngka;
-                return <div className="text-right">Rp {subtotal.toLocaleString('id-ID')}</div>;
-            },
-        },
+                const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
+                const qty = row.quantity;
+                if (typeof harga !== 'number' || typeof qty !== 'number') return '-';
+                const subtotal = harga * qty;
+                return `Rp. ${subtotal.toLocaleString('id-ID')}`;
+            }
+        }
     ];
 
-    // Karena subtotal dihitung manual, kita tidak butuh key `subtotal` di objek.
     const data = products.map(p => ({
         ...p,
-        subtotal: null, // placeholder supaya render tetap jalan
+        subtotal: null, // placeholder untuk kolom render subtotal
     }));
 
     return (

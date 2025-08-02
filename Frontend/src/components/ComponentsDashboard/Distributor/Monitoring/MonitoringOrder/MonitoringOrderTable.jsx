@@ -50,15 +50,25 @@ const MonitoringOrderTable = ({ orders }) => {
 
             const mappedOrder = {
                 ...fullOrder,
+                orderCode: fullOrder.order_code ?? fullOrder.orderCode,
+                agenName: fullOrder.agen ?? fullOrder.agenName,
+                pabrikName: fullOrder.pabrik_name ?? fullOrder.pabrikName,
+                agentName: fullOrder.agen ?? fullOrder.agenName, // untuk modal
+                factoryName: fullOrder.pabrik_name ?? fullOrder.pabrikName, // untuk modal
+                orderDate: (fullOrder.order_date || fullOrder.orderDate || '').split(' ')[0],
+                invoiceNumber: invoiceForm.invoice_number || `INV-${(fullOrder.order_code || fullOrder.orderCode || '').toUpperCase()}`,
+                invoiceDate: invoiceForm.invoice_date,
+                dueDate: invoiceForm.due_date,
+                note: fullOrder.note ?? '',
+                order_items: fullOrder.order_items ?? fullOrder.items ?? [],
                 distributorId: fullOrder.distributorId ?? fullOrder.distributor_id ?? user?.id,
-                order_items: fullOrder.order_items || fullOrder.items || [], // GANTI DARI: fullOrder.order_items
+                agen_id: fullOrder.agen_id ?? fullOrder.agentId ?? null,
             };
 
             console.log('selectedOrder.order_items:', mappedOrder.order_items);
 
             setSelectedOrder(mappedOrder);
             setShowInvoiceModal(true);
-
         } catch (err) {
             console.error('Gagal ambil detail order:', err);
             alert('Tidak bisa membuka invoice: gagal ambil data order.');

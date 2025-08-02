@@ -43,6 +43,7 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
 
     $routes->resource('order-items');
 
+    $routes->post('invoices/(:num)/confirm-payment', 'InvoiceController::confirmPayment/$1');
     $routes->get('invoices/agent/(:num)', 'InvoiceController::getByAgent/$1');
     $routes->get('invoices', 'InvoiceController::index');
     $routes->get('invoices/(:num)', 'InvoiceController::show/$1');

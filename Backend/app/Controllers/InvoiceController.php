@@ -21,7 +21,43 @@ class InvoiceController extends ResourceController
         if (!$invoice) {
             return $this->failNotFound('Invoice tidak ditemukan');
         }
-        return $this->respond($invoice);
+
+        // Ambil user login dari session (misalnya pakai JWT atau session CI4)
+        $session = session();
+        $loggedAgenId = $session->get('user_id'); // Pastikan ini agen yang login
+
+        // Validasi apakah invoice ini milik agen yang login
+        if ($invoice['agen_id'] != $loggedAgenId) {
+            return $this->fail('Anda tidak memiliki akses ke invoice ini');
+        }
+
+        $db = \Config\Database::connect();
+
+        // Ambil invoice_items dan join ke order_items
+        $items = $db->table('invoice_items')
+            ->select('invoice_items.*, order_items.product_name as nama, order_items.quantity as jumlah, order_items.unit_price as harga')
+            ->join('order_items', 'order_items.id = invoice_items.order_item_id')
+            ->where('invoice_items.invoice_id', $id)
+            ->get()
+            ->getResultArray();
+
+        // Ambil order
+        $order = $db->table('orders')->where('id', $invoice['order_id'])->get()->getRowArray();
+
+        $pengirim = $db->table('users')
+            ->select('nama_bank, nama_rekening, rekening')
+            ->where('id', $invoice['distributor_id'])
+            ->get()
+            ->getRowArray();
+
+        // Masukkan ke invoice agar bisa dibaca frontend
+        $invoice['pengirim_bank'] = $pengirim;
+
+        return $this->respond([
+            'invoice' => $invoice,
+            'items' => $items,
+            'order' => $order,
+        ]);
     }
 
     public function create()
@@ -115,27 +151,45 @@ class InvoiceController extends ResourceController
             return $this->fail('agentId diperlukan');
         }
 
-        $invoices = $this->model->where('agen_id', $agentId)->findAll();
+        $db = \Config\Database::connect();
+
+        $invoices = $db->table('invoices i')
+            ->select('i.id, i.invoice_number, i.invoice_date, i.amount_total, i.status, i.order_id, o.order_code, o.order_date')
+            ->join('orders o', 'o.id = i.order_id', 'left')
+            ->where('i.agen_id', $agentId)
+            ->get()
+            ->getResultArray();
+
         return $this->respond($invoices);
     }
 
     public function confirmPayment($id = null)
     {
+        // Pastikan ID invoice ada
         if (!$id) {
             return $this->fail('ID invoice tidak ditemukan');
         }
 
+        // Cari invoice berdasarkan ID
         $invoice = $this->model->find($id);
         if (!$invoice) {
             return $this->failNotFound('Invoice tidak ditemukan');
         }
 
-        $this->model->update($id, ['status' => 'Lunas']);
+        // Perbarui status invoice di database menjadi 'paid'
+        $data = [
+            'status' => 'paid',
+            'payment_date' => date('Y-m-d H:i:s'), // Opsional: catat waktu pembayaran
+        ];
 
+        $this->model->update($id, $data);
+
+        // Kirim respons sukses. Status di database adalah 'paid'.
+        // Anda bisa mengirimkan pesan yang lebih deskriptif untuk frontend.
         return $this->respond([
             'message' => 'Pembayaran berhasil dikonfirmasi',
             'invoice_id' => $id,
-            'status' => 'Lunas'
+            'status' => 'paid' // Kirim status database yang sebenarnya
         ]);
     }
 }
