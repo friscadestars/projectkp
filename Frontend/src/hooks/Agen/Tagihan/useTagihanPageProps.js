@@ -29,6 +29,7 @@ export const useTagihanPageProps = () => {
                             }
                         } catch (e) {
                             console.warn('Gagal ambil order untuk invoice:', inv.id, e.message);
+                            // Tidak hentikan proses, tetap kembalikan invoice
                         }
 
                         return {

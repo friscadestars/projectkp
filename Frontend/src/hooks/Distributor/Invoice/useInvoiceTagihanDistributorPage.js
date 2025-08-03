@@ -12,7 +12,7 @@ export const useInvoiceTagihanDistributorPage = () => {
         openModal,
         closeModal,
         handleKonfirmasi
-    } = useInvoiceData('/distributor/invoice');
+    } = useInvoiceData('/invoices/getByDistributor');
 
     const { handleNavigation } = useNavigation(distributorMenuItems);
 

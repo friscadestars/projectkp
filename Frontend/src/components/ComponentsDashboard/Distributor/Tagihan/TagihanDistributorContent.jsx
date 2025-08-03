@@ -1,7 +1,7 @@
 import React from 'react';
 import PageHeaderWithIcon from '../../Common/PageHeader';
 import SearchInput from '../../Common/SearchInput';
-import TagihanTable from "../../Agen/Tagihan/TagihanTable";
+import TagihanDistributorTable from './TagihanDistributorTable';
 import tagihanIcon from '../../../../assets/IconHeader/IconTagihan.png';
 
 const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders }) => (
@@ -12,14 +12,13 @@ const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders }) => (
                 <SearchInput
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari Order ID atau Agen ID"
+                    placeholder="Cari"
                 />
             </div>
 
-            <TagihanTable
+            <TagihanDistributorTable
                 orders={orders}
                 searchTerm={searchTerm}
-                role="distributor"
             />
         </div>
     </>

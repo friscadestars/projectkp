@@ -9,6 +9,7 @@ use CodeIgniter\Database\Exceptions\DatabaseException;
 use App\Models\UserModel;
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
+use App\Models\RiwayatOrderModel;
 
 class OrderController extends ResourceController
 {
@@ -372,5 +373,68 @@ class OrderController extends ResourceController
         // unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond($order);
+    }
+
+    public function moveToHistory($orderId = null)
+    {
+        if (!$orderId) {
+            return $this->failValidationErrors('ID order diperlukan');
+        }
+
+        $order = $this->model->find($orderId);
+        if (!$order) {
+            return $this->failNotFound('Order tidak ditemukan');
+        }
+
+        if ($order['status'] !== 'delivered') {
+            return $this->failValidationErrors('Order belum berstatus "delivered"');
+        }
+
+        $orderItems = $this->orderItemModel->where('order_id', $orderId)->findAll();
+        if (!$orderItems) {
+            return $this->failNotFound('Item order tidak ditemukan');
+        }
+
+        // Hitung total harga
+        $totalHarga = 0;
+        foreach ($orderItems as $item) {
+            $totalHarga += $item['unit_price'] * $item['quantity'];
+        }
+
+        // Ambil nama distributor
+        $userModel = new UserModel();
+        $distributor = $userModel->find($order['distributor_id']);
+        $distributorName = $distributor['name'] ?? 'Tidak diketahui';
+
+        // Simpan ke riwayat_orders
+        $riwayatModel = new RiwayatOrderModel();
+
+        // Cek jika sudah ada sebelumnya
+        $existing = $riwayatModel->where('order_id', $orderId)->first();
+        if ($existing) {
+            return $this->failValidationErrors('Order sudah pernah dipindahkan ke riwayat');
+        }
+
+        $riwayatData = [
+            'order_id'       => (string) $order['id'],
+            'order_code'     => $order['order_code'],
+            'distributor'    => $distributorName,
+            'tanggal_order'  => $order['order_date'],
+            'tanggal_terima' => $order['accepted_at'],
+            'no_resi'        => $order['resi'],
+            'total_harga'    => $totalHarga,
+            'status_order'   => $order['status'],
+        ];
+
+        $riwayatModel->insert($riwayatData);
+
+        // Hapus dari order_items dan orders
+        $this->orderItemModel->where('order_id', $orderId)->delete();
+        $this->model->delete($orderId);
+
+        return $this->respondCreated([
+            'message' => 'Order berhasil dipindahkan ke riwayat dan dihapus dari orders',
+            'data'    => $riwayatData
+        ]);
     }
 }
