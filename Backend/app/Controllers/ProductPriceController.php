@@ -13,12 +13,17 @@ class ProductPriceController extends ResourceController
     // GET /api/prices
     public function index()
     {
-        $role = $this->request->getGet('role'); // dari query string: ?role=distributor
+        $role = $this->request->getGet('role'); // contoh: distributor
+        $distributorId = $this->request->getGet('distributor_id'); // contoh: 5
 
         $query = $this->model->orderBy('id', 'DESC');
 
         if ($role) {
             $query->where('role', $role);
+        }
+
+        if ($distributorId) {
+            $query->where('distributor_id', $distributorId);
         }
 
         $data = $query->findAll();
@@ -30,7 +35,7 @@ class ProductPriceController extends ResourceController
     {
         $data = $this->request->getJSON(true);
 
-        // Map jika frontend kirim 'nama' dan 'kode'
+        // Map field nama dan kode
         if (isset($data['nama'])) {
             $data['nama_produk'] = $data['nama'];
             unset($data['nama']);
@@ -40,8 +45,16 @@ class ProductPriceController extends ResourceController
             unset($data['kode']);
         }
 
+        // Default role
         if (!isset($data['role'])) {
-            $data['role'] = 'distributor'; // default kalau tidak dikirim
+            $data['role'] = 'distributor';
+        }
+
+        // Pastikan distributor_id ikut disimpan jika role-nya distributor
+        if ($data['role'] === 'distributor') {
+            if (!isset($data['distributor_id'])) {
+                return $this->failValidationErrors('distributor_id wajib diisi untuk role distributor');
+            }
         }
 
         if ($this->model->insert($data)) {

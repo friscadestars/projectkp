@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import { useOrder } from '../../../../Context/OrderContext';
 
-const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => {
+const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDetail }) => {
     const { moveToHistory, setOrderToApproved } = useOrder();
     const navigate = useNavigate();
 
@@ -41,14 +41,14 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => 
         }
     };
 
-    const onDetail = (row) => {
-        if (!row?.orderId) {
-            console.warn('Order ID tidak ditemukan:', row);
-            return;
-        }
+    // const onDetail = (row) => {
+    //     if (!row?.id) {
+    //         console.warn('ID asli tidak ditemukan:', row);
+    //         return;
+    //     }
 
-        navigate(`/agen/ringkasan-order/${row.orderId}`);
-    };
+    //     navigate(`/agen/ringkasan-order/${row.id}`);
+    // };
 
     const columns = [
         { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
@@ -81,21 +81,22 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses }) => 
         {
             header: 'Aksi',
             key: 'aksi',
-            render: (_, row) => (
-                console.log("DEBUG status:", row.orderId, row.status),
-                <div className="flex flex-wrap justify-center gap-2">
-                    <button onClick={() => onDetail(row)} className="button-detail">
-                        Detail
-                    </button>
-                    <button
-                        onClick={() => showConfirmation(row.orderId)}
-                        disabled={row.status !== 'Dikirim'}
-                        className={`button-confirm ${row.status === 'Dikirim' ? 'active' : 'disabled cursor-not-allowed'}`}
-                    >
-                        Diterima
-                    </button>
-                </div>
-            ),
+            render: (_, row) => {
+                return (
+                    <div className="flex flex-wrap justify-center gap-2">
+                        <button onClick={() => onDetail(row)} className="button-detail">
+                            Detail
+                        </button>
+                        <button
+                            onClick={() => showConfirmation(row.id)}
+                            disabled={row.status !== 'Dikirim'}
+                            className={`button-confirm ${row.status === 'Dikirim' ? 'active' : 'disabled cursor-not-allowed'}`}
+                        >
+                            Diterima
+                        </button>
+                    </div>
+                );
+            },
         },
     ];
 

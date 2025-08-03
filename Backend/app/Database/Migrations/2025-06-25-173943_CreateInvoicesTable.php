@@ -15,7 +15,7 @@ class CreateInvoicesTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true
             ],
-            'order_item_id' => [ // Ganti dari order_id ke order_item_id
+            'order_id' => [ // Ganti dari order_id ke order_item_id
                 'type'       => 'INT',
                 'constraint' => 11,
                 'unsigned'   => true,

@@ -82,13 +82,13 @@ function App() {
         {/* Agen */}
         <Route path="/agen/dashboard-agen" element={<DashboardAgen />} />
         <Route path="/agen/ringkasan-order" element={<RingkasanOrder />} />
-        <Route path="/agen/ringkasan-order/:orderId" element={<DetailOrder />} />
+        <Route path="/agen/ringkasan-order/:id" element={<DetailOrder />} />
         <Route path="/agen/permintaan-order" element={<FormPermintaanOrder />} />
         <Route path="/agen/riwayat-order" element={<RiwayatOrder />} />
-        <Route path="/agen/detail-riwayat-order/:orderId" element={<DetailRiwayatOrderAgen />} />
+        <Route path="/agen/detail-riwayat-order/:id" element={<DetailRiwayatOrderAgen />} />
         {/* <Route path="/agen/detail-order" element={<DetailOrder />} /> */}
         <Route path="/agen/tagihan" element={<TagihanOrder />} />
-        <Route path="/agen/invoice-tagihan" element={<InvoiceTagihan />} />
+        <Route path="/agen/invoice-tagihan/:id" element={<InvoiceTagihan />} />
 
         {/* Distributor */}
         <Route path="/distributor/dashboard-distributor" element={<DashboardDistributor />} />
@@ -102,7 +102,7 @@ function App() {
         <Route path="/distributor/daftar-harga-pabrik" element={<DaftarHargaPabrik />} />
         <Route path="/distributor/daftar-harga-distributor" element={<DaftarHargaDistributor />} />
         <Route path="/distributor/riwayat-order" element={<RiwayatOrderDistributor />} />
-        <Route path="/distributor/riwayat-order/detail/:orderId" element={<DetailRiwayatOrder />} />
+        <Route path="/distributor/detail-riwayat-order/:orderId" element={<DetailRiwayatOrder />} />
         <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
         <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
 

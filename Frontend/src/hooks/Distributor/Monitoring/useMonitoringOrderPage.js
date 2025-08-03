@@ -2,8 +2,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchOrders } from '../../../services/ordersApi';
 
-// Sesuaikan dengan yang di-backend
-const allowedStatuses = ['approved', 'processing', 'shipped', 'delivered'];
+// Hapus 'delivered' agar tidak ditampilkan di monitoring
+const allowedStatuses = ['approved', 'processing', 'shipped'];
 
 export const toLabel = (status) => {
     const map = {
@@ -26,8 +26,7 @@ export const useMonitoringOrderPage = () => {
     useEffect(() => {
         (async () => {
             try {
-                const allOrders = await fetchOrders(); // <- langsung ke DB (via API)
-                // filter hanya status yang relevan untuk monitoring
+                const allOrders = await fetchOrders();
                 setOrders(
                     allOrders.filter((o) =>
                         allowedStatuses.includes((o.status || '').toLowerCase())
@@ -45,13 +44,15 @@ export const useMonitoringOrderPage = () => {
         const q = search.toLowerCase();
         return orders
             .map((o) => ({
-                id: o.orderId, // dari mapOrder -> String(o.id)
+                id: o.orderId,
                 orderId: o.orderId,
                 orderCode: o.orderCode,
+                agentId: o.agentId, // <-- INI WAJIB!
+                agen_id: o.agentId ?? o.agen_id ?? null,
                 agenName: o.agenName ?? o.agen ?? '-',
                 pabrikName: o.pabrikName ?? 'Pabrik tidak diketahui',
                 orderDate: o.orderDate ?? '-',
-                deliveryDate: o.deliveryDate ?? '-', // ini yang tadinya estimatedDate
+                deliveryDate: o.deliveryDate ?? '-',
                 status: o.status,
                 products: o.products ?? [],
             }))

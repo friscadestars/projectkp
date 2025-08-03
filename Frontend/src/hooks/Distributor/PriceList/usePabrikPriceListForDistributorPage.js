@@ -3,6 +3,7 @@ import { usePriceListByRole } from './usePriceListByRole';
 import iconHarga from '../../../assets/IconHeader/HargaIcon.png';
 import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
+import { useAuth } from '../../../Context/AuthContext';
 
 export const usePabrikPriceListForDistributorPage = () => {
     const {
@@ -15,9 +16,13 @@ export const usePabrikPriceListForDistributorPage = () => {
         handleEdit,
         handleSave,
         handleDelete
-    } = usePriceListByRole('pabrik'); // ✅ ambil data role: pabrik
+    } = usePriceListByRole('pabrik');
 
-    const { handleNavigation } = useNavigation(distributorMenuItems); // ✅ pakai menu distributor
+    const { handleNavigation } = useNavigation(distributorMenuItems);
+    const { user } = useAuth();
+
+    // Nonaktifkan fungsi jika bukan role pabrik
+    const isPabrik = user?.role === 'pabrik';
 
     return {
         form,
@@ -25,18 +30,19 @@ export const usePabrikPriceListForDistributorPage = () => {
         searchTerm,
         setSearchTerm,
         filteredProduk,
-        handleAdd,
-        handleEdit,
-        handleSave,
-        handleDelete,
+        handleAdd: isPabrik ? handleAdd : undefined,
+        handleEdit: isPabrik ? handleEdit : undefined,
+        handleSave: isPabrik ? handleSave : undefined,
+        handleDelete: isPabrik ? handleDelete : undefined,
         layoutProps: {
-            menuItems: distributorMenuItems, // ✅ ini penting
+            menuItems: distributorMenuItems,
             activeLabel: "Daftar Harga Pabrik",
             onNavigate: handleNavigation
         },
         pageTitleProps: {
             icon: iconHarga,
             title: "Daftar Harga Pabrik"
-        }
+        },
+        isPabrik
     };
 };

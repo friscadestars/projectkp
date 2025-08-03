@@ -1,97 +1,105 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Swal from 'sweetalert2'; 
+import Swal from 'sweetalert2';
 import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
 const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => {
     const navigate = useNavigate();
 
     const handleDelete = (orderId) => {
-    Swal.fire({
-        title: 'Yakin ingin menghapus?',
-        text: 'Data yang sudah dihapus tidak dapat dikembalikan!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#16a34a',
-        cancelButtonColor: '#d33',
-        confirmButtonText: 'Ya, hapus!',
-        cancelButtonText: 'Batal',
-    }).then((result) => {
-        if (result.isConfirmed) {
-            onDelete(orderId);
-            Swal.fire({
-                title: 'Terhapus!',
-                text: 'Riwayat order berhasil dihapus.',
-                icon: 'success',
-                confirmButtonColor: '#2563eb',
-            });
-        }
-    });
-};
+        Swal.fire({
+            title: 'Yakin ingin menghapus?',
+            text: 'Data yang sudah dihapus tidak dapat dikembalikan!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#16a34a',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Ya, hapus!',
+            cancelButtonText: 'Batal',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                onDelete(orderId);
+                Swal.fire({
+                    title: 'Terhapus!',
+                    text: 'Riwayat order berhasil dihapus.',
+                    icon: 'success',
+                    confirmButtonColor: '#2563eb',
+                });
+            }
+        });
+    };
 
-   const columns = [
-    {
-        header: 'No',
-        key: 'no',
-        render: (_, __, index) => index + 1,
-    },
-    { header: 'Order ID', key: 'id' }, // 🔁 Fix di sini
-    { header: 'Agen ID', key: 'agenId' },
-    { header: 'Tanggal Order', key: 'tanggalOrder' },
-    { header: 'Tanggal Terima', key: 'tanggalTerima' },
-    {
-        header: 'Subtotal Harga Pabrik',
-        key: 'hargaPabrik',
-        render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
-    },
-    {
-        header: 'Subtotal Harga Jual',
-        key: 'hargaJual',
-        render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
-    },
-    {
-        header: 'Status Pembayaran',
-        key: 'statusPembayaran',
-        render: (val) => (
-            <span
-                className={`text-white text-sm px-2 py-1 rounded font-bold ${
-                    val === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
-                }`}
-            >
-                {val}
-            </span>
-        ),
-    },
-    {
-        header: 'Status Order',
-        key: 'statusOrder',
-        render: (val) => (
-            <span className="text-white text-sm px-3 py-1 rounded font-bold bg-blue-600">
-                {val}
-            </span>
-        ),
-    },
-    {
-        header: 'Aksi',
-        key: 'aksi',
-        render: (_, row) => (
-            <div className="flex gap-2 justify-center">
-                <button
-                    className="bg-blue-900 text-white px-3 py-1 text-sm rounded font-bold"
-                    onClick={() => navigate(`/distributor/riwayat-order/detail/${row.id}`)} // juga pastikan ini
+    const formatDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const date = new Date(dateStr);
+        if (isNaN(date)) return '-';
+
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // bulan dimulai dari 0
+        const year = date.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
+    const columns = [
+        {
+            header: 'No',
+            key: 'no',
+            render: (_, __, index) => index + 1,
+        },
+        { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase(), },
+        { header: 'Agen', key: 'agenName' },
+        { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
+        { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
+        {
+            header: 'Subtotal Harga Pabrik',
+            key: 'hargaPabrik',
+            render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
+        },
+        {
+            header: 'Subtotal Harga Jual',
+            key: 'hargaJual',
+            render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
+        },
+        {
+            header: 'Status Pembayaran',
+            key: 'statusPembayaran',
+            render: (val) => (
+                <span
+                    className={`text-white text-sm px-2 py-1 rounded font-bold ${val === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
+                        }`}
                 >
-                    Detail
-                </button>
-                <button
-                    className="bg-red-600 text-white px-3 py-1 text-sm rounded font-bold"
-                    onClick={() => handleDelete(row.id)} // ✅ sudah benar
-                >
-                    Hapus
-                </button>
-            </div>
-        ),
-    },
-];
+                    {val}
+                </span>
+            ),
+        },
+        {
+            header: 'Status Order',
+            key: 'status',
+            render: (v) => <StatusBadge status={v} />,
+        },
+        {
+            header: 'Aksi',
+            key: 'aksi',
+            render: (_, row) => (
+                <div className="flex gap-2 justify-center">
+                    <button
+                        className="bg-blue-900 text-white px-3 py-1 text-sm rounded font-bold"
+                        onClick={() => navigate(`/distributor/detail-riwayat-order/${row.id}`)}
+                    >
+                        Detail
+                    </button>
+                    <button
+                        className="bg-red-600 text-white px-3 py-1 text-sm rounded font-bold"
+                        onClick={() => handleDelete(row.id)}
+                    >
+                        Hapus
+                    </button>
+                </div>
+            ),
+        },
+    ];
 
     return (
         <div>

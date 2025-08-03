@@ -101,20 +101,18 @@ const DetailOrderContent = ({ order, titleText, icon }) => {
     if (!order) {
         return <div className="detail-order-error">Order tidak ditemukan.</div>;
     }
-
-    // ✅ Langsung ambil dari hasil mapOrder
     const products = order.products ?? [];
 
-    console.log('✅ Produk dari order.products:', products);
+    console.log('Produk dari order.products:', products);
 
     return (
         <div className="p-1">
             <div className="detail-order-header flex items-center gap-2 mb-4">
-                {icon && <img src={icon} alt="Icon" className="detail-order-icon w-6 h-6" />}
+                {icon && <img src={icon} alt="Icon" className="detail-order-icon w-10 h-10" />}
                 <h1 className="detail-order-title text-lg font-semibold">{titleText}</h1>
             </div>
 
-            <div className="detail-order-container">
+            <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
                 <OrderDetailTable order={order} />
                 <ProductSummaryTable products={products} />
             </div>

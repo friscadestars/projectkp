@@ -95,6 +95,8 @@ class OrderController extends ResourceController
             $order['pabrik_name'] = $userMap[(int) $order['pabrik_id']] ?? 'Pabrik tidak dikenal';
 
             $order['order_code'] = $order['order_code'] ?? sprintf('ord-%03d', $order['agent_order_no'] ?? 0);
+            $order['agen_id'] = $order['agen_id'] ?? null;
+            $order['distributor_id'] = $order['distributor_id'] ?? null;
         }
 
         return $this->respond($orders);
@@ -143,6 +145,7 @@ class OrderController extends ResourceController
         $db->transBegin();
 
         try {
+            log_message('debug', 'ORDER PAYLOAD: ' . json_encode($orderData));
             $orderId = $this->model->insert($orderData, true);
             if (!$orderId) {
                 throw new DatabaseException('Gagal menyimpan order');
@@ -174,7 +177,9 @@ class OrderController extends ResourceController
             // kembalikan nama, dan hapus id jika tidak ingin ditampilkan
             $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
             $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
-            unset($order['agen_id'], $order['distributor_id']);
+            $order['agen_id'] = $order['agen_id'];
+            $order['distributor_id'] = $order['distributor_id'];
+            // unset($order['agen_id'], $order['distributor_id']);
 
             return $this->respondCreated([
                 'message' => 'Order berhasil dibuat',
@@ -192,7 +197,6 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('ID / order_code diperlukan');
         }
 
-        // cari berdasarkan ID numerik atau order_code string
         if (ctype_digit((string) $idOrCode)) {
             $order = $this->model->find((int) $idOrCode);
         } else {
@@ -203,28 +207,26 @@ class OrderController extends ResourceController
             return $this->failNotFound('Order tidak ditemukan');
         }
 
-        // ambil detail item
         $order['items'] = $this->orderItemModel
             ->where('order_id', $order['id'])
             ->findAll();
 
         $userModel = new UserModel();
 
-        // ambil nama agen & distributor
         $agen = $userModel->find($order['agen_id']);
         $distributor = $userModel->find($order['distributor_id']);
-
-        // ambil nama pabrik
         $pabrik = $userModel->find($order['pabrik_id']);
 
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
         $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        // JANGAN hapus pabrik_id karena FE butuh saat update
-        unset($order['agen_id'], $order['distributor_id']);
+        // 🚨 Tetap kirim agen_id ke FE
+        // unset($order['agen_id']); // <-- jangan hapus ini
+
         return $this->respond($order);
     }
+
 
     public function update($id = null)
     {
@@ -270,7 +272,7 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        unset($order['agen_id'], $order['distributor_id']);
+        // unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond([
             'message' => 'Order berhasil diperbarui',
@@ -367,7 +369,7 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        unset($order['agen_id'], $order['distributor_id']);
+        // unset($order['agen_id'], $order['distributor_id']);
 
         return $this->respond($order);
     }

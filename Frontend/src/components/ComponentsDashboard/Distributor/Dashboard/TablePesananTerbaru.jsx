@@ -1,15 +1,7 @@
 // src/Components/Table/ShippingStatusTable.jsx
 import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
-
-const getShippingStatusClass = (status) => {
-    switch (status) {
-        case 'Dikirim': return 'status-badge status-shipped';
-        case 'Diterima': return 'status-badge status-approved';
-        case 'Selesai': return 'status-badge status-processing';
-        default: return 'status-badge status-default';
-    }
-};
+import StatusBadge from '../../Common/StatusBadge';
 
 const ShippingStatusTable = ({ orders }) => {
     const columns = [
@@ -22,7 +14,7 @@ const ShippingStatusTable = ({ orders }) => {
         { header: 'Agen', key: 'agenName', render: (val) => val || '-' },
         { header: 'Tanggal Kirim', key: 'orderDate' },
         {
-            header: 'Estimasi Sampai',
+            header: 'Tanggal Pengiriman',
             key: 'deliveryEstimate',
             render: (value) => value || '-',
         },
@@ -39,11 +31,7 @@ const ShippingStatusTable = ({ orders }) => {
         {
             header: 'Status Order',
             key: 'status',
-            render: (value) => (
-                <span className={getShippingStatusClass(value)}>
-                    {value}
-                </span>
-            ),
+            render: (value) => <StatusBadge status={value} />,
         },
     ];
 

@@ -8,6 +8,8 @@ const StatusBadge = ({ status }) => {
         'processed': 'bg-blue-500',
         'cancelled': 'bg-red-500',
         'delivered': 'bg-green-700',
+        'unpaid': 'bg-red-600',
+        'paid': 'bg-green-500',
     };
 
     const labelMap = {
@@ -17,6 +19,8 @@ const StatusBadge = ({ status }) => {
         'processed': 'Diproses',
         'cancelled': 'Ditolak',
         'delivered': 'Diterima',
+        'unpaid': 'Belum Dibayar',
+        'paid': 'Lunas',
     };
 
     const key = (status || '').toLowerCase();

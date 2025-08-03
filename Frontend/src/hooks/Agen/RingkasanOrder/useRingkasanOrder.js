@@ -43,6 +43,7 @@ const useRingkasanOrder = () => {
                 const filtered = data.filter(order => order.agen && order.agen_id === agenId);
 
                 const transformed = filtered.map(order => ({
+                    id: order.id,
                     orderId: order.order_code,
                     distributor: order.distributor,
                     orderDate: new Date(order.order_date).toLocaleDateString('id-ID'),
@@ -75,7 +76,7 @@ const useRingkasanOrder = () => {
     };
 
     const handleDetail = (order) => {
-        navigate('/agen/detail-order', { state: { order } });
+        navigate(`/agen/ringkasan-order/${order.id}`);
     };
 
     const handleConfirm = (id) => {

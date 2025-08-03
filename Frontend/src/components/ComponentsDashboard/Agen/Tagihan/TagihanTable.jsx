@@ -14,13 +14,29 @@ const getStatusPembayaranClass = (status) => {
     }
 };
 
-const TagihanTable = ({ orders, searchTerm, role }) => {
+const formatDate = (value) => {
+    if (!value || value === 'Invalid Date') return '-';
+
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return '-';
+
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+};
+
+const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- default invoices dan searchTerm
     const navigate = useNavigate();
 
-    const filtered = orders
+    // Pastikan invoices adalah array, jika tidak return array kosong untuk menghindari error
+    const safeInvoices = Array.isArray(invoices) ? invoices : [];
+
+    const filtered = safeInvoices
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'received'];
+            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -35,9 +51,10 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
 
     const columns = [
         {
-            header: 'No', key: 'no',
+            header: 'No',
+            key: 'no',
             render: (_, __, index) => index + 1,
-            className: 'rounded-tl-md'
+            className: 'rounded-tl-md',
         },
         {
             header: 'Order ID',
@@ -46,22 +63,25 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
         },
         ...(role === 'distributor'
             ? [
-                { header: 'Agen ID', key: 'agentId' },
-                { header: 'Pabrik', key: 'pabrikName' }
-            ] : [
-                { header: 'Distributor', key: 'distributorName' }
+                { header: 'Agen', key: 'agenName' },
+                { header: 'Pabrik', key: 'pabrikName' },
+            ]
+            : [
+                { header: 'Distributor', key: 'distributorName' },
             ]),
         {
-            header: 'Tanggal Order', key: 'orderDate',
+            header: 'Tanggal Order',
+            key: 'orderDate',
             render: (val) => {
                 if (!val) return '-';
                 const [y, m, d] = val.split('-');
                 return `${d}/${m}/${y}`;
-            }
+            },
         },
         {
-            header: 'Estimasi Sampai', key: 'deliveryDate',
-            render: (val) => val || '-'
+            header: 'Tanggal Terima',
+            key: 'receivedDate',
+            render: formatDate,
         },
         {
             header: 'Status Order',
@@ -69,34 +89,40 @@ const TagihanTable = ({ orders, searchTerm, role }) => {
             render: (value) => <StatusBadge status={value} />,
         },
         {
-            header: 'Status Pembayaran', key: 'statusPembayaran',
+            header: 'Status Pembayaran',
+            key: 'statusPembayaran',
             render: (_, row) => {
-                const status = row.statusPembayaran || row.tagihan?.statusPembayaran || 'Belum Lunas';
+                const status = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'Belum Lunas';
                 return <span className={getStatusPembayaranClass(status)}>{status}</span>;
-            }
+            },
         },
         {
-            header: 'Aksi', key: 'aksi', className: 'rounded-tr-md',
-            render: (_, row) => (
-                <button
-                    onClick={() => {
-                        const tagihanData = {
-                            ...row,
-                            statusPembayaran: row.statusPembayaran || row.tagihan?.statusPembayaran || 'Belum Lunas'
-                        };
-                        const url = role === 'distributor'
-                            ? `/distributor/invoice/${row.orderId}`
-                            : '/agen/invoice-tagihan';
-                        navigate(url, {
-                            state: { tagihan: tagihanData, orderId: row.orderId }
-                        });
-                    }}
-                    className="button-invoice"
-                >
-                    Invoice
-                </button>
-            )
-        }
+            header: 'Aksi',
+            key: 'aksi',
+            className: 'rounded-tr-md',
+            render: (_, row) => {
+                const tagihanData = {
+                    ...row,
+                    statusPembayaran: row?.tagihan?.statusPembayaran || row.statusPembayaran || 'Belum Lunas',
+                };
+                const url = role === 'distributor'
+                    ? `/distributor/invoice/${row.orderId}`
+                    : `/agen/invoice-tagihan/${row.orderId}`;
+
+                return (
+                    <button
+                        onClick={() => {
+                            navigate(url, {
+                                state: { tagihan: tagihanData, orderId: row.orderId },
+                            });
+                        }}
+                        className="button-invoice"
+                    >
+                        Invoice
+                    </button>
+                );
+            },
+        },
     ];
 
     return (

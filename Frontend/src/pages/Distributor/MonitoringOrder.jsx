@@ -5,11 +5,16 @@ import { useNavigation } from '../../hooks/useNavigation';
 import { useMonitoringOrderPage } from '../../hooks/Distributor/Monitoring/useMonitoringOrderPage';
 import MonitoringOrderContent from '../../components/ComponentsDashboard/Distributor/Monitoring/MonitoringOrder/MonitoringOrderContent';
 
-
 const MonitoringOrder = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const { handleNavigation } = useNavigation(distributorMenuItems);
     const { search, setSearch, filteredOrders } = useMonitoringOrderPage();
+
+    // ✅ Mapping untuk memastikan setiap order punya 'agentId'
+    const mappedOrders = filteredOrders.map((o) => ({
+        ...o,
+        agentId: o.agen_id ?? o.agen?.id ?? null,
+    }));
 
     return (
         <Layout
@@ -18,12 +23,12 @@ const MonitoringOrder = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(prev => !prev)}
-            role="distributor" 
+            role="distributor"
         >
             <MonitoringOrderContent
                 search={search}
                 setSearch={setSearch}
-                filteredOrders={filteredOrders}
+                filteredOrders={mappedOrders} // ✅ kirim hasil mapping
             />
         </Layout>
     );

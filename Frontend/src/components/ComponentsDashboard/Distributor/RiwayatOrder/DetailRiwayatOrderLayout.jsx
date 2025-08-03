@@ -1,31 +1,31 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; // Pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
+
+const formatDate = (date) => {
+    if (!date) return '-';
+    const d = new Date(date);
+    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')
+        }/${d.getFullYear()}`;
+};
 
 const OrderInfoTable = ({ order }) => {
     if (!order) return null;
 
     const columns = [
-        { key: 'id', label: 'Order ID' },
-        { key: 'agenId', label: 'Agen ID' },
-        { key: 'tanggalOrder', label: 'Tanggal Order' },
-        { key: 'tanggalPengiriman', label: 'Tanggal Pengiriman' },
+        { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase(), },
+        { header: 'Agen', key: 'agenName' },
+        { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
+        { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
         {
+            header: 'Status Pembayaran',
             key: 'statusPembayaran',
-            label: 'Status Pembayaran',
-            render: (value) => (
-                <span className={`text-white text-sm px-3 py-1 rounded ${value === 'Lunas' ? 'bg-green-600' : 'bg-red-600 font-bold'}`}>
-                    {value}
-                </span>
-            ),
+            render: (val) => <StatusBadge status={val} />,
         },
         {
-            key: 'statusOrder',
-            label: 'Status Order',
-            render: (value) => (
-                <span className="text-white text-sm px-3 py-1 rounded bg-blue-600 font-bold">
-                    {value}
-                </span>
-            ),
+            header: 'Status Order',
+            key: 'status',
+            render: (v) => <StatusBadge status={v} />,
         },
     ];
 
@@ -41,10 +41,19 @@ const OrderInfoTable = ({ order }) => {
 
 const ProductDetailTable = ({ products }) => {
     const columns = [
-        { key: 'nama', label: 'Nama Produk' },
-        { key: 'jumlah', label: 'Jumlah' },
-        { key: 'hargaAgen', label: 'Harga Satuan Agen' },
-        { key: 'hargaPabrik', label: 'Harga Satuan Pabrik' },
+        { header: 'Nama Produk', key: 'name' },
+        { header: 'Jumlah', key: 'quantity' },
+        {
+            header: 'Harga Distributor',
+            key: 'unitPrice',
+            render: (_, row) => {
+                const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
+                return typeof harga === 'number'
+                    ? `Rp. ${harga.toLocaleString('id-ID')}`
+                    : '-';
+            }
+        },
+        { key: 'hargaPabrik', label: 'Harga Pabrik' },
     ];
 
     const footerRow = (
@@ -74,7 +83,7 @@ const DetailRiwayatOrderLayout = ({ order, titleText, icon }) => {
     }
 
     return (
-        <div className="detail-order-container">
+        <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
             <OrderInfoTable order={order} />
             <ProductDetailTable products={order.products} />
         </div>

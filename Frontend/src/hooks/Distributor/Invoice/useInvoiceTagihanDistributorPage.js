@@ -39,7 +39,7 @@ export const useInvoiceTagihanDistributorPage = () => {
             openModal,
             closeModal,
             handleKonfirmasi,
-            showConfirmButton: statusPembayaran !== 'Lunas', // ✅ logika tombol tampil
+            showConfirmButton: statusPembayaran !== 'Lunas',
         }
     };
 

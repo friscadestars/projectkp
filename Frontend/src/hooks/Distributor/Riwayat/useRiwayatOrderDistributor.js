@@ -9,7 +9,7 @@ export const useRiwayatOrderDistributor = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const result = await fetchCompletedOrdersForHistory();
+                const result = await fetchCompletedOrdersForHistory('distributor');
                 setOrders(result);
             } catch (err) {
                 setError(err);

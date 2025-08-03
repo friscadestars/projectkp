@@ -7,7 +7,7 @@ import { agenMenuItems } from '../../Components/ComponentsDashboard/Constants/me
 import { fetchOrderById } from '../../services/ordersApi';
 
 const DetailRiwayatOrder = () => {
-    const { orderId } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -33,7 +33,7 @@ const DetailRiwayatOrder = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const data = await fetchOrderById(orderId);
+                const data = await fetchOrderById(id);
                 setOrder(data);
             } catch (err) {
                 console.error('Gagal mengambil data order:', err);
@@ -43,7 +43,7 @@ const DetailRiwayatOrder = () => {
         };
 
         fetchData();
-    }, [orderId]);
+    }, [id]);
 
     return (
         <Layout
