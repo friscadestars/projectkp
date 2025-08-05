@@ -4,7 +4,7 @@ import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai 
 
 const ProdukTable = ({ produkList, onDelete }) => {
     const columns = [
-        { header: 'Nama Produk', key: 'nama' },
+        { header: 'Nama Produk', key: 'nama_produk' },
         { header: 'Jumlah', key: 'jumlah' },
         {
             header: 'Harga Request',

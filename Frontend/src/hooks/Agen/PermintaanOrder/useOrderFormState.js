@@ -11,7 +11,7 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const { addNewOrder } = useOrder();
 
   const [produkList, setProdukList] = useState([]);
-  const [produk, setProduk] = useState("");
+  const [produk, setProduk] = useState(null);
   const [jumlah, setJumlah] = useState("");
   const [harga, setHarga] = useState("");
   const [alamat, setAlamat] = useState("");
@@ -20,20 +20,20 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
     const jumlahParsed = parseInt(jumlah, 10);
     const hargaParsed = parseInt(harga, 10);
 
-    if (!produk || isNaN(jumlahParsed) || isNaN(hargaParsed) || jumlahParsed <= 0 || hargaParsed <= 0) {
-      return;
-    }
+    console.log("Produk yang dipilih:", produk);
+    if (!produk || !produk.kode_produk || isNaN(jumlahParsed) || isNaN(hargaParsed)) return;
 
     setProdukList((prev) => [
       ...prev,
       {
-        nama: produk,
+        kode_produk: produk.kode_produk,
+        nama_produk: produk.nama_produk ?? produk.nama ?? '-',
         jumlah: jumlahParsed,
         harga: hargaParsed,
       },
     ]);
 
-    setProduk("");
+    setProduk(null);
     setJumlah("");
     setHarga("");
   };
@@ -58,7 +58,8 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
       accepted_at: null,
       note: alamat,
       products: produkList.map(p => ({
-        product_name: p.nama,
+        kode_produk: p.kode_produk,
+        product_name: p.nama_produk || p.nama,
         quantity: p.jumlah,
         unit_price: p.harga,
         address: alamat

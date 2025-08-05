@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
-const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => {
+const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabrikPrices }) => {
     const navigate = useNavigate();
 
     const handleDelete = (orderId) => {
@@ -30,6 +30,31 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
         });
     };
 
+    const hitungTotalHargaPabrik = (items, pabrikPrices = []) => {
+        if (!items || !Array.isArray(items)) return 0;
+
+        return items.reduce((total, item) => {
+            const kode = item.kode_produk;
+            const hargaPabrik = pabrikPrices.find(p => p.kode_produk === kode && p.role === 'pabrik');
+
+            const harga = hargaPabrik ? Number(hargaPabrik.harga) : 0;
+            const qty = Number(item.quantity) || 0;
+
+            return total + harga * qty;
+        }, 0);
+    };
+
+    const getStatusPembayaran = (_, row) => {
+        const status =
+            row.status_pembayaran || // dari backend CI4 snake_case
+            row.statusPembayaran || // kemungkinan properti yang udah diubah frontend
+            row.invoice_status;
+
+        if (status === 'Lunas') return 'Lunas';
+        if (status === 'Belum Dibayar') return 'Belum Dibayar';
+        return '-';
+    };
+
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         const date = new Date(dateStr);
@@ -53,9 +78,12 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
         { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
         { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
         {
-            header: 'Subtotal Harga Pabrik',
-            key: 'hargaPabrik',
-            render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
+            header: 'Total Harga Pabrik',
+            key: 'totalHargaPabrik',
+            render: (_, row) => {
+                const total = Number(row.totalHargaPabrik) || 0;
+                return `Rp ${total.toLocaleString('id-ID')}`;
+            }
         },
         {
             header: 'Subtotal Harga Jual',
@@ -64,15 +92,16 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
         },
         {
             header: 'Status Pembayaran',
-            key: 'statusPembayaran',
-            render: (val) => (
-                <span
-                    className={`text-white text-sm px-2 py-1 rounded font-bold ${val === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
-                        }`}
-                >
-                    {val}
-                </span>
-            ),
+            key: 'status_pembayaran', // <- harus sesuai juga
+            render: (_, row) => {
+                const status = getStatusPembayaran(_, row);
+                return (
+                    <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
+                        }`}>
+                        {status}
+                    </span>
+                );
+            }
         },
         {
             header: 'Status Order',

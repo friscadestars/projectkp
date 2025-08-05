@@ -10,7 +10,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 const RiwayatOrderDistributor = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [entries, setEntries] = useState(10);
-    const { orders, handleDelete } = useRiwayatOrderDistributor();
+    const { orders, productPrices, handleDelete } = useRiwayatOrderDistributor();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
     return (
@@ -20,7 +20,7 @@ const RiwayatOrderDistributor = () => {
             onNavigate={handleNavigation}
             showDropdown={showDropdown}
             toggleDropdown={() => setShowDropdown(!showDropdown)}
-            role="distributor" 
+            role="distributor"
         >
             <PageHeader icon={iconRiwayat} title="Riwayat Order" />
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
@@ -29,6 +29,7 @@ const RiwayatOrderDistributor = () => {
                     onEntriesChange={setEntries}
                     orders={orders}
                     onDelete={handleDelete}
+                    pabrikPrices={productPrices || []}
                 />
             </div>
         </Layout>

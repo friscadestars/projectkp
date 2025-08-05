@@ -9,6 +9,19 @@ const formatDate = (date) => {
         }/${d.getFullYear()}`;
 };
 
+const getStatusPembayaran = (_, row) => {
+    const status = (
+        row.statusPembayaran ||
+        row.status_pembayaran ||
+        row.invoice_status || ''
+    ).toLowerCase();
+
+    if (status === 'lunas' || status === 'paid') return 'Lunas';
+    if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid') return 'Belum Dibayar';
+    return '-';
+};
+
+
 const OrderInfoTable = ({ order }) => {
     if (!order) return null;
 
@@ -19,8 +32,15 @@ const OrderInfoTable = ({ order }) => {
         { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
         {
             header: 'Status Pembayaran',
-            key: 'statusPembayaran',
-            render: (val) => <StatusBadge status={val} />,
+            key: 'statusPembayaran', // ✅ SESUAI DENGAN NAMA YANG DISET DI BACKEND
+            render: (_, row) => {
+                const status = getStatusPembayaran(_, row);
+                return (
+                    <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'}`}>
+                        {status}
+                    </span>
+                );
+            }
         },
         {
             header: 'Status Order',
@@ -29,6 +49,7 @@ const OrderInfoTable = ({ order }) => {
         },
     ];
 
+    console.log('ORDER YANG MASUK KE DETAIL', order);
     const data = [order];
 
     return (
@@ -47,13 +68,21 @@ const ProductDetailTable = ({ products }) => {
             header: 'Harga Distributor',
             key: 'unitPrice',
             render: (_, row) => {
-                const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
+                const harga = row.status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
                 return typeof harga === 'number'
                     ? `Rp. ${harga.toLocaleString('id-ID')}`
                     : '-';
             }
         },
-        { key: 'hargaPabrik', label: 'Harga Pabrik' },
+        {
+            header: 'Harga Pabrik',
+            key: 'hargaPabrik',
+            render: (value) => (
+                typeof value === 'number'
+                    ? `Rp. ${value.toLocaleString('id-ID')}`
+                    : '-'
+            )
+        }
     ];
 
     const footerRow = (
@@ -78,6 +107,21 @@ const ProductDetailTable = ({ products }) => {
 };
 
 const DetailRiwayatOrderLayout = ({ order, titleText, icon }) => {
+    if (!order || !Array.isArray(order.items)) {
+        return <div className="text-red-600">Data order belum lengkap.</div>;
+    }
+
+    const products = order.items.map((item) => ({
+        name: item.product_name,
+        quantity: item.quantity,
+        requestedPrice: item.requested_price,
+        unitPrice: Number(item.unit_price ?? 0),
+        status: order.status,
+        hargaPabrik: item.harga_pabrik, // <-- pastikan ini sudah ada dari backend
+    }));
+    console.log('ORDER ITEMS:', order.items);
+    console.log("ORDER DETAIL API RESPONSE", order);
+
     if (!order) {
         return <div className="detail-order-error">Order tidak ditemukan.</div>;
     }
@@ -85,7 +129,7 @@ const DetailRiwayatOrderLayout = ({ order, titleText, icon }) => {
     return (
         <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
             <OrderInfoTable order={order} />
-            <ProductDetailTable products={order.products} />
+            <ProductDetailTable products={products} />
         </div>
     );
 };

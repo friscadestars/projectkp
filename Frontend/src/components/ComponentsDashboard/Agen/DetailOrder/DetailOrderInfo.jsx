@@ -32,7 +32,18 @@ const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
         },
         isRiwayat
             ? { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate }
-            : { header: 'Tanggal Pengiriman', key: 'deliveryDate' },
+            : {
+                header: 'Tanggal Pengiriman',
+                key: 'deliveryDate',
+                render: (val) => {
+                    if (!val) return '-';
+                    const date = new Date(val);
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const year = date.getFullYear();
+                    return `${day}/${month}/${year}`;
+                }
+            },
         {
             header: 'Status Order',
             key: 'status',
@@ -43,7 +54,7 @@ const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
     const data = [
         {
             orderCode: order.orderCode || '-',
-            distributor: order.distributorName || 'Tidak tersedia',
+            distributor: order.distributor || order.distributorName || 'Tidak tersedia',
             address: order.alamat || 'Alamat tidak tersedia',
             orderDate: order.orderDate || '-',
             deliveryDate: order.deliveryDate || '-',

@@ -10,6 +10,8 @@ use App\Models\UserModel;
 use \Firebase\JWT\JWT;
 use \Firebase\JWT\Key;
 use App\Models\RiwayatOrderModel;
+use App\Models\InvoiceModel;
+use App\Models\ProductPriceModel;
 
 class OrderController extends ResourceController
 {
@@ -100,6 +102,25 @@ class OrderController extends ResourceController
             $order['distributor_id'] = $order['distributor_id'] ?? null;
         }
 
+        // Ambil semua order ID
+        $orderIds = array_column($orders, 'id');
+
+        // Ambil semua invoice berdasarkan order_id
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoices = $invoiceModel->whereIn('order_id', $orderIds)->findAll();
+
+        // Petakan status invoice berdasarkan order_id
+        $invoiceMap = [];
+        foreach ($invoices as $inv) {
+            $invoiceMap[$inv['order_id']] = $inv['status'];
+        }
+
+        // Tambahkan status pembayaran ke setiap order
+        foreach ($orders as &$order) {
+            $statusInvoice = $invoiceMap[$order['id']] ?? null;
+            $order['status_pembayaran'] = $statusInvoice === 'paid' ? 'Lunas' : 'Belum Dibayar';
+        }
+
         return $this->respond($orders);
     }
 
@@ -155,6 +176,7 @@ class OrderController extends ResourceController
             foreach ($products as $p) {
                 $this->orderItemModel->insert([
                     'order_id'     => $orderId,
+                    'kode_produk'  => $p['kode_produk'] ?? $p['kode'] ?? null,
                     'product_name' => $p['nama']        ?? $p['product_name'] ?? '',
                     'quantity'     => $p['jumlah']      ?? $p['quantity']     ?? 0,
                     'unit_price'   => $p['harga']       ?? $p['unit_price']   ?? 0,
@@ -190,6 +212,38 @@ class OrderController extends ResourceController
             $db->transRollback();
             return $this->failServerError($e->getMessage());
         }
+
+        $productPriceModel = new ProductPriceModel(); // buat instansiasi model
+
+        foreach ($products as $p) {
+            $harga = $p['harga'] ?? $p['unit_price'] ?? 0;
+
+            // cek jika role adalah pabrik → ambil harga dari tabel product_prices
+            if (isset($orderData['pabrik_id'])) {
+                $kodeProduk = $p['kode'] ?? $p['kode_produk'] ?? null;
+
+                if ($kodeProduk) {
+                    $hargaData = $productPriceModel
+                        ->where('kode_produk', $kodeProduk)
+                        ->where('role', 'pabrik')
+                        ->orderBy('created_at', 'desc')
+                        ->first();
+
+                    if ($hargaData) {
+                        $harga = $hargaData['harga']; // override harga
+                    }
+                }
+            }
+
+            $this->orderItemModel->insert([
+                'order_id'     => $orderId,
+                'kode_produk'  => $p['kode_produk'] ?? $p['kode'] ?? null,
+                'product_name' => $p['nama']        ?? $p['product_name'] ?? '',
+                'quantity'     => $p['jumlah']      ?? $p['quantity']     ?? 0,
+                'unit_price'   => $harga, // gunakan harga final
+                'address'      => $alamat ?? '',
+            ]);
+        }
     }
 
     public function show($idOrCode = null)
@@ -222,8 +276,10 @@ class OrderController extends ResourceController
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
         $order['pabrik_name'] = $pabrik['name'] ?? 'Pabrik tidak dikenal';
 
-        // 🚨 Tetap kirim agen_id ke FE
-        // unset($order['agen_id']); // <-- jangan hapus ini
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoice = $invoiceModel->where('order_id', $order['id'])->first();
+
+        $order['status_pembayaran'] = ($invoice && $invoice['status'] === 'paid') ? 'Lunas' : 'Belum Dibayar';
 
         return $this->respond($order);
     }
@@ -325,7 +381,6 @@ class OrderController extends ResourceController
             return $this->failValidationErrors('Parameter agen_id diperlukan');
         }
 
-        // Ambil jumlah order yang sudah pernah dilakukan agen ini
         $orderCount = $this->model
             ->where('agen_id', (int)$agenId)
             ->countAllResults();
@@ -375,66 +430,165 @@ class OrderController extends ResourceController
         return $this->respond($order);
     }
 
-    public function moveToHistory($orderId = null)
+    public function getRiwayatOrders()
     {
-        if (!$orderId) {
-            return $this->failValidationErrors('ID order diperlukan');
+        $db = \Config\Database::connect();
+
+        // Ambil orders dengan status delivered/cancelled dan join user
+        $orders = $db->table('orders o')
+            ->select('o.*, 
+                  i.status AS invoice_status, 
+                  agen.name as agen, 
+                  distributor.name as distributor')
+            ->join('invoices i', 'i.order_id = o.id', 'left')
+            ->join('users agen', 'o.agen_id = agen.id', 'left')
+            ->join('users distributor', 'o.distributor_id = distributor.id', 'left')
+            ->whereIn('o.status', ['delivered', 'cancelled'])
+            ->get()
+            ->getResultArray();
+
+        if (empty($orders)) {
+            return $this->respond([]);
         }
 
-        $order = $this->model->find($orderId);
+        $orderIds = array_column($orders, 'id');
+
+        // Ambil semua item terkait order_id
+        $itemsRaw = $db->table('order_items')
+            ->whereIn('order_id', $orderIds)
+            ->get()->getResultArray();
+
+        // Kelompokkan item berdasarkan order_id
+        $groupedItems = [];
+        foreach ($itemsRaw as $item) {
+            $groupedItems[$item['order_id']][] = $item;
+        }
+
+        // Ambil kode_produk unik dari items
+        $kodeProdukUnik = array_unique(array_column($itemsRaw, 'kode_produk'));
+
+        // Ambil data harga pabrik terbaru untuk masing-masing kode_produk
+        $hargaProdukMap = [];
+        foreach ($kodeProdukUnik as $kode) {
+            if ($kode === null) continue;
+
+            $hargaRow = $db->table('product_prices')
+                ->where('role', 'pabrik')
+                ->where('kode_produk', $kode)
+                ->orderBy('created_at', 'DESC')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+
+            if ($hargaRow) {
+                $hargaProdukMap[$kode] = (float) $hargaRow['harga'];
+            }
+        }
+
+        // Hitung total harga pabrik & harga jual per order
+        $hargaMapPabrik = [];
+        $hargaMapJual = [];
+
+        foreach ($itemsRaw as $item) {
+            $orderId = $item['order_id'];
+            $kodeProduk = $item['kode_produk'] ?? null;
+            $qty = (int)$item['quantity'];
+            $hargaPabrik = $hargaProdukMap[$kodeProduk] ?? 0;
+            $hargaJual = (float)($item['requested_price'] ?? $item['unit_price'] ?? 0);
+
+            if (!isset($hargaMapPabrik[$orderId])) $hargaMapPabrik[$orderId] = 0;
+            if (!isset($hargaMapJual[$orderId])) $hargaMapJual[$orderId] = 0;
+
+            $hargaMapPabrik[$orderId] += $hargaPabrik * $qty;
+            $hargaMapJual[$orderId] += $hargaJual * $qty;
+        }
+
+        // Gabungkan semua ke dalam data order
+        foreach ($orders as &$order) {
+            $items = $groupedItems[$order['id']] ?? [];
+
+            foreach ($items as &$item) {
+                $kodeProduk = $item['kode_produk'] ?? null;
+                $item['harga_pabrik'] = $hargaProdukMap[$kodeProduk] ?? 0;
+            }
+            $order['items'] = $items;
+            $order['statusPembayaran'] = ($order['invoice_status'] === 'paid') ? 'Lunas' : 'Belum Dibayar';
+            $order['totalHargaPabrik'] = $hargaMapPabrik[$order['id']] ?? 0;
+            $order['hargaJual'] = $hargaMapJual[$order['id']] ?? 0;
+        }
+
+        return $this->respond($orders);
+    }
+
+    public function getOrderById($id)
+    {
+        $db = \Config\Database::connect();
+
+        // Ambil detail order
+        $order = $db->table('orders o')
+            ->select('o.*, 
+              i.status AS invoice_status, 
+              agen.name as agenName, 
+              distributor.name as distributor')
+            ->join('invoices i', 'i.order_id = o.id', 'left')
+            ->join('users agen', 'o.agen_id = agen.id', 'left')
+            ->join('users distributor', 'o.distributor_id = distributor.id', 'left')
+            ->where('o.id', $id)
+            ->get()
+            ->getRowArray();
+
         if (!$order) {
-            return $this->failNotFound('Order tidak ditemukan');
+            return $this->failNotFound("Order dengan ID $id tidak ditemukan.");
         }
 
-        if ($order['status'] !== 'delivered') {
-            return $this->failValidationErrors('Order belum berstatus "delivered"');
+        // Ambil items
+        $items = $db->table('order_items')
+            ->where('order_id', $id)
+            ->get()
+            ->getResultArray();
+
+        // Ambil harga pabrik terbaru
+        $kodeProdukUnik = array_unique(array_column($items, 'kode_produk'));
+        $hargaProdukMap = [];
+        foreach ($kodeProdukUnik as $kode) {
+            if (!$kode) continue;
+
+            $hargaRow = $db->table('product_prices')
+                ->where('role', 'pabrik')
+                ->where('kode_produk', $kode)
+                ->orderBy('created_at', 'DESC')
+                ->limit(1)
+                ->get()
+                ->getRowArray();
+
+            if ($hargaRow) {
+                $hargaProdukMap[$kode] = (float) $hargaRow['harga'];
+            }
         }
 
-        $orderItems = $this->orderItemModel->where('order_id', $orderId)->findAll();
-        if (!$orderItems) {
-            return $this->failNotFound('Item order tidak ditemukan');
+        // Hitung total harga pabrik dan jual
+        $totalHargaPabrik = 0;
+        $totalHargaJual = 0;
+
+        foreach ($items as &$item) {
+            $kode = $item['kode_produk'] ?? null;
+            $qty = (int) $item['quantity'];
+            $hargaPabrik = $hargaProdukMap[$kode] ?? 0;
+            $hargaJual = (float)($item['requested_price'] ?? $item['unit_price'] ?? 0);
+
+            $item['harga_pabrik'] = $hargaPabrik;
+
+            $totalHargaPabrik += $hargaPabrik * $qty;
+            $totalHargaJual += $hargaJual * $qty;
         }
 
-        // Hitung total harga
-        $totalHarga = 0;
-        foreach ($orderItems as $item) {
-            $totalHarga += $item['unit_price'] * $item['quantity'];
-        }
+        // Masukkan data tambahan seperti di getRiwayatOrders
+        $order['items'] = $items;
+        $order['totalHargaPabrik'] = $totalHargaPabrik;
+        $order['hargaJual'] = $totalHargaJual;
+        $order['statusPembayaran'] = (strtolower($order['invoice_status']) === 'paid') ? 'Lunas' : 'Belum Dibayar';
+        $order['status_pembayaran'] = $order['statusPembayaran'];
 
-        // Ambil nama distributor
-        $userModel = new UserModel();
-        $distributor = $userModel->find($order['distributor_id']);
-        $distributorName = $distributor['name'] ?? 'Tidak diketahui';
-
-        // Simpan ke riwayat_orders
-        $riwayatModel = new RiwayatOrderModel();
-
-        // Cek jika sudah ada sebelumnya
-        $existing = $riwayatModel->where('order_id', $orderId)->first();
-        if ($existing) {
-            return $this->failValidationErrors('Order sudah pernah dipindahkan ke riwayat');
-        }
-
-        $riwayatData = [
-            'order_id'       => (string) $order['id'],
-            'order_code'     => $order['order_code'],
-            'distributor'    => $distributorName,
-            'tanggal_order'  => $order['order_date'],
-            'tanggal_terima' => $order['accepted_at'],
-            'no_resi'        => $order['resi'],
-            'total_harga'    => $totalHarga,
-            'status_order'   => $order['status'],
-        ];
-
-        $riwayatModel->insert($riwayatData);
-
-        // Hapus dari order_items dan orders
-        $this->orderItemModel->where('order_id', $orderId)->delete();
-        $this->model->delete($orderId);
-
-        return $this->respondCreated([
-            'message' => 'Order berhasil dipindahkan ke riwayat dan dihapus dari orders',
-            'data'    => $riwayatData
-        ]);
+        return $this->respond($order);
     }
 }

@@ -10,18 +10,19 @@ export const mapOrder = async (o) => {
         orderId: String(o.id),
         orderCode: o.order_code ?? `ORD-${String(o.agent_order_no || 0).padStart(3, '0')}`,
         id: Number(o.id),
-        agenName: o.agen,
+        agenName: o.agenName ?? o.agen ?? o.agen_name ?? o.agent_name ?? 'Nama tidak ditemukan',
         distributorId: o.distributor_id,
         distributorName: o.distributor,
         alamat: o.note,
         orderDate: o.order_date?.split(' ')[0] ?? o.order_date,
-        deliveryDate: o.delivery_date,
+        deliveryDate: o.delivery_date ?? o.deliveryDate ?? null,
         status: o.status,
         note: o.note ?? '-',
         pabrik_id: o.pabrik_id ?? null,
-        pabrikName: o.pabrik_name ?? 'Tidak diketahui',
+        pabrikName: o.pabrik_name ?? o.pabrikName ?? await fetchUserById(o.pabrik_id),
         receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
         trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
+        statusPembayaran: o.status_pembayaran ?? 'Belum Lunas',
 
         products: (o.items || []).map(i => ({
             id: i.id,
@@ -31,6 +32,7 @@ export const mapOrder = async (o) => {
             unitPrice: Number(i.unit_price ?? 0),
             address: i.address ?? o.note ?? '',
         })),
+        items: o.items || []
     };
 
     if (o.agen_id) {
@@ -50,6 +52,28 @@ export const mapOrder = async (o) => {
 
     return base;
 };
+
+export async function fetchUserById(id) {
+    try {
+        const res = await fetch(`${API_BASE}/users/${id}`, {
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeader(),
+            },
+        });
+
+        if (!res.ok) {
+            console.warn(`⚠️ Tidak bisa fetch user dengan ID ${id}, kode: ${res.status}`);
+            return 'Tidak diketahui';
+        }
+
+        const json = await res.json();
+        return json?.name || json?.username || 'Tidak diketahui';
+    } catch (error) {
+        console.error('❌ Gagal fetch user:', error.message);
+        return 'Tidak diketahui';
+    }
+}
 
 export async function fetchOrders() {
     const res = await fetch(`${API_BASE}/orders`, { headers: { ...getAuthHeader() } });
@@ -86,7 +110,7 @@ export async function fetchOrderById(idOrCode) {
     if (!res.ok) throw new Error('Order tidak ditemukan');
     const json = await res.json();
     const data = json.data || json;
-    return mapOrder(data);
+    return await mapOrder(data);
 }
 
 // Update status by ID (PUT /orders/:id)
@@ -184,7 +208,8 @@ export async function fetchOrderDetailById(id) {
     const json = await res.json();
     const data = json.data || json;
     console.log('🔥 RAW order detail from API:', data);
-    return mapOrder(data);
+    return await mapOrder(data);
+
 }
 
 export async function fetchOrdersForDashboard() {
@@ -215,7 +240,7 @@ export async function fetchOrdersForDashboard() {
 }
 
 export async function fetchCompletedOrdersForHistory(role = 'agen') {
-    const res = await fetch(`${API_BASE}/orders`, {
+    const res = await fetch(`${API_BASE}/orders/history`, {
         headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
@@ -229,9 +254,8 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userId = Number(user?.id);
-    const DONE = new Set(['delivered', 'selesai']);
+    const DONE = new Set(['delivered', 'selesai', 'rejected', 'cancelled']);
 
-    // Tentukan filter berdasarkan role
     const filtered = (Array.isArray(raw) ? raw : []).filter((o) => {
         const statusMatch = DONE.has(String(o.status || '').toLowerCase());
 
@@ -241,19 +265,20 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             return Number(o.distributor_id) === userId && statusMatch;
         }
 
-        return false; // fallback
+        return false;
     });
 
     return filtered.map((o) => {
-        const items = Array.isArray(o.items) ? o.items : [];
+        const products = Array.isArray(o.items) ? o.items.map(i => ({
+            nama: i.product_name,
+            jumlah: i.quantity,
+            hargaAgen: i.requested_price ?? i.unit_price,
+            hargaPabrik: i.unit_price,
+        })) : [];
 
-        const subtotalPabrik = items.reduce(
-            (sum, i) => sum + Number(i.unit_price ?? 0) * Number(i.quantity ?? 0), 0
-        );
-
-        const subtotalJual = items.reduce(
-            (sum, i) => sum + Number((i.requested_price ?? i.unit_price) ?? 0) * Number(i.quantity ?? 0), 0
-        );
+        const totalPrice = Array.isArray(o.items)
+            ? o.items.reduce((sum, item) => sum + (Number(item.unit_price || 0) * Number(item.quantity || 0)), 0)
+            : 0;
 
         return {
             id: String(o.id),
@@ -264,20 +289,17 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             orderDate: (o.order_date || '').split(' ')[0] || '-',
             receivedDate: (o.accepted_at || o.received_date || '').split(' ')[0] || '-',
             trackingNumber: o.resi ?? '-',
-            totalPrice: subtotalJual,
-            statusPembayaran: o.status_pembayaran ?? 'Belum Lunas',
-            hargaJual: subtotalJual,
-            hargaPabrik: subtotalPabrik,
+            totalHargaPabrik: o.totalHargaPabrik ?? 0,
+            hargaJual: o.hargaJual ?? 0,
+            statusPembayaran: o.statusPembayaran ?? 'Belum Lunas',
             status: o.status ?? '-',
-            products: items.map(i => ({
-                nama: i.product_name,
-                jumlah: i.quantity,
-                hargaAgen: i.requested_price ?? i.unit_price,
-                hargaPabrik: i.unit_price,
-            })),
+            products,
+            totalPrice,
         };
     });
 }
+
+
 
 export async function fetchInvoicesForAgent() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

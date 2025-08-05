@@ -250,7 +250,7 @@ export const OrderProvider = ({ children }) => {
 
     const setOrderToApproved = async (orderId) => {
         try {
-            const order = orders.find(o => o.orderId === orderId);
+            const order = orders.find(o => o.orderId === orderId || o.id === orderId);
             if (!order) throw new Error("Order tidak ditemukan");
 
             const id = order.id;

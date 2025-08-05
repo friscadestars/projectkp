@@ -18,14 +18,16 @@ const MonitoringOrderTable = ({ orders }) => {
         due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0],
         notes: ''
     });
-    const formatDate = (val) =>
-        val
-            ? new Date(val).toLocaleDateString('id-ID', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-            })
-            : '-';
+    const formatDate = (val) => {
+        if (!val) return '-';
+        const date = new Date(val);
+        if (isNaN(date.getTime())) return '-'; // jika bukan tanggal valid
+        return date.toLocaleDateString('id-ID', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+        });
+    };
 
     const handleOpenInvoiceModal = async (order) => {
         console.log('ORDER YANG DIPILIH:', order);
@@ -100,9 +102,9 @@ const MonitoringOrderTable = ({ orders }) => {
             render: (val) => formatDate(val),
         },
         {
-            header: 'Estimasi Sampai',
+            header: 'Tanggal Pengiriman',
             key: 'deliveryDate',
-            render: (val) => val?.split(' ')[0] || '-',
+            render: formatDate,
         },
         {
             header: 'Status Order',

@@ -16,6 +16,7 @@ const PriceListSection = ({
     handleDelete,
     hargaLabel = "Harga",
     hargaHeader = "Harga",
+
     canEdit = true
 }) => {
     return (

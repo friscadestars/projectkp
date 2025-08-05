@@ -33,7 +33,9 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('orders/last/(:num)', 'OrderController::countAgen/$1');
 
     // Detail order (bisa id numerik ATAU order_code) – taruh PALING BAWAH
-    $routes->post('orders/move-to-history/(:num)', 'OrderController::moveToHistory/$1');
+    $routes->get('orders/(:num)', 'OrderController::getOrderById/$1');
+    $routes->get('orders/history', 'OrderController::getRiwayatOrders'); // untuk FE
+    $routes->get('orders/riwayat-orders', 'OrderController::getRiwayatOrders'); // biar tetap backward compatible
     $routes->get('orders/(:segment)', 'OrderController::show/$1');
     $routes->post('orders', 'OrderController::create');
     // update & update-item-price: kita tetap pakai (:num) karena kita akan kirim ID numerik dari FE

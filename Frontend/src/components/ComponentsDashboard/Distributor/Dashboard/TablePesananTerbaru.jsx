@@ -10,7 +10,11 @@ const ShippingStatusTable = ({ orders }) => {
             key: 'no',
             render: (_, __, rowIndex) => rowIndex + 1,
         },
-        { header: 'Order ID', key: 'orderId' },
+        {
+            header: 'Order ID',
+            key: 'orderId',
+            render: (value) => value?.toUpperCase(),
+        },
         { header: 'Agen', key: 'agenName', render: (val) => val || '-' },
         { header: 'Tanggal Kirim', key: 'orderDate' },
         {

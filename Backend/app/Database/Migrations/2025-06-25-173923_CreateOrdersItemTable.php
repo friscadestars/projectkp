@@ -26,6 +26,11 @@ class CreateSimpleOrderItemsTable extends Migration
                 'constraint' => 255,
                 'null'       => false,
             ],
+            'kode_produk' => [ // Kolom tambahan
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
+                'null'       => false,
+            ],
             'quantity' => [
                 'type'       => 'INT',
                 'constraint' => 11,
