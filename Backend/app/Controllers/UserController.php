@@ -74,7 +74,29 @@ class UserController extends ResourceController
             return $this->failValidationErrors($this->userModel->errors());
         }
 
-        return $this->respondCreated(['message' => 'User berhasil dibuat', 'id' => $this->userModel->getInsertID()]);
+        $insertedId = $this->userModel->getInsertID();
+
+        // ➕ Auto insert ke distributor_pabrik jika role = distributor
+        if (isset($data['role']) && $data['role'] === 'distributor') {
+        $distributorPabrikModel = new \App\Models\DistributorPabrikModel();
+
+        $distributorPabrikModel->insert([
+            'distributor_id' => $insertedId,
+            'pabrik_id'      => 1, // ← Ganti sesuai pabrik ID default / dari frontend
+            'created_at'     => date('Y-m-d H:i:s')
+        ]);
+
+        if (!$success) {
+            log_message('error', 'Gagal insert ke distributor_pabrik: ' . print_r($distributorPabrikModel->errors(), true));
+        }
+    }
+
+    return $this->respondCreated([
+        'message' => 'User berhasil dibuat',
+        'id'      => $insertedId
+    ]);
+
+        //return $this->respondCreated(['message' => 'User berhasil dibuat', 'id' => $this->userModel->getInsertID()]);
     }
 
     // PUT /api/users/{id}

@@ -217,6 +217,38 @@
     @apply bg-green-600 hover:opacity-90;
   }
 
+  /* Moniroting Distributor */
+
+  .distributor-table tbody tr {
+    @apply hover:bg-gray-50;
+  }
+
+  .distributor-status {
+    @apply px-2 py-1 rounded text-sm font-bold inline-block;
+  }
+
+  .distributor-status.aktif {
+    @apply bg-blue-500 text-white;
+  }
+
+  .distributor-status.nonaktif {
+    @apply bg-gray-300 text-gray-800;
+  }
+
+  .distributor-button-toggle {
+    @apply px-3 py-2 rounded text-sm font-bold text-white;
+  }
+
+  .distributor-button-toggle.btn-hentikan {
+    @apply bg-red-600 hover:opacity-90;
+  }
+
+  .distributor-button-toggle.btn-aktifkan {
+    @apply bg-green-600 hover:opacity-90;
+  }
+
+  /* End Moniroting Distributor  */
+
   .monitoring-order-table {
     @apply min-w-full text-sm text-center border-collapse;
   }
