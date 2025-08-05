@@ -21,6 +21,11 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('agen-distributor/by-distributor/(:num)', 'AgentDistributorController::agentsByDistributor/$1');
     // $routes->get('agent-distributor/by-distributor/(:num)', 'AgentDistributorController::agentsByDistributor/$1');
     $routes->get('agen-distributor/(:num)', 'AgentDistributorController::show/$1');
+
+    //Tambahan route untuk distributor-pabrik
+    $routes->get('distributor-pabrik/by-pabrik/(:num)', 'DistributorPabrikController::distributorsByPabrik/$1');
+    $routes->get('distributor-pabrik/(:num)', 'DistributorPabrikController::show/$1');
+
     $routes->put('users/(:num)/active', 'UserController::setActive/$1');
     $routes->resource('users', ['controller' => 'UserController']);
 
