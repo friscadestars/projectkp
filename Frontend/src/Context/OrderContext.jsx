@@ -250,13 +250,12 @@ export const OrderProvider = ({ children }) => {
 
     const setOrderToApproved = async (orderId) => {
         try {
-            // Cari objek order dari state berdasarkan orderId
             const order = orders.find(o => o.orderId === orderId);
             if (!order) throw new Error("Order tidak ditemukan");
 
-            const id = order.id; // ✅ ID asli dari backend
+            const id = order.id;
 
-            await updateOrderStatus(id, 'delivered'); // 🔄 Kirim ke API
+            await updateOrderStatus(id, 'delivered');
 
             updateOrder(orderId, (order) => ({
                 ...order,

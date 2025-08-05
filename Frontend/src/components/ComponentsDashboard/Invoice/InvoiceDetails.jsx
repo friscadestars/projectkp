@@ -32,20 +32,21 @@ const InvoiceDetails = ({ invoiceData, showAgen = false, showDistributor = false
                 <strong>Status Pembayaran:</strong>
                 <button
                     disabled
-                    className={`px-3 py-1 rounded text-sm font-bold cursor-default ${normalizedStatus === 'belum lunas'
-                        ? 'bg-red-600'
-                        : normalizedStatus === 'lunas' || normalizedStatus === 'paid'
-                            ? 'bg-green-600'
-                            : 'bg-gray-600'
+                    className={`px-3 py-1 rounded text-sm font-bold cursor-default ${['unpaid', 'belum lunas'].includes(normalizedStatus)
+                            ? 'bg-red-600'
+                            : ['paid', 'lunas', 'dibayar'].includes(normalizedStatus)
+                                ? 'bg-green-600'
+                                : 'bg-gray-600'
                         } text-white`}
                 >
-                    {normalizedStatus === 'belum lunas'
+                    {['unpaid', 'belum lunas'].includes(normalizedStatus)
                         ? 'Belum Dibayar'
-                        : normalizedStatus === 'lunas' || normalizedStatus === 'paid'
+                        : ['paid', 'lunas', 'dibayar'].includes(normalizedStatus)
                             ? 'Lunas'
                             : 'Status Tidak Diketahui'}
                 </button>
             </p>
+
 
         </div>
     );

@@ -35,7 +35,7 @@ class CreateOrdersTable extends Migration
             ],
             'status' => [
                 'type'       => 'ENUM',
-                'constraint' => ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'approved'],
+                'constraint' => ['pending', 'processing', 'shipped', 'delivered', 'rejected', 'approved'],
                 'default'    => 'pending',
                 'null'       => false
             ],

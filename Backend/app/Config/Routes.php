@@ -38,8 +38,8 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('orders/last/(:num)', 'OrderController::countAgen/$1');
 
     // Detail order (bisa id numerik ATAU order_code) – taruh PALING BAWAH
+    $routes->post('orders/move-to-history/(:num)', 'OrderController::moveToHistory/$1');
     $routes->get('orders/(:segment)', 'OrderController::show/$1');
-
     $routes->post('orders', 'OrderController::create');
     // update & update-item-price: kita tetap pakai (:num) karena kita akan kirim ID numerik dari FE
     $routes->put('orders/(:num)', 'OrderController::update/$1');
@@ -48,6 +48,8 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
 
     $routes->resource('order-items');
 
+    $routes->get('invoices/getByDistributor/(:num)', 'InvoiceController::getByDistributor/$1');
+    $routes->get('api/invoices/order/(:num)', 'InvoiceController::getByOrderId/$1');
     $routes->post('invoices/(:num)/confirm-payment', 'InvoiceController::confirmPayment/$1');
     $routes->get('invoices/agent/(:num)', 'InvoiceController::getByAgent/$1');
     $routes->get('invoices', 'InvoiceController::index');

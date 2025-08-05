@@ -7,7 +7,7 @@ const getStatusPembayaranClass = (status) => {
     switch ((status || '').toLowerCase()) {
         case 'lunas':
             return 'status-badge payment-lunas';
-        case 'belum lunas':
+        case 'belum dibayar':
             return 'status-badge payment-belum-lunas';
         default:
             return 'status-badge payment-unknown';
@@ -36,7 +36,7 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- def
     const filtered = safeInvoices
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
+            const allowed = ['dikirim', 'shipped', 'selesai', 'delivered', 'paid', 'unpaid',];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,8 +92,10 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- def
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
             render: (_, row) => {
-                const status = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'Belum Lunas';
-                return <span className={getStatusPembayaranClass(status)}>{status}</span>;
+                const rawStatus = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'unpaid';
+                const displayStatus = rawStatus === 'paid' ? 'Lunas' : 'Belum Dibayar';
+
+                return <span className={getStatusPembayaranClass(displayStatus)}>{displayStatus}</span>;
             },
         },
         {

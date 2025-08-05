@@ -4,6 +4,7 @@ namespace App\Controllers;
 
 use App\Models\InvoiceModel;
 use CodeIgniter\RESTful\ResourceController;
+use Firebase\JWT\JWT;
 
 class InvoiceController extends ResourceController
 {
@@ -15,6 +16,24 @@ class InvoiceController extends ResourceController
         return $this->respond($this->model->findAll());
     }
 
+    private function getUserFromToken()
+    {
+        $authHeader = $this->request->getHeaderLine('Authorization');
+        if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
+            return null;
+        }
+
+        $token = $matches[1];
+        $secretKey = getenv('JWT_SECRET') ?: 'default_key';
+
+        try {
+            $decoded = JWT::decode($token, new \Firebase\JWT\Key($secretKey, 'HS256'));
+            return (array) $decoded->data;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+
     public function show($id = null)
     {
         $invoice = $this->model->find($id);
@@ -23,11 +42,19 @@ class InvoiceController extends ResourceController
         }
 
         // Ambil user login dari session (misalnya pakai JWT atau session CI4)
-        $session = session();
-        $loggedAgenId = $session->get('user_id'); // Pastikan ini agen yang login
+        $user = $this->getUserFromToken();
+        if (!$user || !isset($user['id'])) {
+            return $this->failUnauthorized('User tidak terautentikasi');
+        }
+
+        $loggedAgenId = $user['id'];
 
         // Validasi apakah invoice ini milik agen yang login
-        if ($invoice['agen_id'] != $loggedAgenId) {
+        if (
+            $invoice['agen_id'] != $loggedAgenId &&
+            $invoice['distributor_id'] != $loggedAgenId &&
+            $invoice['pabrik_id'] != $loggedAgenId
+        ) {
             return $this->fail('Anda tidak memiliki akses ke invoice ini');
         }
 
@@ -44,11 +71,16 @@ class InvoiceController extends ResourceController
         // Ambil order
         $order = $db->table('orders')->where('id', $invoice['order_id'])->get()->getRowArray();
 
-        $pengirim = $db->table('users')
-            ->select('nama_bank, nama_rekening, rekening')
-            ->where('id', $invoice['distributor_id'])
-            ->get()
-            ->getRowArray();
+        $pengirimId = $invoice['distributor_id'] ?? $invoice['pabrik_id'];
+
+        $pengirim = null;
+        if ($pengirimId) {
+            $pengirim = $db->table('users')
+                ->select('nama_bank, nama_rekening, rekening')
+                ->where('id', $pengirimId)
+                ->get()
+                ->getRowArray();
+        }
 
         // Masukkan ke invoice agar bisa dibaca frontend
         $invoice['pengirim_bank'] = $pengirim;
@@ -191,5 +223,32 @@ class InvoiceController extends ResourceController
             'invoice_id' => $id,
             'status' => 'paid' // Kirim status database yang sebenarnya
         ]);
+    }
+
+    public function getByDistributor($id)
+    {
+        $db = \Config\Database::connect();
+        $builder = $db->table('invoices i');
+        $builder->select('
+        i.*,
+        o.order_code as orderCode,
+        o.status,
+        o.order_date,
+        COALESCE(u.name, u_order.name) as agenName,
+        u2.name as pabrikName
+    ');
+        $builder->join('orders o', 'o.id = i.order_id', 'left');
+        $builder->join('users u', 'u.id = i.agen_id', 'left');
+        $builder->join('users u_order', 'u_order.id = o.agen_id', 'left');
+        $builder->join('users u2', 'u2.id = i.pabrik_id', 'left');
+
+        $builder->where('i.distributor_id', $id);
+        $builder->groupStart()
+            ->where('i.agen_id', null)
+            ->orWhere('i.agen_id', 20)
+            ->groupEnd();
+
+        $query = $builder->get();
+        return $this->respond($query->getResult());
     }
 }

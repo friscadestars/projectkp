@@ -30,12 +30,15 @@ const InvoiceLayout = ({
         return null;
     }
 
-    // Pindahkan isPaid ke sini, agar bisa akses invoiceData
-    const isPaid = ['lunas', 'paid'].includes(statusPembayaran?.toLowerCase());
-
     const invoice = invoiceData.tagihan || invoiceData.invoice;
+    const invoiceStatus = invoice?.status?.toLowerCase();
+    const isPaid = ['lunas', 'paid', 'dibayar'].includes(invoiceStatus);
+
     const products = invoiceData.products || invoiceData.tagihan?.items || [];
-    const bankData = invoice?.pengirim_bank;
+    const bankData = invoiceData?.pengirim_bank || {};
+    console.log('BANK DATA:', bankData);
+
+    console.log('Pengirim Bank:', invoiceData.pengirim_bank);
 
     return (
         <div className="bg-white border border-gray-200 shadow-md rounded-lg p-8 max-w-9xl mx-auto">
@@ -53,30 +56,27 @@ const InvoiceLayout = ({
             <InvoiceTable products={products} />
 
             <PaymentInstructions
-                bankName={bankData?.nama_bank || '-'}
-                accountName={bankData?.nama_rekening || '-'}
-                accountNumber={bankData?.rekening || '-'}
+                bankName={bankData.nama_bank || '-'}
+                accountName={bankData.nama_rekening || '-'}
+                accountNumber={bankData.rekening || '-'}
             />
 
             {showConfirmationButton && (
                 <div className="text-center mt-4">
                     <button
-                        className={`px-6 py-2 rounded text-white
-                          bg-green-600 hover:bg-green-700
-                          disabled:bg-gray-400 disabled:cursor-not-allowed
-                        `}
-                        onClick={isPaid ? undefined : onOpenModal}
+                        onClick={!isPaid ? onOpenModal : undefined}
                         disabled={isPaid}
+                        className={`px-6 py-2 rounded text-white transition
+        ${isPaid ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}
+      `}
                     >
-                        Konfirmasi Pembayaran
+                        {isPaid ? 'Pembayaran Sudah Lunas' : 'Konfirmasi Pembayaran'}
                     </button>
                 </div>
             )}
 
-            {showModal && (
-                <PaymentConfirmation
-                    onConfirm={onConfirmPayment}
-                />
+            {showModal && !isPaid && (
+                <PaymentConfirmation onConfirm={onConfirmPayment} />
             )}
         </div>
     );
