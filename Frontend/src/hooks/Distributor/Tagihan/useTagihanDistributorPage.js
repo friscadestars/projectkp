@@ -31,7 +31,19 @@ export const useTagihanDistributorPage = () => {
                 if (!res.ok) throw new Error('Gagal memuat data invoice distributor');
                 const data = await res.json();
 
-                setOrders(data);
+                const mappedOrders = data.map((order) => {
+                    const status = order.invoice_status?.toLowerCase();
+                    const statusPembayaran = (status === 'paid' || status === 'lunas')
+                        ? 'Lunas'
+                        : 'Belum Dibayar';
+
+                    return {
+                        ...order,
+                        statusPembayaran,
+                    };
+                });
+
+                setOrders(mappedOrders);
                 console.log('Fetched Orders:', data);
             } catch (err) {
                 setError(err.message);

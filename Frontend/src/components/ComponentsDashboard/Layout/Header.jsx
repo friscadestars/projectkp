@@ -3,13 +3,20 @@ import { useNavigate } from 'react-router-dom';
 import bellIcon from '../../../assets/IconHeader/IconNotif.png';
 import userIcon from '../../../assets/IconHeader/IconProfile.png';
 import NotificationDropdown from './Notification';
+import useNotifications from '../../../hooks/useNotifications';
 
 const Header = ({ showDropdown, toggleDropdown, role }) => {
     const navigate = useNavigate();
-    const [showNotif, setShowNotif] = useState(false); // Untuk toggle dropdown notif
+    const [showNotif, setShowNotif] = useState(false);
 
     const toggleNotif = () => {
-        setShowNotif((prev) => !prev);
+        setShowNotif((prev) => {
+            const next = !prev;
+            if (next) {
+                markAllAsRead();
+            }
+            return next;
+        });
     };
 
     const handleNavigateToBeranda = () => {
@@ -22,6 +29,10 @@ const Header = ({ showDropdown, toggleDropdown, role }) => {
         }
     };
 
+    const { notifications, markAsRead, markAllAsRead } = useNotifications();
+
+    const unreadCount = notifications.filter(n => String(n.is_read) === '0').length;
+
     return (
         <header className="bg-white shadow-md border-b border-gray-200 text-gray-700 p-4 flex flex-wrap justify-between items-center w-full">
             <div className="flex items-center mb-2 md:mb-0">
@@ -31,13 +42,20 @@ const Header = ({ showDropdown, toggleDropdown, role }) => {
                 {/* Ikon Notifikasi */}
                 <button onClick={toggleNotif} className="relative">
                     <img src={bellIcon} alt="notifikasi" className="w-4 h-4" />
-                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full px-1">
-                        3
-                    </span>
+                    {unreadCount > 0 && (
+                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] rounded-full px-1">
+                            {unreadCount}
+                        </span>
+                    )}
                 </button>
 
                 {/* Dropdown Notifikasi dari komponen terpisah */}
-                {showNotif && <NotificationDropdown />}
+                {showNotif && (
+                    <NotificationDropdown
+                        notifications={notifications}
+                        onMarkAsRead={markAsRead}
+                    />
+                )}
 
                 {/* Ikon Profile */}
                 <div className="relative">

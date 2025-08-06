@@ -24,7 +24,6 @@ const InvoiceLayout = ({
     showAgen = false,
     showDistributor = false,
 }) => {
-    console.log('Invoice Data:', invoiceData);
 
     if (!invoiceData) {
         return null;
@@ -35,10 +34,7 @@ const InvoiceLayout = ({
     const isPaid = ['lunas', 'paid', 'dibayar'].includes(invoiceStatus);
 
     const products = invoiceData.products || invoiceData.tagihan?.items || [];
-    const bankData = invoiceData?.pengirim_bank || {};
-    console.log('BANK DATA:', bankData);
-
-    console.log('Pengirim Bank:', invoiceData.pengirim_bank);
+    const bankData = invoiceData?.pengirim_bank || invoiceData?.invoice?.pengirim_bank || {};
 
     return (
         <div className="bg-white border border-gray-200 shadow-md rounded-lg p-8 max-w-9xl mx-auto">

@@ -4,7 +4,7 @@ import SearchInput from '../../Common/SearchInput';
 import TagihanDistributorTable from './TagihanDistributorTable';
 import tagihanIcon from '../../../../assets/IconHeader/IconTagihan.png';
 
-const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders }) => (
+const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders, loading }) => (
     <>
         <PageHeaderWithIcon icon={tagihanIcon} title="Tagihan Anda" />
         <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
@@ -19,6 +19,7 @@ const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders }) => (
             <TagihanDistributorTable
                 orders={orders}
                 searchTerm={searchTerm}
+                loading={loading}
             />
         </div>
     </>

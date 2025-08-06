@@ -50,6 +50,9 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
 
     $routes->resource('order-items');
 
+    $routes->put('invoices/(:num)/konfirmasi-pembayaran', 'InvoiceController::konfirmasi_pembayaran/$1');
+    $routes->get('invoice/pabrik-ke-distributor/(:num)', 'InvoiceController::getDistributorInvoices/$1');
+    $routes->post('invoice/distributor', 'InvoiceController::createInvoiceForDistributor');
     $routes->get('invoices/getByDistributor/(:num)', 'InvoiceController::getByDistributor/$1');
     $routes->get('api/invoices/order/(:num)', 'InvoiceController::getByOrderId/$1');
     $routes->post('invoices/(:num)/confirm-payment', 'InvoiceController::confirmPayment/$1');

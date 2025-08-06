@@ -14,30 +14,31 @@ const getStatusPembayaranClass = (status) => {
     }
 };
 
-const formatDate = (value) => {
-    if (!value || value === 'Invalid Date') return '-';
-    const date = new Date(value);
-    if (isNaN(date.getTime())) return '-';
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const safeDateStr = dateStr.replace(' ', 'T');
+    const date = new Date(safeDateStr);
+    if (isNaN(date)) return '-';
 
-    return date.toLocaleDateString('id-ID', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-    });
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 };
 
-const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
-    console.log("Orders received:", orders);
+const TagihanDistributorTable = ({ orders = [], searchTerm = '', loading = false }) => {
     const navigate = useNavigate();
 
     const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
 
     const filtered = orders.filter(order => {
-        const status = (order.status || '').toLowerCase();
-        return allowed.includes(status) && (
+        const orderStatus = (order.order_status || '').toLowerCase();
+
+        return allowed.includes(orderStatus) && (
             (order.orderCode || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
             (order.agenName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-            status.includes(searchTerm.toLowerCase())
+            orderStatus.includes(searchTerm.toLowerCase())
         );
     })
         .sort((a, b) => {
@@ -63,15 +64,7 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
         {
             header: 'Tanggal Order',
             key: 'order_date',
-            render: (val) => {
-                if (!val) return '-';
-                const date = new Date(val);
-                return new Intl.DateTimeFormat('id-ID', {
-                    day: '2-digit',
-                    month: 'numeric',
-                    year: 'numeric'
-                }).format(date);
-            },
+            render: formatDate,
         },
         {
             header: 'Tanggal Terima',
@@ -80,15 +73,14 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
         },
         {
             header: 'Status Order',
-            key: 'status',
+            key: 'order_status',
             render: (value) => <StatusBadge status={value} />,
         },
         {
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
             render: (_, row) => {
-                const rawStatus = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'unpaid';
-                const displayStatus = rawStatus === 'paid' ? 'Lunas' : 'Belum Dibayar';
+                const displayStatus = row.statusPembayaran || 'Belum Dibayar';
                 return <span className={getStatusPembayaranClass(displayStatus)}>{displayStatus}</span>;
             },
         },
@@ -98,7 +90,7 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
             className: 'rounded-tr-md',
             render: (_, row) => {
                 const tagihanData = {
-                    id: row.id, // penting
+                    id: row.id,
                     invoice_number: row.invoice_number,
                     invoice_date: row.invoice_date,
                     due_date: row.due_date,
@@ -106,7 +98,7 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
                     distributor_id: row.distributor_id,
                     pabrik_id: row.pabrik_id,
                     status: row.status,
-                    items: row.items || [], // pastikan ada
+                    items: row.items || [],
                 };
 
                 const url = `/distributor/invoice/${row.orderId || row.order_id}`;
@@ -127,25 +119,30 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '' }) => {
                     </button>
                 );
             }
-
         },
     ];
 
     return (
-        <ReusableTable
-            columns={columns}
-            data={filtered}
-            footer={
-                <tr>
-                    <td
-                        colSpan={columns.length}
-                        className="px-4 py-3 text-right text-gray-600 font-medium"
-                    >
-                        Total Tagihan: {filtered.length}
-                    </td>
-                </tr>
-            }
-        />
+        <>
+            {loading ? (
+                <p className="text-center text-sm text-gray-500 py-4">Memuat data...</p>
+            ) : (
+                <ReusableTable
+                    columns={columns}
+                    data={filtered}
+                    footer={
+                        <tr>
+                            <td
+                                colSpan={columns.length}
+                                className="px-4 py-3 text-right text-gray-600 font-medium"
+                            >
+                                Total Tagihan: {filtered.length}
+                            </td>
+                        </tr>
+                    }
+                />
+            )}
+        </>
     );
 };
 
