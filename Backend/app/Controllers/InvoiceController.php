@@ -131,6 +131,7 @@ class InvoiceController extends ResourceController
             return $this->failValidationErrors('Order ID wajib disertakan');
         }
 
+        $invoiceData['invoice_date'] = date('Y-m-d H:i:s');
         if (!$this->model->insert($invoiceData)) {
             return $this->failValidationErrors($this->model->errors());
         }
@@ -299,7 +300,7 @@ class InvoiceController extends ResourceController
         return $this->respond([
             'message' => 'Pembayaran berhasil dikonfirmasi',
             'invoice_id' => $id,
-            'status' => 'paid' // Kirim status database yang sebenarnya
+            'status' => 'paid'
         ]);
     }
 
@@ -350,16 +351,14 @@ class InvoiceController extends ResourceController
 
         $data = [
             'order_id'       => $orderId,
-            'distributor_id' => $distributorId, // pastikan kolom benar
+            'distributor_id' => $distributorId,
             'amount_total'   => $totalAmount,
             'status'         => 'unpaid',
             'role'           => 'pabrik',
             'created_at'     => date('Y-m-d H:i:s'),
         ];
 
-        // ✅ Insert invoice sekali saja
         if ($invoiceModel->insert($data)) {
-            // ✅ Kirim notifikasi ke distributor
             $notifModel->insert([
                 'user_id'    => $distributorId,
                 'title'      => 'Tagihan Baru dari Pabrik',
@@ -485,6 +484,64 @@ class InvoiceController extends ResourceController
             ]);
         } else {
             return $this->failServerError('Gagal memperbarui status pembayaran');
+        }
+    }
+
+    public function generateInvoiceNumber($type = 'distributor', $id = null)
+    {
+        helper('text');
+        $model = new \App\Models\InvoiceModel();
+
+        $today = date('Ymd');
+
+        if ($type === 'distributor') {
+            $prefix = "INV/$today/";
+            $filterField = 'distributor_id';
+        } elseif ($type === 'pabrik') {
+            $prefix = "INVPB/$today/";
+            $filterField = 'pabrik_id';
+        } else {
+            return $this->fail('Tipe invoice tidak valid.');
+        }
+
+        if (!$id) {
+            return $this->fail('ID distributor atau pabrik tidak diberikan.');
+        }
+
+        $count = $model
+            ->like('invoice_number', $prefix, 'after')
+            ->where($filterField, $id)
+            ->countAllResults();
+
+        $number = str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+
+        $invoiceNumber = $prefix . $number;
+
+        return $this->respond([
+            'invoice_number' => $invoiceNumber
+        ]);
+    }
+
+    public function checkInvoiceByOrder($orderId = null)
+    {
+        if (!$orderId) {
+            return $this->fail('Order ID tidak diberikan');
+        }
+
+        $invoice = $this->model
+            ->where('order_id', $orderId)
+            ->first();
+
+        if ($invoice) {
+            return $this->respond([
+                'exists' => true,
+                'invoice_id' => $invoice['id'],
+                'invoice_number' => $invoice['invoice_number'],
+            ]);
+        } else {
+            return $this->respond([
+                'exists' => false,
+            ]);
         }
     }
 }

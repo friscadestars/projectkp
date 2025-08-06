@@ -30,7 +30,7 @@ const formatDate = (dateStr) => {
 const TagihanDistributorTable = ({ orders = [], searchTerm = '', loading = false }) => {
     const navigate = useNavigate();
 
-    const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
+    const allowed = ['diproses', 'processing', 'dikirim', 'shipped', 'selesai', 'delivered'];
 
     const filtered = orders.filter(order => {
         const orderStatus = (order.order_status || '').toLowerCase();

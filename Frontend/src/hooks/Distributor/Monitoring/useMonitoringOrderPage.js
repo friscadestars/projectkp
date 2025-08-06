@@ -47,7 +47,7 @@ export const useMonitoringOrderPage = () => {
                 id: o.orderId,
                 orderId: o.orderId,
                 orderCode: o.orderCode,
-                agentId: o.agentId, // <-- INI WAJIB!
+                agentId: o.agentId,
                 agen_id: o.agentId ?? o.agen_id ?? null,
                 agenName: o.agenName ?? o.agen ?? '-',
                 pabrikName: o.pabrikName ?? 'Pabrik tidak diketahui',
@@ -55,6 +55,7 @@ export const useMonitoringOrderPage = () => {
                 deliveryDate: o.deliveryDate ?? '-',
                 status: o.status,
                 products: o.products ?? [],
+                invoiceExist: o.invoiceExist,
             }))
             .filter(
                 (o) =>

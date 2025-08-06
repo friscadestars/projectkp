@@ -33,6 +33,7 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('orders', 'OrderController::index');
 
     // letakkan semua path “spesifik” SEBELUM (:segment) supaya tidak ketabrak
+    $routes->get('/orders/monitoring', 'OrderController::getMonitoringOrders');
     $routes->get('orders/find/by-agen-no', 'OrderController::findByAgenAndNo');
     $routes->get('orders/last', 'OrderController::countAgen');
     $routes->get('orders/last/(:num)', 'OrderController::countAgen/$1');
@@ -62,6 +63,9 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->post('invoices', 'InvoiceController::create');
     $routes->put('invoices/(:num)', 'InvoiceController::update/$1');
     $routes->delete('invoices/(:num)', 'InvoiceController::delete/$1');
+    $routes->get('invoices/generate/distributor/(:num)', 'InvoiceController::generateInvoiceNumber/distributor/$1');
+    $routes->get('invoices/generate/pabrik/(:num)', 'InvoiceController::generateInvoiceNumber/pabrik/$1');
+    $routes->get('invoices/order/(:num)', 'InvoiceController::checkInvoiceByOrder/$1');
 
     $routes->get('shipments', 'ShipmentController::index');
     $routes->get('shipments/(:num)', 'ShipmentController::show/$1');

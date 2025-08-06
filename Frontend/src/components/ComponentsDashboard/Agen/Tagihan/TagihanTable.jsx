@@ -27,16 +27,15 @@ const formatDate = (value) => {
     });
 };
 
-const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- default invoices dan searchTerm
+const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
     const navigate = useNavigate();
 
-    // Pastikan invoices adalah array, jika tidak return array kosong untuk menghindari error
     const safeInvoices = Array.isArray(invoices) ? invoices : [];
 
     const filtered = safeInvoices
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['dikirim', 'shipped', 'selesai', 'delivered', 'paid', 'unpaid',];
+            const allowed = ['diproses', 'processing', 'dikirim', 'shipped', 'diterima', 'delivered', 'paid', 'unpaid',];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||

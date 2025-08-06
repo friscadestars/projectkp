@@ -4,6 +4,19 @@ const getAuthHeader = () => ({
     Authorization: `Bearer ${localStorage.getItem('token')}`
 });
 
+export const checkInvoiceExist = async (orderId) => {
+    try {
+        const res = await fetch(`${API_BASE}/invoices/order/${orderId}`, {
+            headers: { ...getAuthHeader() },
+        });
+        const json = await res.json();
+        return res.ok && json.exists;
+    } catch (err) {
+        console.error('Gagal cek invoice:', err.message);
+        return false;
+    }
+};
+
 // ordersApi.js
 export const mapOrder = async (o) => {
     const base = {
@@ -19,7 +32,12 @@ export const mapOrder = async (o) => {
         status: o.status,
         note: o.note ?? '-',
         pabrik_id: o.pabrik_id ?? null,
-        pabrikName: o.pabrik_name ?? o.pabrikName ?? await fetchUserById(o.pabrik_id),
+        pabrikName: o.pabrik_name
+            ? o.pabrik_name
+            : o.pabrik_id
+                ? await fetchUserById(o.pabrik_id)
+                : 'Pabrik tidak diketahui',
+
         receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
         trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
         statusPembayaran: o.status_pembayaran ?? 'Belum Lunas',
@@ -34,6 +52,8 @@ export const mapOrder = async (o) => {
         })),
         items: o.items || []
     };
+
+    base.invoiceExist = await checkInvoiceExist(o.id);
 
     if (o.agen_id) {
         base.agentId = Number(o.agen_id);
@@ -70,7 +90,7 @@ export async function fetchUserById(id) {
         const json = await res.json();
         return json?.name || json?.username || 'Tidak diketahui';
     } catch (error) {
-        console.error('❌ Gagal fetch user:', error.message);
+        console.error('Gagal fetch user:', error.message);
         return 'Tidak diketahui';
     }
 }

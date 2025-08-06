@@ -6,6 +6,21 @@ import Modal from '../../../Common/Modal';
 import { API_BASE } from '../../../../../services/ordersApi';
 import { useAuth } from '../../../../../Context/AuthContext';
 
+const getPabrikNameById = async (id, token) => {
+    try {
+        const res = await fetch(`${API_BASE}/users/${id}`, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        });
+        const data = await res.json();
+        return data?.name || 'Pabrik tidak diketahui';
+    } catch (err) {
+        console.error('Gagal mengambil nama pabrik:', err);
+        return 'Pabrik tidak diketahui';
+    }
+};
+
 const MonitoringOrderTable = ({ orders }) => {
     const { user, token } = useAuth();
     const navigate = useNavigate();
@@ -21,7 +36,7 @@ const MonitoringOrderTable = ({ orders }) => {
     const formatDate = (val) => {
         if (!val) return '-';
         const date = new Date(val);
-        if (isNaN(date.getTime())) return '-'; // jika bukan tanggal valid
+        if (isNaN(date.getTime())) return '-';
         return date.toLocaleDateString('id-ID', {
             day: '2-digit',
             month: '2-digit',
@@ -50,13 +65,18 @@ const MonitoringOrderTable = ({ orders }) => {
 
             const fullOrder = await res.json();
 
+            let pabrikName = fullOrder.pabrik_name ?? fullOrder.pabrikName;
+            if (!pabrikName && fullOrder.pabrik_id) {
+                pabrikName = await getPabrikNameById(fullOrder.pabrik_id, token);
+            }
+
             const mappedOrder = {
                 ...fullOrder,
                 orderCode: fullOrder.order_code ?? fullOrder.orderCode,
                 agenName: fullOrder.agen ?? fullOrder.agenName,
-                pabrikName: fullOrder.pabrik_name ?? fullOrder.pabrikName,
-                agentName: fullOrder.agen ?? fullOrder.agenName, // untuk modal
-                factoryName: fullOrder.pabrik_name ?? fullOrder.pabrikName, // untuk modal
+                pabrikName: pabrikName,
+                agentName: fullOrder.agen ?? fullOrder.agenName,
+                factoryName: fullOrder.pabrik_name ?? fullOrder.pabrikName,
                 orderDate: (fullOrder.order_date || fullOrder.orderDate || '').split(' ')[0],
                 invoiceNumber: invoiceForm.invoice_number || `INV-${(fullOrder.order_code || fullOrder.orderCode || '').toUpperCase()}`,
                 invoiceDate: invoiceForm.invoice_date,
@@ -67,7 +87,49 @@ const MonitoringOrderTable = ({ orders }) => {
                 agen_id: fullOrder.agen_id ?? fullOrder.agentId ?? null,
             };
 
+            try {
+
+                const resInvoice = await fetch(`${API_BASE}/invoices/generate/distributor/${mappedOrder.distributorId}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                const invoiceData = await resInvoice.json();
+
+                console.log("DATA invoice number:", invoiceData);
+                console.log("Status response:", resInvoice.status);
+
+                const generatedInvoiceNumber = resInvoice.ok && invoiceData?.invoice_number
+                    ? invoiceData.invoice_number
+                    : 'GAGAL_GENERATE';
+
+                setInvoiceForm({
+                    ...invoiceForm,
+                    invoice_number: generatedInvoiceNumber,
+                    invoice_date: new Date().toISOString().split('T')[0],
+                    due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0],
+                    notes: ''
+                });
+            } catch (error) {
+                console.error('Gagal generate nomor invoice:', error);
+                setInvoiceForm({
+                    ...invoiceForm,
+                    invoice_number: 'ERROR',
+                });
+            }
+
             console.log('selectedOrder.order_items:', mappedOrder.order_items);
+
+            const checkInvoice = await fetch(`${API_BASE}/invoices/order/${mappedOrder.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+            const invoiceCheckData = await checkInvoice.json();
+            const isInvoiceExist = checkInvoice.ok && invoiceCheckData?.exists;
+
+            if (isInvoiceExist) {
+                alert('Invoice untuk order ini sudah pernah dibuat.');
+                return;
+            }
 
             setSelectedOrder(mappedOrder);
             setShowInvoiceModal(true);
@@ -114,25 +176,37 @@ const MonitoringOrderTable = ({ orders }) => {
         {
             header: 'Aksi',
             key: 'aksi',
-            render: (_, row) => (
-                <div className="button-group flex flex-wrap gap-2 justify-center">
-                    <button
-                        className="px-4 py-1 bg-blue-900 text-white text-sm rounded font-semibold hover:opacity-90"
-                        onClick={() =>
-                            navigate(`/distributor/monitoring-order/detail/${row.orderId}`)
-                        }
-                    >
-                        Detail
-                    </button>
-                    <button
-                        className="px-4 py-1 bg-green-700 text-white text-sm rounded font-semibold hover:opacity-90"
-                        onClick={() => handleOpenInvoiceModal(row)}
-                    >
-                        Buat Invoice
-                    </button>
-                </div>
-            ),
-        },
+            render: (_, row) => {
+                const isInvoiceAllowed = ['processing', 'shipped'].includes(row.status?.toLowerCase());
+                const isInvoiceExist = row?.invoiceExist;
+                const isDisabled = !isInvoiceAllowed || isInvoiceExist;
+
+                return (
+                    <div className="button-group flex flex-wrap gap-2 justify-center">
+                        <button
+                            className="px-4 py-1 bg-blue-900 text-white text-sm rounded font-semibold hover:opacity-90"
+                            onClick={() =>
+                                navigate(`/distributor/monitoring-order/detail/${row.orderId}`)
+                            }
+                        >
+                            Detail
+                        </button>
+                        <button
+                            className={`px-4 py-1 text-sm rounded font-semibold ${isDisabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-blue-900 text-white hover:opacity-90'
+                                }`}
+                            onClick={() => {
+                                if (!isDisabled) handleOpenInvoiceModal(row);
+                            }}
+                            disabled={isDisabled}
+                        >
+                            Buat Invoice
+                        </button>
+                    </div>
+                );
+            }
+        }
     ];
 
     const handleCreateInvoice = async () => {
@@ -232,11 +306,9 @@ const MonitoringOrderTable = ({ orders }) => {
                             <label>
                                 Nomor Invoice
                                 <input
-                                    className="w-full border rounded px-2 py-1"
+                                    className="w-full border rounded px-2 py-1 bg-gray-100 text-gray-600"
                                     value={invoiceForm.invoice_number}
-                                    onChange={(e) =>
-                                        setInvoiceForm({ ...invoiceForm, invoice_number: e.target.value })
-                                    }
+                                    readOnly
                                 />
                             </label>
 

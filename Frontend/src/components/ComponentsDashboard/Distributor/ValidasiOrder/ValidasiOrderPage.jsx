@@ -11,7 +11,8 @@ const ValidasiOrderPage = () => {
     const navigate = useNavigate();
     const { orders, approveOrder } = useOrder();
 
-    const order = orders.find(order => order.orderId === orderId);
+    const pendingOrders = orders.filter(order => order.status?.toLowerCase() === 'pending');
+    const order = pendingOrders.find(order => order.orderId === orderId);
     const [inputPrices, setInputPrices] = useState({});
 
     const handleSetHarga = (productName, price) => {

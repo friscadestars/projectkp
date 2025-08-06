@@ -13,6 +13,7 @@ use App\Models\RiwayatOrderModel;
 use App\Models\InvoiceModel;
 use App\Models\ProductPriceModel;
 use App\Models\NotificationModel;
+use CodeIgniter\I18n\Time;
 
 class OrderController extends ResourceController
 {
@@ -155,10 +156,10 @@ class OrderController extends ResourceController
             'distributor_id' => isset($payload['distributor_id']) ? (int) $payload['distributor_id'] : null,
             'pabrik_id'      => $payload['pabrik_id'] ?? null,
             'status'         => $payload['status'],
-            'order_date'     => $payload['order_date'],
-            'delivery_date'  => $payload['delivery_date'] ?? null,
+            'order_date'     => Time::parse($payload['order_date'], 'UTC')->setTimezone('Asia/Jakarta')->toDateTimeString(),
+            'delivery_date'  => isset($payload['delivery_date']) ? Time::parse($payload['delivery_date'], 'UTC')->setTimezone('Asia/Jakarta')->toDateTimeString() : null,
             'resi'           => $payload['resi'] ?? null,
-            'accepted_at'    => $payload['accepted_at'] ?? null,
+            'accepted_at'    => isset($payload['accepted_at']) ? Time::parse($payload['accepted_at'], 'UTC')->setTimezone('Asia/Jakarta')->toDateTimeString() : null,
             'note'           => $alamat,
             'agent_order_no' => $nextNo,
             'order_code'     => $orderCode,
@@ -279,7 +280,7 @@ class OrderController extends ResourceController
                 'kode_produk'  => $p['kode_produk'] ?? $p['kode'] ?? null,
                 'product_name' => $p['nama']        ?? $p['product_name'] ?? '',
                 'quantity'     => $p['jumlah']      ?? $p['quantity']     ?? 0,
-                'unit_price'   => $harga, // gunakan harga final
+                'unit_price'   => $harga,
                 'address'      => $alamat ?? '',
             ]);
         }
@@ -368,7 +369,6 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        // unset($order['agen_id'], $order['distributor_id']);
         if (isset($payload['status'])) {
             $notifModel = new NotificationModel();
 
@@ -396,7 +396,7 @@ class OrderController extends ResourceController
                 ]);
             }
 
-            // Notif ke pabrik (opsional, tergantung peran pabrik)
+            // Notif ke pabrik
             if (!empty($order['pabrik_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['pabrik_id'],
@@ -503,8 +503,6 @@ class OrderController extends ResourceController
         $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
-        // unset($order['agen_id'], $order['distributor_id']);
-
         return $this->respond($order);
     }
 
@@ -512,7 +510,6 @@ class OrderController extends ResourceController
     {
         $db = \Config\Database::connect();
 
-        // Ambil orders dengan status delivered/cancelled dan join user
         $orders = $db->table('orders o')
             ->select('o.*, 
                   i.status AS invoice_status, 
@@ -531,21 +528,17 @@ class OrderController extends ResourceController
 
         $orderIds = array_column($orders, 'id');
 
-        // Ambil semua item terkait order_id
         $itemsRaw = $db->table('order_items')
             ->whereIn('order_id', $orderIds)
             ->get()->getResultArray();
 
-        // Kelompokkan item berdasarkan order_id
         $groupedItems = [];
         foreach ($itemsRaw as $item) {
             $groupedItems[$item['order_id']][] = $item;
         }
 
-        // Ambil kode_produk unik dari items
         $kodeProdukUnik = array_unique(array_column($itemsRaw, 'kode_produk'));
 
-        // Ambil data harga pabrik terbaru untuk masing-masing kode_produk
         $hargaProdukMap = [];
         foreach ($kodeProdukUnik as $kode) {
             if ($kode === null) continue;
@@ -563,7 +556,6 @@ class OrderController extends ResourceController
             }
         }
 
-        // Hitung total harga pabrik & harga jual per order
         $hargaMapPabrik = [];
         $hargaMapJual = [];
 
@@ -668,5 +660,26 @@ class OrderController extends ResourceController
         $order['status_pembayaran'] = $order['statusPembayaran'];
 
         return $this->respond($order);
+    }
+
+    public function getMonitoringOrders()
+    {
+        $db = \Config\Database::connect();
+
+        $orders = $db->table('orders o')
+            ->select('o.*, i.status as invoice_status, agen.name as agenName, pabrik.name as pabrikName')
+            ->join('users agen', 'o.agen_id = agen.id', 'left')
+            ->join('users pabrik', 'o.pabrik_id = pabrik.id', 'left')
+            ->join('invoices i', 'i.order_id = o.id', 'left')
+            ->whereIn('o.status', ['approved', 'processing', 'shipped'])
+            ->orderBy('o.created_at', 'DESC')
+            ->get()
+            ->getResultArray();
+
+        foreach ($orders as &$order) {
+            $order['invoiceExist'] = !empty($order['invoice_status']);
+        }
+
+        return $this->respond($orders);
     }
 }
