@@ -37,7 +37,6 @@ export function usePabrikPriceListPage() {
     }
   };
 
-
   const handleAdd = async () => {
     try {
       if (!form.nama || !form.kode || !form.harga) {
@@ -103,8 +102,10 @@ export function usePabrikPriceListPage() {
             : item
         )
       );
+      Swal.fire('Berhasil', 'Produk berhasil diperbarui', 'success');
     } catch (error) {
-      console.error('Gagal menyimpan perubahan:', error.message);
+      console.error('Gagal update harga:', error.message);
+      Swal.fire('Gagal', error.message || 'Gagal menyimpan perubahan', 'error');
     }
   };
 
