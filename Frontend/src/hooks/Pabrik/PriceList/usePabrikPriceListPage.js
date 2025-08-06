@@ -110,11 +110,28 @@ export function usePabrikPriceListPage() {
   };
 
   const handleDelete = async (id) => {
-    try {
-      await deletePrice(id);
-      setProdukList((prev) => prev.filter((item) => item.id !== id));
-    } catch (error) {
-      console.error('Gagal menghapus data:', error.message);
+    const result = await Swal.fire({
+      title: 'Konfirmasi Hapus',
+      text: 'Apakah yakin ingin menghapus produk ini?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#16a34a',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Ya, Hapus',
+      cancelButtonText: 'Batal',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await deletePrice(id);
+
+        setProdukList((prev) => prev.filter((item) => item.id !== id));
+
+        Swal.fire('Berhasil', 'Produk berhasil dihapus', 'success');
+      } catch (error) {
+        console.error('Gagal menghapus produk:', error.message);
+        Swal.fire('Gagal', error.message || 'Gagal menghapus produk', 'error');
+      }
     }
   };
 
