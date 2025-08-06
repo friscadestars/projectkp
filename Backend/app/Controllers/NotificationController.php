@@ -41,7 +41,16 @@ class NotificationController extends ResourceController
     {
         $data = $this->request->getJSON(true);
 
-        if ($this->model->update($id, $data)) {
+        if (!isset($data['is_read'])) {
+            return $this->failValidationErrors('Kolom is_read wajib diisi');
+        }
+
+        $updateData = [
+            'is_read' => (int) $data['is_read'],
+            'updated_at' => date('Y-m-d H:i:s'),
+        ];
+
+        if ($this->model->update($id, $updateData)) {
             return $this->respond(['message' => 'Notifikasi diperbarui']);
         }
 

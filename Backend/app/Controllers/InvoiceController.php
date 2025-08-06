@@ -5,6 +5,9 @@ namespace App\Controllers;
 use App\Models\InvoiceModel;
 use CodeIgniter\RESTful\ResourceController;
 use Firebase\JWT\JWT;
+use App\Models\OrderModel;
+use App\Models\UserModel;
+
 
 class InvoiceController extends ResourceController
 {
@@ -62,16 +65,23 @@ class InvoiceController extends ResourceController
 
         // Ambil invoice_items dan join ke order_items
         $items = $db->table('invoice_items')
-            ->select('invoice_items.*, order_items.product_name as nama, order_items.quantity as jumlah, order_items.unit_price as harga')
+            ->select('invoice_items.*, order_items.product_name as name, pp.harga as unitPrice')
             ->join('order_items', 'order_items.id = invoice_items.order_item_id')
+            ->join('product_prices pp', 'pp.kode_produk = order_items.kode_produk AND pp.role = "pabrik"', 'left')
             ->where('invoice_items.invoice_id', $id)
             ->get()
             ->getResultArray();
 
         // Ambil order
-        $order = $db->table('orders')->where('id', $invoice['order_id'])->get()->getRowArray();
+        $order = $db->table('orders o')
+            ->select('o.*, u.name as agen_name')
+            ->join('users u', 'u.id = o.agen_id', 'left')
+            ->where('o.id', $invoice['order_id'])
+            ->get()
+            ->getRowArray();
 
-        $pengirimId = $invoice['distributor_id'] ?? $invoice['pabrik_id'];
+
+        $pengirimId = $invoice['pabrik_id'] ?? $invoice['distributor_id'];
 
         $pengirim = null;
         if ($pengirimId) {
@@ -89,6 +99,7 @@ class InvoiceController extends ResourceController
             'invoice' => $invoice,
             'items' => $items,
             'order' => $order,
+            'pengirim_bank' => $pengirim,
         ]);
     }
 
@@ -126,6 +137,38 @@ class InvoiceController extends ResourceController
 
         $invoiceId = $this->model->getInsertID();
 
+        $notifModel = new \App\Models\NotificationModel();
+        $orderModel = new \App\Models\OrderModel();
+        $userModel = new \App\Models\UserModel();
+
+        $order = $orderModel->find($invoiceData['order_id']);
+        $agenId = $invoiceData['agen_id'] ?? $order['agen_id'] ?? null;
+
+        if ($agenId) {
+            $agen = $userModel->find($agenId);
+            $notifModel->insert([
+                'user_id'    => $agenId,
+                'title'      => 'Tagihan Baru Diterbitkan',
+                'message'    => 'Tagihan baru telah dibuat untuk pesanan Anda.',
+                'type'       => 'invoice_created',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $distributorId = $invoiceData['distributor_id'] ?? $order['distributor_id'] ?? null;
+
+        if ($distributorId) {
+            $notifModel->insert([
+                'user_id'    => $distributorId,
+                'title'      => 'Invoice Diterbitkan untuk Agen Anda',
+                'message'    => 'Invoice untuk agen telah dibuat dan siap dibayar.',
+                'type'       => 'invoice_created_distributor',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         // Simpan ke invoice_items
         if (!empty($data['order_item_ids'])) {
             $invoiceItems = [];
@@ -141,6 +184,7 @@ class InvoiceController extends ResourceController
                     'order_item_id' => $item['id'],
                     'quantity'      => $item['quantity'],
                     'unit_price'    => $item['unit_price'],
+                    // 'unit_price'    => $hargaPabrik,
                 ];
             }
 
@@ -216,8 +260,42 @@ class InvoiceController extends ResourceController
 
         $this->model->update($id, $data);
 
-        // Kirim respons sukses. Status di database adalah 'paid'.
-        // Anda bisa mengirimkan pesan yang lebih deskriptif untuk frontend.
+        // Ambil data invoice dan order setelah update
+        $invoice = $this->model->find($id);
+
+        $orderModel = new \App\Models\OrderModel();
+        $order = $orderModel->find($invoice['order_id'] ?? 0);
+
+        $notifModel = new \App\Models\NotificationModel();
+        $userModel = new \App\Models\UserModel();
+
+        $agenId = $invoice['agen_id'] ?? $order['agen_id'] ?? null;
+
+        // Notifikasi ke agen bahwa pembayaran diterima
+        if ($agenId) {
+            $notifModel->insert([
+                'user_id'    => $agenId,
+                'title'      => 'Pembayaran Dikonfirmasi',
+                'message'    => 'Pembayaran Anda telah dikonfirmasi. Status tagihan: Lunas.',
+                'type'       => 'invoice_paid',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        $distributorId = $invoice['distributor_id'] ?? $order['distributor_id'] ?? null;
+
+        if ($distributorId) {
+            $notifModel->insert([
+                'user_id'    => $distributorId,
+                'title'      => 'Pembayaran Tagihan Diterima',
+                'message'    => 'Pembayaran dari agen telah dikonfirmasi. Tagihan sudah lunas.',
+                'type'       => 'invoice_paid_distributor',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
         return $this->respond([
             'message' => 'Pembayaran berhasil dikonfirmasi',
             'invoice_id' => $id,
@@ -230,13 +308,15 @@ class InvoiceController extends ResourceController
         $db = \Config\Database::connect();
         $builder = $db->table('invoices i');
         $builder->select('
-        i.*,
-        o.order_code as orderCode,
-        o.status,
-        o.order_date,
-        COALESCE(u.name, u_order.name) as agenName,
-        u2.name as pabrikName
-    ');
+    i.*,
+    o.order_code as orderCode,
+    o.status as order_status,
+    i.status as invoice_status,
+    o.order_date,
+    o.accepted_at as receivedDate,
+    COALESCE(u.name, u_order.name) as agenName,
+    u2.name as pabrikName
+');
         $builder->join('orders o', 'o.id = i.order_id', 'left');
         $builder->join('users u', 'u.id = i.agen_id', 'left');
         $builder->join('users u_order', 'u_order.id = o.agen_id', 'left');
@@ -250,5 +330,161 @@ class InvoiceController extends ResourceController
 
         $query = $builder->get();
         return $this->respond($query->getResult());
+    }
+
+    public function createInvoiceForDistributor()
+    {
+        $distributorId = $this->request->getPost('distributor_id');
+        $orderId = $this->request->getPost('order_id');
+        $totalAmount = $this->request->getPost('total_amount');
+
+        if (!$distributorId || !$orderId || !$totalAmount) {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Semua data wajib diisi.'
+            ]);
+        }
+
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $notifModel = new \App\Models\NotificationModel();
+
+        $data = [
+            'order_id'       => $orderId,
+            'distributor_id' => $distributorId, // pastikan kolom benar
+            'amount_total'   => $totalAmount,
+            'status'         => 'unpaid',
+            'role'           => 'pabrik',
+            'created_at'     => date('Y-m-d H:i:s'),
+        ];
+
+        // ✅ Insert invoice sekali saja
+        if ($invoiceModel->insert($data)) {
+            // ✅ Kirim notifikasi ke distributor
+            $notifModel->insert([
+                'user_id'    => $distributorId,
+                'title'      => 'Tagihan Baru dari Pabrik',
+                'message'    => 'Anda menerima tagihan baru dari pabrik untuk pesanan #' . $orderId . '.',
+                'type'       => 'invoice_from_pabrik',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+
+            return $this->response->setJSON([
+                'status' => 'success',
+                'message' => 'Invoice dari pabrik ke distributor berhasil dibuat.'
+            ]);
+        } else {
+            return $this->response->setJSON([
+                'status' => 'error',
+                'message' => 'Gagal membuat invoice.',
+                'errors' => $invoiceModel->errors()
+            ]);
+        }
+    }
+
+    public function getDistributorInvoices($distributorId = null)
+    {
+        if (!$distributorId) {
+            return $this->fail('ID distributor diperlukan');
+        }
+
+        $db = \Config\Database::connect();
+        $builder = $db->table('invoices i');
+
+        $builder->select('
+        i.id as invoice_id,
+        i.invoice_number,
+        i.invoice_date,
+        i.amount_total,
+        i.status,
+        i.order_id,
+        o.order_code,
+        o.order_date,
+        o.agen_id,
+        agen.name as agen_name,
+        pabrik.name as pabrik_name
+    ');
+        $builder->join('orders o', 'o.id = i.order_id', 'left');
+        $builder->join('users agen', 'agen.id = o.agen_id', 'left');
+        $builder->join('users pabrik', 'pabrik.id = o.pabrik_id', 'left');
+
+        $builder->where('i.role', 'pabrik');
+        $builder->where('o.distributor_id', $distributorId);
+        $builder->orderBy('i.invoice_date', 'DESC');
+
+        $query = $builder->get();
+
+        return $this->respond([
+            'status' => 'success',
+            'invoices' => $query->getResultArray()
+        ]);
+    }
+
+    public function konfirmasi_pembayaran($id = null)
+    {
+        if (!$id) {
+            return $this->fail('ID invoice tidak ditemukan');
+        }
+
+        $data = $this->request->getJSON(true);
+        $status = strtolower($data['status'] ?? '');
+
+        if (!in_array($status, ['paid', 'unpaid'])) {
+            return $this->failValidationErrors('Status tidak valid');
+        }
+
+        $updateData = ['status' => $status];
+
+        if ($status === 'paid') {
+            $updateData['payment_date'] = date('Y-m-d H:i:s');
+        }
+
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $updated = $invoiceModel->update($id, $updateData);
+
+        if ($updated) {
+            if ($status === 'paid') {
+                $invoice = $invoiceModel->find($id);
+
+                $orderModel = new \App\Models\OrderModel();
+                $order = $orderModel->find($invoice['order_id'] ?? 0);
+
+                $notifModel = new \App\Models\NotificationModel();
+                $userModel = new \App\Models\UserModel();
+
+                $agenId = $invoice['agen_id'] ?? $order['agen_id'] ?? null;
+                $distributorId = $invoice['distributor_id'] ?? $order['distributor_id'] ?? null;
+
+                if ($agenId) {
+                    $notifModel->insert([
+                        'user_id'    => $agenId,
+                        'title'      => 'Pembayaran Dikonfirmasi',
+                        'message'    => 'Pembayaran Anda telah dikonfirmasi. Status tagihan anda sudah Lunas.',
+                        'type'       => 'invoice_paid',
+                        'is_read'    => 0,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+
+                if ($distributorId) {
+                    $notifModel->insert([
+                        'user_id'    => $distributorId,
+                        'title'      => 'Pembayaran Tagihan Diterima',
+                        'message'    => 'Pembayaran tagihan anda telah dikonfirmasi. Tagihan sudah lunas.',
+                        'type'       => 'invoice_paid_distributor',
+                        'is_read'    => 0,
+                        'created_at' => date('Y-m-d H:i:s'),
+                    ]);
+                }
+            }
+
+            return $this->respond([
+                'message' => 'Status pembayaran berhasil diperbarui',
+                'invoice_id' => $id,
+                'status' => $status
+            ]);
+        } else {
+            return $this->failServerError('Gagal memperbarui status pembayaran');
+        }
     }
 }

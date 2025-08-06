@@ -3,6 +3,20 @@ import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const safeDateStr = dateStr.replace(' ', 'T');
+    const date = new Date(safeDateStr);
+
+    if (isNaN(date)) return '-';
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
 const ShippingStatusTable = ({ orders }) => {
     const columns = [
         {
@@ -16,11 +30,15 @@ const ShippingStatusTable = ({ orders }) => {
             render: (value) => value?.toUpperCase(),
         },
         { header: 'Agen', key: 'agenName', render: (val) => val || '-' },
-        { header: 'Tanggal Kirim', key: 'orderDate' },
+        {
+            header: 'Tanggal Order',
+            key: 'order_date',
+            render: (value) => value ? formatDate(value) : '-',
+        },
         {
             header: 'Tanggal Pengiriman',
-            key: 'deliveryEstimate',
-            render: (value) => value || '-',
+            key: 'delivery_date',
+            render: (value) => value ? formatDate(value) : '-',
         },
         {
             header: 'Jumlah Produk',

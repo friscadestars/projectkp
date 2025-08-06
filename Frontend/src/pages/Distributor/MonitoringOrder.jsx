@@ -10,7 +10,6 @@ const MonitoringOrder = () => {
     const { handleNavigation } = useNavigation(distributorMenuItems);
     const { search, setSearch, filteredOrders } = useMonitoringOrderPage();
 
-    // ✅ Mapping untuk memastikan setiap order punya 'agentId'
     const mappedOrders = filteredOrders.map((o) => ({
         ...o,
         agentId: o.agen_id ?? o.agen?.id ?? null,
@@ -28,7 +27,7 @@ const MonitoringOrder = () => {
             <MonitoringOrderContent
                 search={search}
                 setSearch={setSearch}
-                filteredOrders={mappedOrders} // ✅ kirim hasil mapping
+                filteredOrders={mappedOrders}
             />
         </Layout>
     );

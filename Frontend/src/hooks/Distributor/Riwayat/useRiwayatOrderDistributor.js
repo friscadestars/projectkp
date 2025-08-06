@@ -20,7 +20,6 @@ export const useRiwayatOrderDistributor = () => {
         const fetchOrders = async () => {
             try {
                 const result = await fetchCompletedOrdersForHistory('distributor');
-                console.log("🧾 Riwayat Order dari Backend:", result);
                 setOrders(result);
             } catch (err) {
                 setError(err);

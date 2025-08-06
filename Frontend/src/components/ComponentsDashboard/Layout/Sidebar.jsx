@@ -39,7 +39,7 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                     fixed md:static z-40 bg-blue-900 text-white w-64 transform transition-transform duration-300
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     md:translate-x-0
-                    h-full md:h-screen overflow-y-auto
+                    min-h-screen overflow-y-auto
                     px-4 py-3
                 `}
             >

@@ -10,7 +10,7 @@ import { useNavigation } from '../../hooks/useNavigation';
 const RiwayatOrderDistributor = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [entries, setEntries] = useState(10);
-    const { orders, productPrices, handleDelete } = useRiwayatOrderDistributor();
+    const { orders, productPrices, handleDelete, loading } = useRiwayatOrderDistributor();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
     return (
@@ -30,6 +30,7 @@ const RiwayatOrderDistributor = () => {
                     orders={orders}
                     onDelete={handleDelete}
                     pabrikPrices={productPrices || []}
+                    loading={loading}
                 />
             </div>
         </Layout>

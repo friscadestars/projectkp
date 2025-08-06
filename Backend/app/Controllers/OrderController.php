@@ -12,6 +12,7 @@ use \Firebase\JWT\Key;
 use App\Models\RiwayatOrderModel;
 use App\Models\InvoiceModel;
 use App\Models\ProductPriceModel;
+use App\Models\NotificationModel;
 
 class OrderController extends ResourceController
 {
@@ -204,6 +205,44 @@ class OrderController extends ResourceController
             $order['distributor_id'] = $order['distributor_id'];
             // unset($order['agen_id'], $order['distributor_id']);
 
+            $notifModel = new NotificationModel();
+
+            // Notifikasi untuk Distributor
+            if (!empty($order['distributor_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['distributor_id'],
+                    'title'      => 'Pesanan Baru Masuk',
+                    'message'    => ($agen['name'] ?? 'Agen tidak dikenal') . ' telah membuat pesanan baru.',
+                    'type'       => 'order_created',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // Notifikasi untuk Agen (konfirmasi bahwa pesanan berhasil dibuat)
+            if (!empty($order['agen_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['agen_id'],
+                    'title'      => 'Pesanan Berhasil Dikirim',
+                    'message'    => 'Pesanan Anda berhasil dikirim ke distributor.',
+                    'type'       => 'order_sent',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // Notifikasi untuk Pabrik (jika sudah ditentukan sejak awal)
+            if (!empty($order['pabrik_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['pabrik_id'],
+                    'title'      => 'Permintaan Order Baru',
+                    'message'    => 'Distributor menerima pesanan dan mengarahkannya ke Anda.',
+                    'type'       => 'order_created_to_factory',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
             return $this->respondCreated([
                 'message' => 'Order berhasil dibuat',
                 'data'    => $order
@@ -330,6 +369,45 @@ class OrderController extends ResourceController
         $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
 
         // unset($order['agen_id'], $order['distributor_id']);
+        if (isset($payload['status'])) {
+            $notifModel = new NotificationModel();
+
+            // Notif ke agen
+            if (!empty($order['agen_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['agen_id'],
+                    'title'      => 'Status Pesanan Diperbarui',
+                    'message'    => 'Pesanan Anda sekarang berstatus: ' . $payload['status'],
+                    'type'       => 'order_updated',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // Notif ke distributor
+            if (!empty($order['distributor_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['distributor_id'],
+                    'title'      => 'Status Pesanan Diubah',
+                    'message'    => 'Pesanan dari' . ($agen['name'] ?? '-') . ' kini berstatus: ' . $payload['status'],
+                    'type'       => 'order_status_change',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+
+            // Notif ke pabrik (opsional, tergantung peran pabrik)
+            if (!empty($order['pabrik_id'])) {
+                $notifModel->insert([
+                    'user_id'    => $order['pabrik_id'],
+                    'title'      => 'Status Order dari Distributor Diubah',
+                    'message'    => 'Order dengan kode ' . $order['order_code'] . ' sekarang berstatus: ' . $payload['status'],
+                    'type'       => 'order_status_change',
+                    'is_read'    => 0,
+                    'created_at' => date('Y-m-d H:i:s'),
+                ]);
+            }
+        }
 
         return $this->respond([
             'message' => 'Order berhasil diperbarui',
