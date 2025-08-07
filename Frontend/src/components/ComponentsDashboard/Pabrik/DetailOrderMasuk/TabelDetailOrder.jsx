@@ -3,8 +3,8 @@ import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
 
 const getStatusClasses = (status) => {
     switch (status) {
-        case 'Menunggu Produksi': return 'bg-btn-danger text-white font-bold';
-        case 'Sedang Diproduksi': return 'bg-blue-500 text-white font-bold'; //
+        case 'Belum Dikirim': return 'bg-btn-danger text-white font-bold';
+        case 'Sedang Diproduksi': return 'bg-blue-500 text-white font-bold'; 
         case 'Diproduksi': return 'bg-yellow-500 text-white font-bold';
         case 'Dikirim': return 'bg-blue-500 text-white font-bold';
         case 'Selesai': return 'bg-green-700 text-white font-bold';
@@ -24,11 +24,36 @@ const TabelDetailOrder = ({ order }) => {
         {
             key: 'status',
             label: 'Status Order',
-            render: (value) => (
-                <span className={`px-3 py-1 rounded text-sm ${getStatusClasses(value)}`}>
-                    {value === 'approved' ? 'Belum Dikirim' : value}
-                </span>
-            ),
+            render: (value) => {
+                let displayText = value;
+
+                // Pemetaan status backend ke label yang ditampilkan
+                switch (value) {
+                    case 'approved':
+                        displayText = 'Belum Dikirim';
+                        break;
+                    case 'processing':
+                        displayText = 'Sedang Diproduksi';
+                        break;
+                    case 'produced':
+                        displayText = 'Diproduksi';
+                        break;
+                    case 'shipped':
+                        displayText = 'Dikirim';
+                        break;
+                    case 'completed':
+                        displayText = 'Selesai';
+                        break;
+                    default:
+                        displayText = value;
+                }
+
+                return (
+                    <span className={`px-3 py-1 rounded text-sm ${getStatusClasses(displayText)}`}>
+                        {displayText}
+                    </span>
+                );
+            }
         },
     ];
 
