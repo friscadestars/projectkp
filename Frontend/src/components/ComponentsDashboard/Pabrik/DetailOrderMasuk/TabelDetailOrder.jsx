@@ -18,7 +18,7 @@ const TabelDetailOrder = ({ order }) => {
     const columns = [
         { key: 'orderId', label: 'Order ID' },
         { key: 'distributorName', label: 'Distributor' },
-        { key: 'agentId', label: 'Agen ID' },
+        { key: 'agenName', label: 'Agen' },
         { key: 'alamat', label: 'Alamat Agen' },
         { key: 'orderDate', label: 'Tanggal Order' },
         {

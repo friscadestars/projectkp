@@ -8,22 +8,29 @@ export const useDashboardPabrik = () => {
         return new Date(year, month - 1, day);
     };
 
-    // Filter hanya order yang sedang diproduksi atau sudah dikirim
+    // Pemetaan status backend ke label UI
+    const statusMap = {
+        approved: 'Order Masuk',
+        processing: 'Sedang Diproduksi',
+        shipped: 'Dikirim',
+    };
+
+    // Filter orders yang tampil di tabel pengiriman aktif
     const filteredOrders = orders.filter(order =>
-        order.status === 'Diproduksi' || order.status === 'Dikirim'
+        order.status === 'processing' || order.status === 'shipped'
     );
 
-    // Urutkan order terbaru di atas
     const sortedOrders = [...filteredOrders].sort((a, b) => {
         return parseDate(b.orderDate) - parseDate(a.orderDate);
     });
 
-    // Summary cards untuk Dashboard Pabrik
+    // Summary cards untuk dashboard
     const summaryCards = [
-        { title: 'Order Masuk', value: orders.filter(o => o.status === 'Tertunda').length },
-        { title: 'Sedang Diproduksi', value: orders.filter(o => o.status === 'Diproduksi').length },
-        { title: 'Dikirim', value: orders.filter(o => o.status === 'Dikirim').length },
+        { title: 'Order Masuk', value: orders.filter(o => o.status === 'approved').length },
+        { title: 'Sedang Diproduksi', value: orders.filter(o => o.status === 'processing').length },
+        { title: 'Dikirim', value: orders.filter(o => o.status === 'shipped').length },
     ];
 
     return { sortedOrders, summaryCards };
 };
+

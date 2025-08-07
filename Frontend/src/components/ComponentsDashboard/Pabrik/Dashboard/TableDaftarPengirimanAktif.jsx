@@ -1,47 +1,35 @@
 import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge'; 
 
 const TableDaftarPengirimanAktif = ({ orders }) => {
   const columns = [
     { key: 'no', header: 'No' },
     { key: 'orderId', header: 'Order ID' },
-    { key: 'agentId', header: 'Agen ID' },
-    { key: 'distributorId', header: 'Distributor ID' },
-    { key: 'tanggalKirim', header: 'Tanggal Kirim' },
-    { key: 'jumlahProduk', header: 'Jumlah Produk' },
+    { key: 'agenName', header: 'Agen' },
+    { key: 'distributor', header: 'Distributor' },
+    { key: 'delivery_date', header: 'Tanggal Kirim' },
+    { key: 'products', header: 'Jumlah Produk' },
     { key: 'noResi', header: 'No. Resi' },
     {
       key: 'status',
       header: 'Status Order',
-      render: (value) => {
-        const badgeColor =
-          value === 'Dikirim'
-            ? 'bg-cyan-500 text-white'
-            : value === 'Diterima'
-            ? 'bg-green-500 text-white'
-            : value === 'Diproduksi'
-            ? 'bg-yellow-500 text-primary-darkest'
-            : '';
-
-        return (
-          <span className={`px-3 py-1 rounded text-sm font-bold ${badgeColor}`}>
-            {value}
-          </span>
-        );
-      },
+      render: (value) => <StatusBadge status={value} />,
     },
   ];
 
   const data = orders.map((order, index) => ({
     no: index + 1,
     orderId: order.orderId,
-    agentId: order.agentId,
-    distributorId: order.distributorId,
-    tanggalKirim: order.tanggalKirim,
-    jumlahProduk: order.jumlahProduk,
-    noResi: order.noResi || '-',
+    agenName: order.agenName,
+    distributor: order.distributor,
+    delivery_date: order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : '-',
+    products: order.products.length,
+    noResi: order.noResi,
     status: order.status,
   }));
+
+  console.log('orders:', orders);
 
   return (
     <div className="mt-6">
