@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Layout from '../../Components/ComponentsDashboard/Layout/Layout.jsx';
 import { pabrikMenuItems } from '../../Components/ComponentsDashboard/Constants/menuItems.js';
-import { useDaftarOrderMasuk } from '../../hooks/Pabrik/useDaftarOrderMasuk.js';
+import { useDaftarOrderMasuk } from '../../hooks/Pabrik/DaftarOrder/useDaftarOrderMasuk.js';
 import { useNavigation } from '../../hooks/useNavigation.js';
 import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader.jsx';
 import TableDaftarOrderMasuk from '../../components/ComponentsDashboard/Pabrik/DetailOrderMasuk/TableDaftarOrderMasuk.jsx';

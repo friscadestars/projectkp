@@ -13,11 +13,24 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         {
             label: 'Status Order',
             key: 'status',
-            render: (value) => (
-                <span className="bg-btn-danger text-white px-3 py-1 rounded text-sm">
-                    {value === 'approved' ? 'Belum Dikirim' : value}
-                </span>
-            ),
+            render: (value) => {
+                let label = value;
+                let bgClass = 'bg-gray-400';
+
+                if (value === 'approved') {
+                    label = 'Belum Dikirim';
+                    bgClass = 'bg-btn-danger';
+                } else if (value === 'processing') {
+                    label = 'Sedang Diproduksi';
+                    bgClass = 'bg-blue-500';
+                }
+
+                return (
+                    <span className={`${bgClass} text-white px-3 py-1 rounded text-sm`}>
+                        {label}
+                    </span>
+                );
+            }
         },
         {
             label: 'Aksi',

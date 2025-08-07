@@ -134,27 +134,51 @@ export async function fetchOrderById(idOrCode) {
 }
 
 // Update status by ID (PUT /orders/:id)
+// export async function updateOrderStatus(id, status) {
+//     const order = await fetchOrderById(id); // Ambil dulu data lengkap order-nya
+
+//     // Cek apakah statusnya delivered
+//     const isDelivered = status.toLowerCase() === 'delivered';
+
+//     // Format waktu saat ini untuk accepted_at (format: YYYY-MM-DD HH:mm:ss)
+//     const now = new Date();
+//     const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:mm:ss"
+
+//     const payload = {
+//         agen_id: order.agentId,
+//         distributor_id: order.distributorId,
+//         pabrik_id: 1,
+//         order_date: order.orderDate + ' 00:00:00',
+//         note: order.alamat,
+//         status: status,
+//         ...(isDelivered && { accepted_at: acceptedAt }) // hanya kirim accepted_at jika status = delivered
+//     };
+
+//     const res = await fetch(`${API_BASE}/orders/${id}`, {
+//         method: 'PUT',
+//         headers: {
+//             'Content-Type': 'application/json',
+//             ...getAuthHeader(),
+//         },
+//         body: JSON.stringify(payload),
+//     });
+
+//     if (!res.ok) throw new Error('Gagal update status order');
+
+//     return res.json();
+// }
+
 export async function updateOrderStatus(id, status) {
-    const order = await fetchOrderById(id); // Ambil dulu data lengkap order-nya
+    const payload = { status };
 
-    // Cek apakah statusnya delivered
-    const isDelivered = status.toLowerCase() === 'delivered';
+    // Kalau statusnya delivered, kirim accepted_at juga
+    if (status.toLowerCase() === 'delivered') {
+        const now = new Date();
+        const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' ');
+        payload.accepted_at = acceptedAt;
+    }
 
-    // Format waktu saat ini untuk accepted_at (format: YYYY-MM-DD HH:mm:ss)
-    const now = new Date();
-    const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:mm:ss"
-
-    const payload = {
-        agen_id: order.agentId,
-        distributor_id: order.distributorId,
-        pabrik_id: 1,
-        order_date: order.orderDate + ' 00:00:00',
-        note: order.alamat,
-        status: status,
-        ...(isDelivered && { accepted_at: acceptedAt }) // hanya kirim accepted_at jika status = delivered
-    };
-
-    const res = await fetch(`${API_BASE}/orders/${id}`, {
+    const res = await fetch(`${API_BASE}/orders/${id}/status`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -163,7 +187,10 @@ export async function updateOrderStatus(id, status) {
         body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error('Gagal update status order');
+    if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || 'Gagal update status order');
+    }
 
     return res.json();
 }

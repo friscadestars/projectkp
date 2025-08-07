@@ -682,4 +682,26 @@ class OrderController extends ResourceController
 
         return $this->respond($orders);
     }
+
+    // Tambahan untuk update status order dari pabrik
+    public function updateOrderStatus($orderId)
+    {
+        $db = \Config\Database::connect();
+        $json = $this->request->getJSON();
+
+        if (!isset($json->status)) {
+            return $this->failValidationError('Status tidak boleh kosong.');
+        }
+
+        $update = $db->table('orders')
+            ->where('id', $orderId)
+            ->update(['status' => $json->status]);
+
+        if ($update) {
+            return $this->respond(['message' => 'Status berhasil diupdate.']);
+        } else {
+            return $this->fail('Gagal mengupdate status.');
+        }
+    }
+
 }

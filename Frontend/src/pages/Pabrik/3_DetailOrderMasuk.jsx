@@ -7,12 +7,19 @@ import IconOrderMasuk from '../../assets/IconHeader/IconOrderMasuk.png';
 import TabelDetailOrder from '../../components/ComponentsDashboard/Pabrik/DetailOrderMasuk/TabelDetailOrder.jsx';
 import TabelRincianProduk from "../../components/ComponentsDashboard/Pabrik/DetailOrderMasuk/TableRincianProduk.jsx";
 
+import { useDetailOrderPabrik } from '../../hooks/Pabrik/DaftarOrder/useDetailOrderPabrik.js';
+
 const DetailOrderMasuk = () => {
     const location = useLocation();
-    const { order } = location.state || {};
+    //const { order } = location.state || {};
     const [showDropdown, setShowDropdown] = useState(false);
-
     const { handleNavigation } = useNavigation(pabrikMenuItems);
+
+    const { order: initialOrder } = location.state || {};
+
+    // Gunakan hook custom
+    const { order, mulaiProduksi } = useDetailOrderPabrik(initialOrder);
+
 
     if (!order) {
         return <div className="p-8 text-red-500">Order tidak ditemukan.</div>;
@@ -33,7 +40,10 @@ const DetailOrderMasuk = () => {
 
             <div className="bg-white border-2 border-gray-200 shadow-lg rounded-xl p-6 space-y-6">
                 <TabelDetailOrder order={order} />
-                <TabelRincianProduk products={order.products} />
+                {/* <TabelRincianProduk products={order.products} /> */}
+
+                 <TabelRincianProduk products={order.products} onMulaiProduksi={mulaiProduksi} />
+                 
             </div>
         </Layout>
     );

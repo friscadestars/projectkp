@@ -4,6 +4,7 @@ import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
 const getStatusClasses = (status) => {
     switch (status) {
         case 'Menunggu Produksi': return 'bg-btn-danger text-white font-bold';
+        case 'Sedang Diproduksi': return 'bg-blue-500 text-white font-bold'; //
         case 'Diproduksi': return 'bg-yellow-500 text-white font-bold';
         case 'Dikirim': return 'bg-blue-500 text-white font-bold';
         case 'Selesai': return 'bg-green-700 text-white font-bold';

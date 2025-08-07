@@ -32,6 +32,10 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     // Orders
     $routes->get('orders', 'OrderController::index');
 
+    // Tambahan untuk update status order dari pabrik
+    $routes->patch('orders/(:num)/status', 'OrderController::updateOrderStatus/$1');
+    $routes->put('orders/(:num)/status', 'OrderController::updateOrderStatus/$1');
+
     // letakkan semua path “spesifik” SEBELUM (:segment) supaya tidak ketabrak
     $routes->get('/orders/monitoring', 'OrderController::getMonitoringOrders');
     $routes->get('orders/find/by-agen-no', 'OrderController::findByAgenAndNo');
