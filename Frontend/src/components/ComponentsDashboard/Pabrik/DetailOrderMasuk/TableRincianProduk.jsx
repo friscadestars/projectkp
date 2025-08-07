@@ -16,7 +16,7 @@ const TabelRincianProduk = ({ products = [] }) => {
             <h2 className="text-lg font-semibold mb-1.5">Rincian Produk</h2>
 
             {/* Table wrapper */}
-            <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
+            <div className="border border-gray-200 shadow overflow-hidden">
                 <ReusableTable
                     columns={columns}
                     data={products}

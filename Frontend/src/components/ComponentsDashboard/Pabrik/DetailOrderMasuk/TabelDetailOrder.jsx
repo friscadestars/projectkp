@@ -16,16 +16,16 @@ const TabelDetailOrder = ({ order }) => {
 
     const columns = [
         { key: 'orderId', label: 'Order ID' },
-        { key: 'distributor', label: 'Distributor' },
+        { key: 'distributorName', label: 'Distributor' },
         { key: 'agentId', label: 'Agen ID' },
-        { key: 'agenAddress', label: 'Alamat Agen' },
+        { key: 'alamat', label: 'Alamat Agen' },
         { key: 'orderDate', label: 'Tanggal Order' },
         {
             key: 'status',
             label: 'Status Order',
             render: (value) => (
                 <span className={`px-3 py-1 rounded text-sm ${getStatusClasses(value)}`}>
-                    {value}
+                    {value === 'approved' ? 'Belum Dikirim' : value}
                 </span>
             ),
         },
@@ -36,7 +36,7 @@ const TabelDetailOrder = ({ order }) => {
     return (
         <div>
             <h2 className="text-lg font-semibold mb-1.5">Detail Order</h2>
-            <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
+            <div className=" border border-gray-200 shadow overflow-hidden">
                 <ReusableTable
                     columns={columns}
                     data={data}

@@ -14,7 +14,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
             label: 'Status Order',
             key: 'status',
             render: (value) => (
-                <span className="bg-btn-danger text-white px-3 py-1 rounded text-xs">
+                <span className="bg-btn-danger text-white px-3 py-1 rounded text-sm">
                     {value === 'approved' ? 'Belum Dikirim' : value}
                 </span>
             ),
@@ -40,7 +40,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     }));
 
     return (
-        <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
+        <div className="border border-gray-200 shadow overflow-hidden">
             <ReusableTable
                 columns={columns}
                 data={dataWithIndex}
