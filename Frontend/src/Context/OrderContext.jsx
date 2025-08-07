@@ -71,6 +71,7 @@ export const OrderProvider = ({ children }) => {
             const normalized = ordersRaw.map(order => ({
                 ...order,
                 id: order.id,
+                pabrikId: order.pabrik_id, // ⬅️ Tambahan penting!
                 status: normalizeStatus(order.status),
                 distributorId: order.distributor_id,
                 agentId: order.agen_id,
@@ -113,6 +114,7 @@ export const OrderProvider = ({ children }) => {
 
             setOrdersMasukPabrik(sorted.filter(order =>
                 ['approved'].includes(order.status)
+                 //order.status === 'approved' && (order.pabrikId === null || order.pabrikId === undefined)
             ));
 
         } catch (error) {

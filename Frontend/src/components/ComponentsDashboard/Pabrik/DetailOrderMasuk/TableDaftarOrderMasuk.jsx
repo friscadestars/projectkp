@@ -5,9 +5,9 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     const columns = [
         { label: 'No', key: 'no' },
         { label: 'Order ID', key: 'orderId' },
-        { label: 'Distributor', key: 'distributor' },
+        { label: 'Distributor', key: 'distributorName' },
         { label: 'Agen ID', key: 'agentId' },
-        { label: 'Alamat Agen', key: 'agentAddress' },
+        { label: 'Alamat Agen', key: 'alamat' },
         { label: 'Jumlah', key: 'jumlahProduk' },
         { label: 'Tanggal Order', key: 'orderDate' },
         {
@@ -15,7 +15,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
             key: 'status',
             render: (value) => (
                 <span className="bg-btn-danger text-white px-3 py-1 rounded text-xs">
-                    {value}
+                    {value === 'approved' ? 'Belum Dikirim' : value}
                 </span>
             ),
         },
@@ -33,13 +33,10 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         },
     ];
 
-    // ✅ Ambil semua order yang statusnya 'Tertunda' (berarti baru dikirim ke pabrik)
-    const filteredOrders = orders.filter(order => order.status === 'Tertunda');
-
-    const dataWithIndex = filteredOrders.map((order, idx) => ({
+    const dataWithIndex = orders.map((order, idx) => ({
         ...order,
         no: idx + 1,
-        jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0
+        jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0,
     }));
 
     return (
