@@ -6,7 +6,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         { label: 'No', key: 'no' },
         { label: 'Order ID', key: 'orderId' },
         { label: 'Distributor', key: 'distributorName' },
-        { label: 'Agen ID', key: 'agentId' },
+        { label: 'Agen', key: 'agenName' },
         { label: 'Alamat Agen', key: 'alamat' },
         { label: 'Jumlah', key: 'jumlahProduk' },
         { label: 'Tanggal Order', key: 'orderDate' },
