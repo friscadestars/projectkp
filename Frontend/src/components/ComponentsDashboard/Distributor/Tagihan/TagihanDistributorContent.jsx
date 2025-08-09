@@ -12,7 +12,7 @@ const TagihanDistributorContent = ({ searchTerm, setSearchTerm, orders, loading 
                 <SearchInput
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari"
+                    placeholder="Cari Order ID"
                 />
             </div>
 

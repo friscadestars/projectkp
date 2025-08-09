@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import * as XLSX from 'xlsx';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
+import FilterBarRiwayat from '../../Common/FilterBarRiwayat';
 
 const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabrikPrices, loading }) => {
     const navigate = useNavigate();
+
+    // Optional: simpan data filtered untuk export jika ada filter
+    const [filteredOrders, setFilteredOrders] = useState([]);
+
+    useEffect(() => {
+        setFilteredOrders(orders);
+    }, [orders]);
 
     const handleDelete = (orderId) => {
         Swal.fire({
@@ -51,6 +60,31 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabri
         const year = date.getFullYear();
 
         return `${day}/${month}/${year}`;
+    };
+
+    // Fungsi export excel
+    const handleExportExcel = () => {
+        if (!filteredOrders || filteredOrders.length === 0) {
+            Swal.fire('Info', 'Tidak ada data untuk diexport', 'info');
+            return;
+        }
+
+        // Map data ke format yang diinginkan
+        const exportData = filteredOrders.map(order => ({
+            'Order ID': order.orderCode?.toUpperCase(),
+            'Agen': order.agenName,
+            'Tanggal Order': formatDate(order.orderDate),
+            'Tanggal Terima': formatDate(order.receivedDate),
+            'Total Harga Pabrik': order.totalHargaPabrik ? `Rp ${Number(order.totalHargaPabrik).toLocaleString('id-ID')}` : '-',
+            'Total Harga Jual': order.hargaJual ? `Rp ${Number(order.hargaJual).toLocaleString('id-ID')}` : '-',
+            'Status Pembayaran': getStatusPembayaran(null, order),
+            'Status Order': order.status,
+        }));
+
+        const worksheet = XLSX.utils.json_to_sheet(exportData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'RiwayatOrder');
+        XLSX.writeFile(workbook, 'riwayat_order.xlsx');
     };
 
     const columns = [
@@ -117,45 +151,24 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabri
 
     return (
         <div>
-            {/* Filter Bar */}
-            <div className="mb-4">
-                <div className="flex items-center gap-2 mb-2">
-                    <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
-                    <span>-</span>
-                    <input type="date" className="border border-gray-300 rounded px-2 py-1 text-sm" />
-                    <button className="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold">Filter</button>
-                    <button className="bg-blue-900 text-white px-3 py-1 rounded text-sm font-bold">Export Excel</button>
-                </div>
-                <div className="flex items-center gap-2">
-                    <label htmlFor="entries" className="text-sm">Show</label>
-                    <select
-                        id="entries"
-                        value={entries}
-                        onChange={(e) => onEntriesChange(Number(e.target.value))}
-                        className="border border-gray-300 rounded px-2 py-1 text-sm"
-                    >
-                        <option value={5}>5</option>
-                        <option value={10}>10</option>
-                        <option value={25}>25</option>
-                        <option value={50}>50</option>
-                        <option value={100}>100</option>
-                    </select>
-                    <span className="text-sm">entries</span>
-                </div>
-            </div>
+            <FilterBarRiwayat
+                entries={entries}
+                onEntriesChange={onEntriesChange}
+                onFilterDate={() => { }}
+                onExportExcel={handleExportExcel}
+            />
 
-            {/* Table */}
             <div className="mt-4">
                 {loading ? (
                     <p className="text-center text-gray-500 text-sm">Memuat data...</p>
                 ) : (
                     <ReusableTable
                         columns={columns}
-                        data={orders}
+                        data={filteredOrders}
                         footer={
                             <tr className="px-4 py-3 text-right text-gray-600 font-medium">
                                 <td colSpan={columns.length} className="py-2 px-4 text-right">
-                                    Total Riwayat Order: {orders.length}
+                                    Total Riwayat Order: {filteredOrders.length}
                                 </td>
                             </tr>
                         }

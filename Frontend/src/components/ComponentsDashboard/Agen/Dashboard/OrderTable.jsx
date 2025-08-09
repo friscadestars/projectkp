@@ -14,38 +14,17 @@ const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
     const navigate = useNavigate();
 
     const columns = [
-        {
-            header: 'No',
-            key: 'no',
-            render: (_, __, index) => index + 1
-        },
-        {
-            header: 'Order ID',
-            key: 'orderId',
-            render: (value) => value?.toUpperCase(),
-        },
+        { header: 'No', key: 'no', render: (_, __, index) => index + 1 },
+        { header: 'Order ID', key: 'orderId', render: (value) => value?.toUpperCase() },
         { header: 'Distributor', key: 'distributor' },
-        {
-            header: 'Tanggal Order',
-            key: 'orderDate',
-            render: parseDate,
-        },
-        {
-            header: 'Tanggal Pengiriman',
-            key: 'deliveryEstimate',
-            render: (value) => value || '-',
-        },
+        { header: 'Tanggal Order', key: 'orderDate', render: parseDate },
+        { header: 'Tanggal Pengiriman', key: 'deliveryEstimate', render: (value) => value || '-' },
         {
             header: 'Jumlah Produk',
             key: 'products',
-            render: (products) =>
-                Number(products?.reduce((sum, p) => sum + p.quantity, 0)) || 0
+            render: (products) => Number(products?.reduce((sum, p) => sum + p.quantity, 0)) || 0
         },
-        {
-            header: 'Status Order',
-            key: 'status',
-            render: (value) => <StatusBadge status={value} />,
-        },
+        { header: 'Status Order', key: 'status', render: (value) => <StatusBadge status={value} /> },
         ...(showAction
             ? [{
                 header: 'Aksi',
@@ -53,7 +32,7 @@ const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
                 render: (_, row) => (
                     <button
                         onClick={() => navigate(`${detailPath}/${row.orderId}`)}
-                        className="button-detail"
+                        className="px-3 py-1 rounded bg-blue-500 text-white hover:bg-blue-600 text-xs"
                     >
                         Detail
                     </button>
@@ -63,13 +42,16 @@ const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
     ];
 
     return (
-        <div className="overflow-x-auto">
+        <div className="flex flex-col lg:flex-row">
             <ReusableTable
                 columns={columns}
                 data={orders}
                 footer={
                     <tr>
-                        <td colSpan={columns.length} className="px-4 py-3 text-right font-medium text-gray-600">
+                        <td
+                            colSpan={columns.length}
+                            className="px-4 py-3 text-right font-medium text-gray-600"
+                        >
                             Total Pesanan Terbaru: {orders.length}
                         </td>
                     </tr>

@@ -80,7 +80,7 @@ export const useValidasiOrderPage = () => {
                 }
             }
 
-            await updateOrderStatus(orderId, 'approved');
+            await updateOrderStatus(orderId, 'approved', 1);
 
             Swal.fire({
                 icon: 'success',

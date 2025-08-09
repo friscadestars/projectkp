@@ -18,7 +18,7 @@ const KirimOrderKePabrikContent = ({
                 <SearchInput
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="Cari Order ID / Agen / Distributor"
+                    placeholder="Cari Order ID"
                     className="mb-4"
                 />
 

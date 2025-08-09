@@ -36,11 +36,13 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
             {/* Sidebar */}
             <aside
                 className={`
-                    fixed md:static z-40 bg-blue-900 text-white w-64 transform transition-transform duration-300
+                    fixed md:static z-40 bg-blue-900 text-white 
+                    w-48 sm:w-52 md:w-56 lg:w-60
+                    transform transition-transform duration-300
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     md:translate-x-0
                     min-h-screen overflow-y-auto
-                    px-4 py-3
+                    px-3 sm:px-4 py-3
                 `}
             >
                 {/* Close button untuk mobile */}
@@ -60,21 +62,34 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                             item.subItems?.some(sub => sub.label === activeLabel);
 
                         return (
-                            <li key={index} className="mb-2">
+                            <li key={index} className="mb-1 sm:mb-2">
                                 <div
-                                    className={`flex items-center justify-between px-2 py-2 rounded cursor-pointer hover:bg-blue-800 ${isActive ? 'bg-blue-800' : ''}`}
+                                    className={`flex items-center justify-between px-2 py-1 rounded cursor-pointer hover:bg-blue-800 transition-colors duration-200 ${isActive ? 'bg-blue-800' : ''}`}
                                     onClick={() => {
                                         if (item.subItems) {
                                             toggleMenu(item.label);
                                         } else {
                                             onNavigate(item.label);
-                                            setIsSidebarOpen(false); // Tutup sidebar di mobile
+                                            setIsSidebarOpen(false);
                                         }
                                     }}
                                 >
                                     <div className="flex items-center space-x-3">
-                                        <img src={item.icon} alt={item.label} className="w-16 h-19 object-contain" />
-                                        <span className="font-medium text-sm md:text-base">{item.label}</span>
+                                        <img
+                                            src={item.icon}
+                                            alt={item.label}
+                                            className="
+    w-10 h-10          /* default: mobile kecil */
+    sm:w-10 sm:h-10   /* tablet */
+    md:w-12 md:h-12   /* desktop awal */
+    lg:w-13 lg:h-13   /* desktop besar (custom kalau ada) */
+    xl:w-15 xl:h-16   /* desktop extra besar (custom kalau ada) */
+    object-contain
+  "
+                                        />
+                                        <span className="font-medium text-xs sm:text-sm md:text-base">
+                                            {item.label}
+                                        </span>
                                     </div>
 
                                     {item.subItems && (
@@ -87,11 +102,11 @@ const Sidebar = ({ menuItems, activeLabel, onNavigate, isSidebarOpen, setIsSideb
                                 </div>
 
                                 {item.subItems && openMenus[item.label] && (
-                                    <ul className="ml-6 mt-1 space-y-1">
+                                    <ul className="ml-4 sm:ml-6 mt-1 space-y-1">
                                         {item.subItems.map((subItem, subIndex) => (
                                             <li
                                                 key={subIndex}
-                                                className={`cursor-pointer px-4 py-1 rounded hover:bg-blue-700 text-sm md:text-base ${subItem.label === activeLabel
+                                                className={`cursor-pointer px-3 sm:px-4 py-1 rounded hover:bg-blue-700 text-xs sm:text-sm md:text-base ${subItem.label === activeLabel
                                                     ? 'bg-blue-700 font-semibold'
                                                     : ''
                                                     }`}

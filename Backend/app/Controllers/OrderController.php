@@ -212,7 +212,7 @@ class OrderController extends ResourceController
             if (!empty($order['distributor_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['distributor_id'],
-                    'title'      => 'Pesanan Baru Masuk',
+                    'title'      => 'Pesanan Baru Masuk, Ayo Lihat Pesananmu!',
                     'message'    => ($agen['name'] ?? 'Agen tidak dikenal') . ' telah membuat pesanan baru.',
                     'type'       => 'order_created',
                     'is_read'    => 0,
@@ -225,7 +225,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['agen_id'],
                     'title'      => 'Pesanan Berhasil Dikirim',
-                    'message'    => 'Pesanan Anda berhasil dikirim ke distributor.',
+                    'message'    => 'Selamat! Pesanan Anda berhasil dikirim ke distributor.',
                     'type'       => 'order_sent',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -237,7 +237,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['pabrik_id'],
                     'title'      => 'Permintaan Order Baru',
-                    'message'    => 'Distributor menerima pesanan dan mengarahkannya ke Anda.',
+                    'message'    => 'Pesanan baru dari distributor! Ayo Lihat.',
                     'type'       => 'order_created_to_factory',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -377,7 +377,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['agen_id'],
                     'title'      => 'Status Pesanan Diperbarui',
-                    'message'    => 'Pesanan Anda sekarang berstatus: ' . $payload['status'],
+                    'message'    => 'Selamat pesanan Anda sekarang berstatus: ' . $payload['status'],
                     'type'       => 'order_updated',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -389,7 +389,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['distributor_id'],
                     'title'      => 'Status Pesanan Diubah',
-                    'message'    => 'Pesanan dari' . ($agen['name'] ?? '-') . ' kini berstatus: ' . $payload['status'],
+                    'message'    => 'Pesanan dari ' . ($agen['name'] ?? '-') . ' kini berstatus: ' . $payload['status'],
                     'type'       => 'order_status_change',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -690,7 +690,7 @@ class OrderController extends ResourceController
         $json = $this->request->getJSON();
 
         if (!isset($json->status)) {
-            return $this->failValidationError('Status tidak boleh kosong.');
+            return $this->failValidationErrors('Status tidak boleh kosong.');
         }
 
         $update = $db->table('orders')
@@ -703,5 +703,4 @@ class OrderController extends ResourceController
             return $this->fail('Gagal mengupdate status.');
         }
     }
-
 }

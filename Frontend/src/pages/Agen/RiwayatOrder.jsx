@@ -21,7 +21,6 @@ const RiwayatOrder = () => {
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [allOrders, setAllOrders] = useState([]);
 
-    // Simpan semua data saat pertama kali load
     useEffect(() => {
         if (orderTableProps.orders) {
             setFilteredOrders(orderTableProps.orders);
