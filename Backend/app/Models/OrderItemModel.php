@@ -13,6 +13,7 @@ class OrderItemModel extends Model
         'id',
         'order_id',
         'product_name',
+        'kode_produk',
         'quantity',
         'unit_price',
         'address'

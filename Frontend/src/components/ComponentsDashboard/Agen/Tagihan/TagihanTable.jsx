@@ -7,7 +7,7 @@ const getStatusPembayaranClass = (status) => {
     switch ((status || '').toLowerCase()) {
         case 'lunas':
             return 'status-badge payment-lunas';
-        case 'belum lunas':
+        case 'belum dibayar':
             return 'status-badge payment-belum-lunas';
         default:
             return 'status-badge payment-unknown';
@@ -27,16 +27,15 @@ const formatDate = (value) => {
     });
 };
 
-const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- default invoices dan searchTerm
+const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
     const navigate = useNavigate();
 
-    // Pastikan invoices adalah array, jika tidak return array kosong untuk menghindari error
     const safeInvoices = Array.isArray(invoices) ? invoices : [];
 
     const filtered = safeInvoices
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['approved', 'disetujui', 'dikirim', 'shipped', 'selesai', 'delivered'];
+            const allowed = ['diproses', 'processing', 'dikirim', 'shipped', 'diterima', 'delivered', 'paid', 'unpaid',];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -92,8 +91,10 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {  // <-- def
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
             render: (_, row) => {
-                const status = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'Belum Lunas';
-                return <span className={getStatusPembayaranClass(status)}>{status}</span>;
+                const rawStatus = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'unpaid';
+                const displayStatus = rawStatus === 'paid' ? 'Lunas' : 'Belum Dibayar';
+
+                return <span className={getStatusPembayaranClass(displayStatus)}>{displayStatus}</span>;
             },
         },
         {

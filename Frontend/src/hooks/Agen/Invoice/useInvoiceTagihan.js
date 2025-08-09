@@ -17,18 +17,51 @@ const useInvoiceTagihan = () => {
 
     useEffect(() => {
         const loadData = async () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                console.warn('⚠️ Token tidak ditemukan di localStorage');
+                return;
+            }
             if (location.state?.tagihan) {
                 const tagihan = location.state.tagihan;
-
-                // Cek status dari tagihan yang dilempar via location.state
                 const status = tagihan.status?.toLowerCase();
                 const statusPembayaran = status === 'paid' ? 'Lunas' : 'Belum Lunas';
 
-                // Gabungkan data dan simpan
+                // Ambil user pengirim (dari distributor_id atau pabrik_id)
+                const senderId = tagihan.distributorId || tagihan.distributor_id;
+                let pengirim = null;
+
+                if (senderId) {
+                    try {
+                        const userRes = await fetch(`http://localhost:8080/api/users/${senderId}`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${localStorage.getItem('token')}`
+                            }
+                        });
+
+                        if (userRes.ok) {
+                            const userJson = await userRes.json();
+                            console.log('🔍 FULL USER JSON:', userJson);
+                            pengirim = userJson && userJson.id ? userJson : null;
+                            console.log('DATA PENGIRIM:', pengirim);
+                        }
+                    } catch (e) {
+                        console.error('Gagal ambil pengirim:', e);
+                    }
+                }
+
                 setInvoiceData({
                     ...tagihan,
                     statusPembayaran,
                     items: tagihan.items || [],
+                    pengirim_bank: pengirim
+                        ? {
+                            nama_bank: pengirim.nama_bank,
+                            nama_rekening: pengirim.nama_rekening,
+                            rekening: pengirim.rekening
+                        }
+                        : null // ← SIMPAN DATA BANK DI SINI
                 });
 
                 setStatusPembayaran(statusPembayaran);
@@ -50,13 +83,41 @@ const useInvoiceTagihan = () => {
                         ? 'Lunas'
                         : 'Belum Lunas';
 
-                    // Gabungkan semua data dari API
+                    // Ambil user pengirim
+                    const senderId = invoice.distributorId || invoice.distributor_id || invoice.pabrikId || invoice.pabrik_id;
+                    let pengirim = null;
+
+                    if (senderId) {
+                        try {
+                            const userRes = await fetch(`http://localhost:8080/api/users/${senderId}`, {
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                                }
+                            });
+
+                            if (userRes.ok) {
+                                const userJson = await userRes.json();
+                                pengirim = userJson.data || null;
+                            }
+                        } catch (e) {
+                            console.error('Gagal ambil pengirim:', e);
+                        }
+                    }
+
                     const processedData = {
                         ...order,
                         tagihan: {
                             ...invoice,
                             items: items
                         },
+                        pengirim_bank: pengirim
+                            ? {
+                                nama_bank: pengirim.nama_bank,
+                                nama_rekening: pengirim.nama_rekening,
+                                rekening: pengirim.rekening
+                            }
+                            : null,
                         statusPembayaran
                     };
 
@@ -77,7 +138,6 @@ const useInvoiceTagihan = () => {
                 navigate('/agen/tagihan');
             }
         };
-
         loadData();
     }, [location.state, id, navigate]);
 

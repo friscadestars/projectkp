@@ -7,6 +7,7 @@ const OrderForm = ({
     setProduk, setJumlah, setHarga, setAlamat,
     handleAddProduk, handleDeleteProduk,
     orderId, agentName, distributorName, orderDate,
+    produkListDropdown, // ✅ TAMBAHKAN INI
     children
 }) => {
     return (
@@ -54,13 +55,22 @@ const OrderForm = ({
 
             {/* Tambah Produk */}
             <div className="grid grid-cols-4 gap-4 items-center border-gray-300">
-                <input
-                    type="text"
-                    placeholder="Nama Produk"
-                    value={produk}
-                    onChange={(e) => setProduk(e.target.value)}
+                <select
+                    value={produk?.kode_produk || ''}
+                    onChange={(e) => {
+                        const selected = produkListDropdown.find(p => p.kode_produk === e.target.value);
+                        setProduk(selected || null);
+                    }}
                     className={`border border-gray-400 px-3 py-2 rounded text-sm ${produk ? 'text-black' : 'text-gray-400'}`}
-                />
+                >
+                    <option value="">Pilih Produk</option>
+                    {produkListDropdown.map((item) => (
+                        <option key={item.kode_produk} value={item.kode_produk}>
+                            {item.nama_produk}
+                        </option>
+                    ))}
+                </select>
+
                 <input
                     type="number"
                     placeholder="Jumlah"
@@ -97,7 +107,7 @@ const OrderForm = ({
                     <tbody>
                         {produkList.map((item, index) => (
                             <tr key={index} className="border-b">
-                                <td className="px-4 py-2">{item.nama || '-'}</td>
+                                <td className="px-4 py-2">{item.nama_produk || '-'}</td>
                                 <td className="px-4 py-2">{item.jumlah || '-'}</td>
                                 <td className="px-4 py-2">
                                     {typeof item.harga === "number"

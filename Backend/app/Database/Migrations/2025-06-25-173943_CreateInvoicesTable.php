@@ -15,12 +15,6 @@ class CreateInvoicesTable extends Migration
                 'unsigned'       => true,
                 'auto_increment' => true
             ],
-            'order_id' => [ // Ganti dari order_id ke order_item_id
-                'type'       => 'INT',
-                'constraint' => 11,
-                'unsigned'   => true,
-                'null'       => false
-            ],
             'invoice_number' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 50,
@@ -47,7 +41,7 @@ class CreateInvoicesTable extends Migration
             ],
             'status' => [
                 'type'       => 'ENUM',
-                'constraint' => ['draft', 'unpaid', 'partially_paid', 'paid', 'overdue', 'cancelled'],
+                'constraint' => ['unpaid', 'paid'],
                 'default'    => 'draft',
                 'null'       => false
             ],
@@ -71,18 +65,49 @@ class CreateInvoicesTable extends Migration
             'updated_at' => [
                 'type' => 'DATETIME',
                 'null' => true
+            ],
+            'agen_id' => [
+                'type'     => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+                'null'     => true
+            ],
+            'distributor_id' => [
+                'type'     => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+                'null'     => true
+            ],
+            'order_id' => [
+                'type'     => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+                'null'     => true
+            ],
+            'pabrik_id' => [
+                'type'     => 'INT',
+                'constraint' => 11,
+                'unsigned' => true,
+                'null'     => true
             ]
         ]);
 
         $this->forge->addPrimaryKey('id');
         $this->forge->addUniqueKey('invoice_number');
-        // Ubah foreign key menjadi ke order_items.id
-        $this->forge->addForeignKey('order_item_id', 'order_items', 'id', 'CASCADE', 'CASCADE');
+
+        // Tambahkan foreign key jika relasi sudah ada (optional, tergantung kebutuhan)
+        $this->forge->addForeignKey('agen_id', 'users', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->addForeignKey('distributor_id', 'users', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->addForeignKey('order_id', 'orders', 'id', 'SET NULL', 'CASCADE');
+        $this->forge->addForeignKey('pabrik_id', 'users', 'id', 'SET NULL', 'CASCADE');
+
         $this->forge->createTable('invoices');
 
-        // Buat index
-        $this->db->query('CREATE INDEX invoices_order_item_id_idx ON invoices(order_item_id)');
+        // Index tambahan (opsional untuk performa query)
+        $this->db->query('CREATE INDEX invoices_order_id_idx ON invoices(order_id)');
         $this->db->query('CREATE INDEX invoices_status_idx ON invoices(status)');
+        $this->db->query('CREATE INDEX invoices_distributor_id_idx ON invoices(distributor_id)');
+        $this->db->query('CREATE INDEX invoices_agen_id_idx ON invoices(agen_id)');
     }
 
     public function down()

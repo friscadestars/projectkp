@@ -104,7 +104,7 @@ function App() {
         <Route path="/distributor/riwayat-order" element={<RiwayatOrderDistributor />} />
         <Route path="/distributor/detail-riwayat-order/:orderId" element={<DetailRiwayatOrder />} />
         <Route path="/distributor/tagihan" element={<TagihanDistributor />} />
-        <Route path="/distributor/invoice/:orderId" element={<InvoiceTagihanDistributor />} />
+        <Route path="/distributor/invoice/:id" element={<InvoiceTagihanDistributor />} />
 
         {/* Pabrik */}
         <Route path="/pabrik/dashboard-pabrik" element={<DashboardPabrik />} />

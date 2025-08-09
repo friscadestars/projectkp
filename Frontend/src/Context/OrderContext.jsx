@@ -71,6 +71,7 @@ export const OrderProvider = ({ children }) => {
             const normalized = ordersRaw.map(order => ({
                 ...order,
                 id: order.id,
+                pabrikId: order.pabrik_id, // ⬅️ Tambahan penting!
                 status: normalizeStatus(order.status),
                 distributorId: order.distributor_id,
                 agentId: order.agen_id,
@@ -113,6 +114,7 @@ export const OrderProvider = ({ children }) => {
 
             setOrdersMasukPabrik(sorted.filter(order =>
                 ['approved'].includes(order.status)
+                 //order.status === 'approved' && (order.pabrikId === null || order.pabrikId === undefined)
             ));
 
         } catch (error) {
@@ -250,13 +252,12 @@ export const OrderProvider = ({ children }) => {
 
     const setOrderToApproved = async (orderId) => {
         try {
-            // Cari objek order dari state berdasarkan orderId
-            const order = orders.find(o => o.orderId === orderId);
+            const order = orders.find(o => o.orderId === orderId || o.id === orderId);
             if (!order) throw new Error("Order tidak ditemukan");
 
-            const id = order.id; // ✅ ID asli dari backend
+            const id = order.id;
 
-            await updateOrderStatus(id, 'delivered'); // 🔄 Kirim ke API
+            await updateOrderStatus(id, 'delivered');
 
             updateOrder(orderId, (order) => ({
                 ...order,

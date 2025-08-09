@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
-const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => {
+const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabrikPrices, loading }) => {
     const navigate = useNavigate();
 
     const handleDelete = (orderId) => {
@@ -30,13 +30,24 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
         });
     };
 
+    const getStatusPembayaran = (_, row) => {
+        const status =
+            row.status_pembayaran ||
+            row.statusPembayaran ||
+            row.invoice_status;
+
+        if (status === 'Lunas') return 'Lunas';
+        if (status === 'Belum Dibayar') return 'Belum Dibayar';
+        return '-';
+    };
+
     const formatDate = (dateStr) => {
         if (!dateStr) return '-';
         const date = new Date(dateStr);
         if (isNaN(date)) return '-';
 
         const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0'); // bulan dimulai dari 0
+        const month = String(date.getMonth() + 1).padStart(2, '0');
         const year = date.getFullYear();
 
         return `${day}/${month}/${year}`;
@@ -48,31 +59,34 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
             key: 'no',
             render: (_, __, index) => index + 1,
         },
-        { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase(), },
+        { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase() },
         { header: 'Agen', key: 'agenName' },
         { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
         { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
         {
-            header: 'Subtotal Harga Pabrik',
-            key: 'hargaPabrik',
-            render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
+            header: 'Total Harga Pabrik',
+            key: 'totalHargaPabrik',
+            render: (_, row) => {
+                const total = Number(row.totalHargaPabrik) || 0;
+                return `Rp ${total.toLocaleString('id-ID')}`;
+            }
         },
         {
-            header: 'Subtotal Harga Jual',
+            header: 'Total Harga Jual',
             key: 'hargaJual',
             render: (val) => `Rp. ${Number(val).toLocaleString('id-ID')}`,
         },
         {
             header: 'Status Pembayaran',
-            key: 'statusPembayaran',
-            render: (val) => (
-                <span
-                    className={`text-white text-sm px-2 py-1 rounded font-bold ${val === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
-                        }`}
-                >
-                    {val}
-                </span>
-            ),
+            key: 'status_pembayaran',
+            render: (_, row) => {
+                const status = getStatusPembayaran(_, row);
+                return (
+                    <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'}`}>
+                        {status}
+                    </span>
+                );
+            }
         },
         {
             header: 'Status Order',
@@ -132,17 +146,21 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete }) => 
 
             {/* Table */}
             <div className="mt-4">
-                <ReusableTable
-                    columns={columns}
-                    data={orders}
-                    footer={
-                        <tr className="px-4 py-3 text-right text-gray-600 font-medium">
-                            <td colSpan={columns.length} className="py-2 px-4 text-right">
-                                Total Riwayat Order: {orders.length}
-                            </td>
-                        </tr>
-                    }
-                />
+                {loading ? (
+                    <p className="text-center text-gray-500 text-sm">Memuat data...</p>
+                ) : (
+                    <ReusableTable
+                        columns={columns}
+                        data={orders}
+                        footer={
+                            <tr className="px-4 py-3 text-right text-gray-600 font-medium">
+                                <td colSpan={columns.length} className="py-2 px-4 text-right">
+                                    Total Riwayat Order: {orders.length}
+                                </td>
+                            </tr>
+                        }
+                    />
+                )}
             </div>
         </div>
     );

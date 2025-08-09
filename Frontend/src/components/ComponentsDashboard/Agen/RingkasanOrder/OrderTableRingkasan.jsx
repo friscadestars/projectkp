@@ -88,7 +88,7 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
                             Detail
                         </button>
                         <button
-                            onClick={() => showConfirmation(row.id)}
+                            onClick={() => showConfirmation(row.orderId)}
                             disabled={row.status !== 'Dikirim'}
                             className={`button-confirm ${row.status === 'Dikirim' ? 'active' : 'disabled cursor-not-allowed'}`}
                         >

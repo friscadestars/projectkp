@@ -22,6 +22,7 @@ export const usePermintaanOrderPage = () => {
     const { handleNavigation } = useNavigation(agenMenuItems);
     const [showDropdown, setShowDropdown] = useState(false);
     const toggleDropdown = () => setShowDropdown((prev) => !prev);
+    const [produkListDropdown, setProdukListDropdown] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -61,6 +62,29 @@ export const usePermintaanOrderPage = () => {
         };
 
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        const fetchProduk = async () => {
+            const token = localStorage.getItem('token');
+            try {
+                const res = await fetch(`${API_BASE}/prices?role=pabrik`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    throw new Error('Gagal fetch produk');
+                }
+
+                const data = await res.json();
+                setProdukListDropdown(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Gagal mengambil data produk:", error);
+                setProdukListDropdown([]);
+            }
+        };
+
+        fetchProduk();
     }, []);
 
     const {
@@ -111,6 +135,7 @@ export const usePermintaanOrderPage = () => {
         setAlamat,
         handleAddProduk,
         handleDeleteProduk,
+        produkListDropdown,
         orderId: lastOrderId || '',
         agentName,
         distributorName: distributorInfo?.name || '',

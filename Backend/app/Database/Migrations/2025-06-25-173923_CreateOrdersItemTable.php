@@ -9,13 +9,13 @@ class CreateSimpleOrderItemsTable extends Migration
     public function up()
     {
         $this->forge->addField([
-            'id' => [ // Primary Key
+            'id' => [
                 'type'           => 'INT',
                 'constraint'     => 11,
                 'unsigned'       => true,
                 'auto_increment' => true,
             ],
-            'order_id' => [ // Foreign Key ke tabel orders
+            'order_id' => [
                 'type'       => 'INT',
                 'constraint' => 11,
                 'unsigned'   => true,
@@ -24,6 +24,11 @@ class CreateSimpleOrderItemsTable extends Migration
             'product_name' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 255,
+                'null'       => false,
+            ],
+            'kode_produk' => [
+                'type'       => 'VARCHAR',
+                'constraint' => 100,
                 'null'       => false,
             ],
             'quantity' => [
@@ -45,7 +50,6 @@ class CreateSimpleOrderItemsTable extends Migration
 
         $this->forge->addPrimaryKey('id');
 
-        // Aktifkan foreign key ke orders
         $this->forge->addForeignKey('order_id', 'orders', 'id', 'CASCADE', 'CASCADE');
 
         $this->forge->createTable('order_items');

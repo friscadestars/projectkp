@@ -10,7 +10,7 @@ const DetailValidasiOrder = () => {
     const props = useValidasiOrderPage();
 
     if (!props.order) {
-        return <div className="p-8 text-red-500">Order tidak ditemukan.</div>;
+        return <div className="p-8 text-red-500"></div>;
     }
 
     return (

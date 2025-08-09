@@ -5,6 +5,10 @@ import StatusBadge from '../../Common/StatusBadge';
 const formatDate = (date) => {
     if (!date) return '-';
     const d = new Date(date);
+
+    // Cek apakah tanggal valid
+    if (isNaN(d.getTime())) return '-';
+
     return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')
         }/${d.getFullYear()}`;
 };
@@ -21,7 +25,11 @@ const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
         },
         { header: 'Distributor', key: 'distributorName' },
         { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
-        { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
+        {
+            header: 'Tanggal Terima',
+            key: 'receivedDate',
+            render: (v) => v ? formatDate(v) : '-'
+        },
         { header: 'No. Resi', key: 'trackingNumber', render: (v) => v || '-' },
         { header: 'Total Harga', key: 'totalPrice', render: formatPrice },
         {

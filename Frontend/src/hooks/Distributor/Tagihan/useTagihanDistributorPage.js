@@ -1,26 +1,59 @@
-// hooks/useTagihanDistributorPage.js
 import { useState, useEffect } from 'react';
-import { fetchOrders } from '../../../services/ordersApi'; // pastikan path sesuai
 
 export const useTagihanDistributorPage = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        const loadOrders = async () => {
+        const fetchInvoices = async () => {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const distributorId = user?.id;
+
+            if (!distributorId || user?.role !== 'distributor') {
+                setLoading(false);
+                setError("User tidak valid atau bukan distributor.");
+                return;
+            }
+
             try {
-                const result = await fetchOrders();
-                setOrders(result);
+                const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+                const token = localStorage.getItem('token');
+
+                const res = await fetch(`${BASE_URL}/invoices/getByDistributor/${distributorId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!res.ok) throw new Error('Gagal memuat data invoice distributor');
+                const data = await res.json();
+
+                const mappedOrders = data.map((order) => {
+                    const status = order.invoice_status?.toLowerCase();
+                    const statusPembayaran = (status === 'paid' || status === 'lunas')
+                        ? 'Lunas'
+                        : 'Belum Dibayar';
+
+                    return {
+                        ...order,
+                        statusPembayaran,
+                    };
+                });
+
+                setOrders(mappedOrders);
+                console.log('Fetched Orders:', data);
             } catch (err) {
-                console.error('Gagal memuat orders:', err);
+                setError(err.message);
             } finally {
                 setLoading(false);
             }
         };
 
-        loadOrders();
+        fetchInvoices();
     }, []);
 
-    return { searchTerm, setSearchTerm, orders, loading };
+    return { searchTerm, setSearchTerm, orders, loading, error };
 };

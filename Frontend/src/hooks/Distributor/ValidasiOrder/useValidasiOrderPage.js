@@ -7,7 +7,7 @@ import iconValidasi from '../../../assets/IconHeader/ValidasiIcon.png';
 import { fetchOrderById, updateOrderStatus, updateOrderItemPrice, fetchPabrikPrices } from '../../../services/ordersApi';
 
 export const useValidasiOrderPage = () => {
-    const { orderId } = useParams(); // <-- ini ID numerik (string)
+    const { orderId } = useParams();
     const navigate = useNavigate();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
@@ -17,8 +17,8 @@ export const useValidasiOrderPage = () => {
     useEffect(() => {
         (async () => {
             try {
-                const fetchedOrder = await fetchOrderById(orderId); // dari order_items
-                const pabrikPrices = await fetchPabrikPrices(); // dari tabel product_prices
+                const fetchedOrder = await fetchOrderById(orderId);
+                const pabrikPrices = await fetchPabrikPrices();
                 const normalizeStatus = (status) => {
                     const map = {
                         pending: 'Tertunda',
@@ -41,7 +41,7 @@ export const useValidasiOrderPage = () => {
                         name: p.name,
                         quantity: p.quantity,
                         requestedPrice: p.requestedPrice ?? 0,
-                        unitPrice: pabrikPrices[p.name.toLowerCase().trim()] ?? 0, // Ganti jadi dari daftar harga pabrik
+                        unitPrice: pabrikPrices[p.name.toLowerCase().trim()] ?? 0,
                     })),
                 };
 
@@ -50,7 +50,7 @@ export const useValidasiOrderPage = () => {
                 setInputPrices(
                     mappedOrder.products.map((p) => ({
                         name: p.name,
-                        price: p.unitPrice || '', // tetap isi dari harga pabrik
+                        price: p.unitPrice || '',
                     }))
                 );
             } catch (e) {
@@ -63,7 +63,7 @@ export const useValidasiOrderPage = () => {
     const handleSetHarga = (index, value) => {
         const updated = [...inputPrices];
         if (!updated[index]) {
-            updated[index] = {}; // inisialisasi jika belum ada
+            updated[index] = {};
         }
         updated[index].price = value;
         setInputPrices(updated);
@@ -76,11 +76,11 @@ export const useValidasiOrderPage = () => {
                 const item = inputPrices[i];
                 const price = parseInt(String(item.price).replace(/[^\d]/g, ''), 10);
                 if (!isNaN(price)) {
-                    await updateOrderItemPrice(orderId, item.name, price); // <-- pakai ID
+                    await updateOrderItemPrice(orderId, item.name, price);
                 }
             }
 
-            await updateOrderStatus(orderId, 'approved'); // <-- pakai ID
+            await updateOrderStatus(orderId, 'approved');
 
             Swal.fire({
                 icon: 'success',
@@ -97,7 +97,7 @@ export const useValidasiOrderPage = () => {
 
     const handleTolak = async () => {
         try {
-            await updateOrderStatus(orderId, 'cancelled'); // <-- pakai ID
+            await updateOrderStatus(orderId, 'cancelled');
             Swal.fire({
                 icon: 'info',
                 title: 'Order Ditolak',

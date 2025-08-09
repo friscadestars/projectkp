@@ -2,12 +2,32 @@ import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
-const formatDate = (date) => {
-    if (!date) return '-';
-    const d = new Date(date);
-    return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')
-        }/${d.getFullYear()}`;
+const formatDate = (dateStr) => {
+    if (!dateStr) return '-';
+    const safeDateStr = dateStr.replace(' ', 'T');
+    const date = new Date(safeDateStr);
+
+    if (isNaN(date)) return '-';
+
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
 };
+
+const getStatusPembayaran = (_, row) => {
+    const status = (
+        row.statusPembayaran ||
+        row.status_pembayaran ||
+        row.invoice_status || ''
+    ).toLowerCase();
+
+    if (status === 'lunas' || status === 'paid') return 'Lunas';
+    if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid') return 'Belum Dibayar';
+    return '-';
+};
+
 
 const OrderInfoTable = ({ order }) => {
     if (!order) return null;
@@ -20,7 +40,14 @@ const OrderInfoTable = ({ order }) => {
         {
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
-            render: (val) => <StatusBadge status={val} />,
+            render: (_, row) => {
+                const status = getStatusPembayaran(_, row);
+                return (
+                    <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'}`}>
+                        {status}
+                    </span>
+                );
+            }
         },
         {
             header: 'Status Order',
@@ -44,16 +71,24 @@ const ProductDetailTable = ({ products }) => {
         { header: 'Nama Produk', key: 'name' },
         { header: 'Jumlah', key: 'quantity' },
         {
-            header: 'Harga Distributor',
+            header: 'Harga Satuan Distributor',
             key: 'unitPrice',
             render: (_, row) => {
-                const harga = status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
+                const harga = row.status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
                 return typeof harga === 'number'
                     ? `Rp. ${harga.toLocaleString('id-ID')}`
                     : '-';
             }
         },
-        { key: 'hargaPabrik', label: 'Harga Pabrik' },
+        {
+            header: 'Harga Satuan Pabrik',
+            key: 'hargaPabrik',
+            render: (value) => (
+                typeof value === 'number'
+                    ? `Rp. ${value.toLocaleString('id-ID')}`
+                    : '-'
+            )
+        }
     ];
 
     const footerRow = (
@@ -78,6 +113,19 @@ const ProductDetailTable = ({ products }) => {
 };
 
 const DetailRiwayatOrderLayout = ({ order, titleText, icon }) => {
+    if (!order || !Array.isArray(order.items)) {
+        return <div className="text-red-600">Data order belum lengkap.</div>;
+    }
+
+    const products = order.items.map((item) => ({
+        name: item.product_name,
+        quantity: item.quantity,
+        requestedPrice: item.requested_price,
+        unitPrice: Number(item.unit_price ?? 0),
+        status: order.status,
+        hargaPabrik: item.harga_pabrik,
+    }));
+
     if (!order) {
         return <div className="detail-order-error">Order tidak ditemukan.</div>;
     }
@@ -85,7 +133,7 @@ const DetailRiwayatOrderLayout = ({ order, titleText, icon }) => {
     return (
         <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
             <OrderInfoTable order={order} />
-            <ProductDetailTable products={order.products} />
+            <ProductDetailTable products={products} />
         </div>
     );
 };

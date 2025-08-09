@@ -91,6 +91,17 @@ class AuthController extends ResourceController
         // >>> TAMBAHAN: ambil ID user yang baru dibuat
         $newUserId = $this->userModel->getInsertID();
 
+        // >>> TAMBAHAN: auto-insert ke distributor_pabrik jika pabrik mendaftarkan distributor
+        if ($creatorRole === 'pabrik' && $allowedRole === 'distributor') {
+            $distributorPabrikModel = new \App\Models\DistributorPabrikModel();
+            $distributorPabrikModel->insert([
+                'distributor_id' => (int) $newUserId,
+                'pabrik_id'      => (int) $creatorId,
+                'created_at'     => date('Y-m-d H:i:s')
+            ]);
+        }
+
+
         // >>> TAMBAHAN: auto-insert ke agent_distributor jika
         // distributor mendaftarkan agen (sesuai roleHierarchy yang ada sekarang)
         if ($creatorRole === 'distributor' && $allowedRole === 'agen') {
@@ -102,7 +113,7 @@ class AuthController extends ResourceController
                 'created_at'     => date('Y-m-d H:i:s')
             ]);
         }
-
+        
         return $this->respondCreated([
             'message' => "User dengan role '{$allowedRole}' berhasil dibuat oleh {$creatorRole}",
             'user_id' => $newUserId

@@ -5,19 +5,32 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     const columns = [
         { label: 'No', key: 'no' },
         { label: 'Order ID', key: 'orderId' },
-        { label: 'Distributor', key: 'distributor' },
-        { label: 'Agen ID', key: 'agentId' },
-        { label: 'Alamat Agen', key: 'agentAddress' },
+        { label: 'Distributor', key: 'distributorName' },
+        { label: 'Agen', key: 'agenName' },
+        { label: 'Alamat Agen', key: 'alamat' },
         { label: 'Jumlah', key: 'jumlahProduk' },
         { label: 'Tanggal Order', key: 'orderDate' },
         {
             label: 'Status Order',
             key: 'status',
-            render: (value) => (
-                <span className="bg-btn-danger text-white px-3 py-1 rounded text-xs">
-                    {value}
-                </span>
-            ),
+            render: (value) => {
+                let label = value;
+                let bgClass = 'bg-gray-400';
+
+                if (value === 'approved') {
+                    label = 'Belum Dikirim';
+                    bgClass = 'bg-btn-danger';
+                } else if (value === 'processing') {
+                    label = 'Sedang Diproduksi';
+                    bgClass = 'bg-blue-500';
+                }
+
+                return (
+                    <span className={`${bgClass} text-white px-3 py-1 rounded text-sm`}>
+                        {label}
+                    </span>
+                );
+            }
         },
         {
             label: 'Aksi',
@@ -33,17 +46,14 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
         },
     ];
 
-    // ✅ Ambil semua order yang statusnya 'Tertunda' (berarti baru dikirim ke pabrik)
-    const filteredOrders = orders.filter(order => order.status === 'Tertunda');
-
-    const dataWithIndex = filteredOrders.map((order, idx) => ({
+    const dataWithIndex = orders.map((order, idx) => ({
         ...order,
         no: idx + 1,
-        jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0
+        jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0,
     }));
 
     return (
-        <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
+        <div className="border border-gray-200 shadow overflow-hidden">
             <ReusableTable
                 columns={columns}
                 data={dataWithIndex}

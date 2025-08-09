@@ -2,6 +2,17 @@ import React from 'react';
 import ReusableTable from '../../../Common/ReusableTable'; // Sesuaikan path jika perlu
 import StatusBadge from '../../../Common/StatusBadge';
 
+const formatDate = (val) => {
+    if (!val) return '-';
+    const date = new Date(val);
+    if (isNaN(date.getTime())) return '-'; // jika bukan tanggal valid
+    return date.toLocaleDateString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
+};
+
 const OrderDetailTable = ({ order }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
@@ -34,9 +45,9 @@ const OrderDetailTable = ({ order }) => {
             }
         },
         {
-            header: 'Estimasi Sampai',
+            header: 'Tanggal Pengiriman',
             key: 'deliveryDate',
-            render: (val) => val?.split(' ')[0] || '-',
+            render: formatDate,
         },
         {
             header: 'Status Order',

@@ -12,7 +12,7 @@ const ValidasiOrderSection = ({ orders, handleTerima, handleTolak }) => {
                 onChange={(e) => setSearchText(e.target.value)}
             />
             <ValidasiOrderTable
-                orders={orders}
+                orders={orders.filter(order => order.status?.toLowerCase() === 'pending')}
                 handleTerima={handleTerima}
                 handleTolak={handleTolak}
             />

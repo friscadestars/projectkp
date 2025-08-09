@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import InvoiceTable from './InvoiceTable';
 
 const BuatInvoiceModal = ({ order = {}, onClose }) => {
     const {
         orderCode,
         agentName,
-        factoryName,
+        pabrikName,
         orderDate,
-        invoiceNumber,
+        distributor_id,
         invoiceDate,
         dueDate,
         note,
@@ -17,13 +17,43 @@ const BuatInvoiceModal = ({ order = {}, onClose }) => {
         accountNumber
     } = order;
 
+    const [invoiceNumber, setInvoiceNumber] = useState('');
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchInvoiceNumber = async () => {
+            try {
+                const res = await fetch(
+                    `${import.meta.env.VITE_API_BASE_URL}/invoices/generate/distributor/${distributor_id}`
+                );
+                const data = await res.json();
+
+                if (res.ok && data?.invoice_number) {
+                    setInvoiceNumber(data.invoice_number);
+                } else {
+                    console.error('Gagal ambil nomor invoice:', data.message);
+                    setInvoiceNumber('GAGAL_GENERATE');
+                }
+            } catch (error) {
+                console.error('Error saat ambil nomor invoice:', error);
+                setInvoiceNumber('ERROR');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (distributor_id) {
+            fetchInvoiceNumber();
+        }
+    }, [distributor_id]);
+
     return (
         <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto">
             <h2 className="text-xl font-bold mb-4">Buat Invoice</h2>
             <div className="mb-4">
                 <p><strong>Order ID:</strong> {orderCode}</p>
                 <p><strong>Agen:</strong> {agentName}</p>
-                <p><strong>Pabrik:</strong> {factoryName}</p>
+                <p><strong>Pabrik:</strong> {pabrikName || 'Pabrik tidak diketahui'}</p>
                 <p><strong>Tanggal Order:</strong> {orderDate}</p>
             </div>
 
@@ -32,8 +62,8 @@ const BuatInvoiceModal = ({ order = {}, onClose }) => {
                     <label className="block text-sm font-semibold mb-1">Nomor Invoice</label>
                     <input
                         type="text"
-                        value={invoiceNumber}
-                        readOnly
+                        value={loading ? 'Memuat...' : invoiceNumber}
+                        disabled
                         className="border p-2 w-full"
                     />
                 </div>

@@ -16,10 +16,14 @@ class CreateRiwayatOrdersTable extends Migration
                 'constraint'     => 11
             ],
             'order_id' => [
+                'type'       => 'INT',
+                'unsigned'   => true,
+                'null'       => false
+            ],
+            'order_code' => [
                 'type'       => 'VARCHAR',
                 'constraint' => 20,
-                'null'       => false,
-                'unique'     => true
+                'null'       => false
             ],
             'distributor' => [
                 'type'       => 'VARCHAR',
@@ -46,8 +50,8 @@ class CreateRiwayatOrdersTable extends Migration
             ],
             'status_order' => [
                 'type'       => 'ENUM',
-                'constraint' => ['Diproses', 'Dikirim', 'Selesai', 'Dibatalkan'],
-                'default'    => 'Diproses',
+                'constraint' => ['delivered', 'rejected'],
+                'default'    => 'delivered',
                 'null'       => false
             ],
             'created_at' => [

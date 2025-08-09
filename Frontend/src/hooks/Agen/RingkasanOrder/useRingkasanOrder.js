@@ -47,6 +47,9 @@ const useRingkasanOrder = () => {
                     orderId: order.order_code,
                     distributor: order.distributor,
                     orderDate: new Date(order.order_date).toLocaleDateString('id-ID'),
+                    deliveryDate: order.delivery_date
+                        ? new Date(order.delivery_date).toLocaleDateString('id-ID')
+                        : null,
                     noResi: order.resi || '-',
                     status: mapStatus(order.status),
                     products: order.items || [],
@@ -68,7 +71,6 @@ const useRingkasanOrder = () => {
             pending: 'Tertunda',
             approved: 'Disetujui',
             processing: 'Diproses',
-            cancelled: 'Ditolak',
             shipped: 'Dikirim',
             delivered: 'Selesai'
         };
@@ -128,11 +130,8 @@ const useRingkasanOrder = () => {
     };
 
     const getEstimatedDate = (order) => {
-        if (order.status !== 'Dikirim' || !order.orderDate) return '-';
-        const [day, month, year] = order.orderDate.split('/');
-        const date = new Date(`${year}-${month}-${day}`);
-        date.setDate(date.getDate() + 3);
-        return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+        if (!order.deliveryDate || order.deliveryDate === '-') return '-';
+        return order.deliveryDate;
     };
 
     const parseDate = (date) => {
