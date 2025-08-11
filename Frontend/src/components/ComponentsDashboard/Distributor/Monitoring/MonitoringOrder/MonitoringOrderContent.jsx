@@ -12,7 +12,7 @@ const MonitoringOrderContent = ({ search, setSearch, filteredOrders }) => (
             <SearchInput
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari berdasarkan Order ID"
+                placeholder="Cari Order ID"
                 className="mb-4"
             />
             <MonitoringOrderTable orders={filteredOrders} />

@@ -23,8 +23,8 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
         if (result.isConfirmed) {
             try {
                 Swal.showLoading(); // tampilkan loading
-                await setOrderToApproved(orderId); // update status jadi 'received'
-                moveToHistory(orderId); // pindah ke riwayat (opsional jika memang diperlukan)
+                await setOrderToApproved(orderId);
+                moveToHistory(orderId);
 
                 Swal.fire({
                     title: 'Berhasil!',
@@ -41,14 +41,12 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
         }
     };
 
-    // const onDetail = (row) => {
-    //     if (!row?.id) {
-    //         console.warn('ID asli tidak ditemukan:', row);
-    //         return;
-    //     }
-
-    //     navigate(`/agen/ringkasan-order/${row.id}`);
-    // };
+    const parseDate = (dateString) => {
+        if (!dateString) return '-';
+        const [d, m, y] = dateString.split('/').map(Number);
+        const date = new Date(y, m - 1, d);
+        return isNaN(date) ? '-' : `${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`;
+    };
 
     const columns = [
         { header: 'No', key: 'no', render: (_, __, rowIndex) => rowIndex + 1 },
@@ -58,7 +56,7 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
             render: (value) => value?.toUpperCase(),
         },
         { header: 'Distributor', key: 'distributor' },
-        { header: 'Tanggal Order', key: 'orderDate' },
+        { header: 'Tanggal Order', key: 'orderDate', render: parseDate },
         {
             header: 'Tanggal Pengiriman',
             key: 'deliveryEstimate',

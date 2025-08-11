@@ -26,6 +26,12 @@
   --font-inter: "Inter", sans-serif;
 }
 
+header {
+  position: sticky;
+  left: 0;
+  /* biar dia selalu mulai dari kiri viewport */
+}
+
 @layer components {
   .bg-btn-primary {
     @apply bg-blue-600 hover:bg-blue-700 text-white;
@@ -162,6 +168,11 @@
 
   .detail-order-header {
     @apply flex items-center gap-4 mb-6;
+  }
+
+  .break-anywhere {
+    word-break: break-word;
+    overflow-wrap: anywhere;
   }
 
   .detail-order-icon {
@@ -321,5 +332,21 @@
 
   .form-submit-button {
     @apply bg-blue-600 text-white px-4 py-2 rounded text-sm hover:bg-blue-700 font-bold;
+  }
+
+  .order-table {
+    @apply w-full border-collapse text-sm;
+  }
+
+  @media (max-width: 640px) {
+
+    .order-table th,
+    .order-table td {
+      @apply px-2 py-1 text-xs;
+    }
+  }
+
+  .summary-card {
+    @apply bg-white shadow rounded-xl p-4 flex flex-col items-center text-center border;
   }
 }

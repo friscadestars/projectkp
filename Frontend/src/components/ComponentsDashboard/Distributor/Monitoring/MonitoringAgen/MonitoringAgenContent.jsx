@@ -13,7 +13,7 @@ const MonitoringAgenContent = ({ searchTerm, setSearchTerm, filteredAgenList, to
                     <SearchInput
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        placeholder="Cari Agen berdasarkan nama, email, atau alamat"
+                        placeholder="Cari Agen"
                     />
                 </div>
 

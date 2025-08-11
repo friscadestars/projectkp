@@ -1,6 +1,6 @@
 import React from 'react';
 import { FiTrash2 } from 'react-icons/fi';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai strukturmu
+import ReusableTable from '../../Common/ReusableTable';
 
 const ProdukTable = ({ produkList, onDelete }) => {
     const columns = [
@@ -15,7 +15,10 @@ const ProdukTable = ({ produkList, onDelete }) => {
             header: 'Aksi',
             key: 'aksi',
             render: (_, row, index) => (
-                <button onClick={() => onDelete(index)} className="button-delete">
+                <button
+                    onClick={() => onDelete(index)}
+                    className="bg-black text-white px-2 py-1 rounded hover:bg-gray-800"
+                >
                     <FiTrash2 />
                 </button>
             ),
@@ -23,8 +26,12 @@ const ProdukTable = ({ produkList, onDelete }) => {
     ];
 
     return (
-        <div className="order-table-container mt-6">
-            <ReusableTable columns={columns} data={produkList} />
+        <div className="order-table-container mt-6 overflow-x-auto">
+            <ReusableTable
+                columns={columns}
+                data={produkList}
+                className="min-w-full text-xs sm:text-sm"
+            />
         </div>
     );
 };

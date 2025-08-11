@@ -19,7 +19,7 @@ const normalizeStatus = (status) => {
 
 const DistributorKirimOrderTable = () => {
     const navigate = useNavigate();
-    const { orders } = useOrder(); // Ambil semua order dari context
+    const { orders } = useOrder();
     console.log('Orders di context:', orders);
     const columns = [
         {

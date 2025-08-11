@@ -10,7 +10,13 @@ const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
     const formatDate = (val) => {
         if (!val) return '-';
         const date = new Date(val);
-        return isNaN(date.getTime()) ? val : date.toLocaleDateString('id-ID');
+
+        // Validasi tanggal
+        if (isNaN(date.getTime())) return '-';
+
+        // Format dd/mm/yyyy
+        return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')
+            }/${date.getFullYear()}`;
     };
 
     const columns = [
@@ -35,14 +41,7 @@ const DetailOrderInfo = ({ order, mode = 'ringkasan' }) => {
             : {
                 header: 'Tanggal Pengiriman',
                 key: 'deliveryDate',
-                render: (val) => {
-                    if (!val) return '-';
-                    const date = new Date(val);
-                    const day = String(date.getDate()).padStart(2, '0');
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const year = date.getFullYear();
-                    return `${day}/${month}/${year}`;
-                }
+                render: formatDate
             },
         {
             header: 'Status Order',

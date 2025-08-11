@@ -168,17 +168,24 @@ export async function fetchOrderById(idOrCode) {
 //     return res.json();
 // }
 
-export async function updateOrderStatus(id, status) {
-    const payload = { status };
+export async function updateOrderStatus(id, status, pabrikId = 1) {
+    const order = await fetchOrderById(id); // ambil data dulu
 
-    // Kalau statusnya delivered, kirim accepted_at juga
-    if (status.toLowerCase() === 'delivered') {
-        const now = new Date();
-        const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' ');
-        payload.accepted_at = acceptedAt;
-    }
+    const isDelivered = status.toLowerCase() === 'delivered';
+    const now = new Date();
+    const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' ');
 
-    const res = await fetch(`${API_BASE}/orders/${id}/status`, {
+    const payload = {
+        agen_id: order.agentId,
+        distributor_id: order.distributorId,
+        pabrik_id: pabrikId,
+        order_date: order.orderDate + ' 00:00:00',
+        note: order.alamat,
+        status: status,
+        ...(isDelivered && { accepted_at: acceptedAt })
+    };
+
+    const res = await fetch(`${API_BASE}/orders/${id}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -187,13 +194,11 @@ export async function updateOrderStatus(id, status) {
         body: JSON.stringify(payload),
     });
 
-    if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Gagal update status order');
-    }
+    if (!res.ok) throw new Error('Gagal update status order');
 
     return res.json();
 }
+
 
 // Update harga produk dalam order (by ID)
 export async function updateOrderItemPrice(id, productName, price) {

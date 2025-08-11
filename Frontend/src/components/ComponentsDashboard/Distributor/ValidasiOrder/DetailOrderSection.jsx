@@ -2,6 +2,19 @@ import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
+
+function formatRupiah(value) {
+    let number = Number(value);
+    if (isNaN(number) || number <= 0) return 'Rp 0';
+    if (number > 1000000) {
+        number = number / 100;
+    }
+    return 'Rp ' + number.toLocaleString('id-ID', {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+}
+
 const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, handleTolak }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia</p>;
 
@@ -13,11 +26,11 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
         },
         {
             header: 'Agen',
-            key: 'agenId', // ambil dari backend (sudah dimap dari fetched data)
+            key: 'agenId',
         },
         {
             header: 'Alamat',
-            key: 'alamat', // ambil dari backend (note/order.note)
+            key: 'alamat',
         },
         {
             header: 'Tanggal Order',
@@ -51,25 +64,40 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
         {
             header: 'Harga Agen',
             key: 'requestedPrice',
-            render: (val) => `Rp ${val.toLocaleString('id-ID')}`,
+            render: (val) => formatRupiah(val),
         },
         {
             header: 'Harga Pabrik',
             key: 'unitPrice',
-            render: (val) => `Rp ${val > 0 ? val.toLocaleString('id-ID') : '0'}`,
+            render: (val) => {
+                const num = Number(val);
+                if (isNaN(num) || num <= 0) return 'Rp 0';
+                return `Rp ${num.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+            },
         },
         {
             header: 'Set Harga',
             key: 'setHarga',
-            render: (_, row, index) => (
-                <input
-                    type="text"
-                    placeholder="Rp"
-                    value={inputPrices[index]?.price}
-                    onChange={(e) => handleSetHarga(index, e.target.value)}
-                    className="border rounded px-2 py-1 w-28 text-sm"
-                />
-            ),
+            render: (_, row, index) => {
+                const rawValue = inputPrices[index]?.price || '';
+                const formattedValue = formatRupiah(rawValue);
+
+                const handleChange = (e) => {
+                    const input = e.target.value;
+                    const numberValue = Number(input.replace(/[^0-9]/g, '')) || 0;
+                    handleSetHarga(index, numberValue);
+                };
+
+                return (
+                    <input
+                        type="text"
+                        placeholder="Rp"
+                        value={formattedValue}
+                        onChange={handleChange}
+                        className="border rounded px-2 py-1 w-28 text-sm"
+                    />
+                );
+            },
         },
     ];
 

@@ -19,10 +19,9 @@ const SendOrderButton = ({ orderId }) => {
             cancelButtonText: 'Batal'
         }).then((result) => {
             if (result.isConfirmed) {
-                updateOrderStatus(orderId, 'Diproses');
+                updateOrderStatus(orderId, 'Diproses', pabrikId);
                 markAsProcessed(orderId);
-                sendToMonitoringOrder(orderId); // ✅ Tambahkan ini
-
+                sendToMonitoringOrder(orderId);
                 Swal.fire({
                     icon: 'success',
                     title: 'Order Dikirim',
