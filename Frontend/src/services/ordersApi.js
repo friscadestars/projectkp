@@ -412,3 +412,34 @@ export const fetchAgentIdByName = async (agenName, distributorId) => {
     return data?.id ?? null;
 };
 
+// Disini
+// Ambil data monitoring orders (pabrik lihat approved, processing, shipped)
+export async function fetchMonitoringOrders() {
+    const res = await fetch(`${API_BASE}/orders/monitoring`, {
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+        },
+    });
+    if (!res.ok) throw new Error('Gagal ambil data monitoring orders');
+    return res.json();
+}
+
+// Update status order
+export async function updateMonitoringOrderStatus(orderId, status) {
+    const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
+        method: 'PATCH', // bisa PATCH atau PUT
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+        },
+        body: JSON.stringify({ status }),
+    });
+    if (!res.ok) throw new Error('Gagal update status order');
+    return res.json();
+}
+
+
+// selasa 12 - 08
+
+

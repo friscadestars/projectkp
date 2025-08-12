@@ -35,5 +35,3 @@ const TabelRincianProduk = ({ products = [], onMulaiProduksi }) => {
 };
 
 export default TabelRincianProduk;
-
-
