@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useOrder } from "../../Context/OrderContext";
+import { useOrder} from "../../Context/OrderContext";
 import { useNavigate } from 'react-router-dom';
 
 export const useProduksiPengiriman = () => {
@@ -9,22 +9,22 @@ export const useProduksiPengiriman = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  const getStatusProduksiClass = (status) => {
-    switch (status) {
-      case "Sedang Diproduksi": return "bg-blue-500";
-      case "Selesai Produksi": return "bg-green-500";
-      default: return "bg-gray-400";
-    }
-  };
+  // const getStatusProduksiClass = (status) => {
+  //   switch (status) {
+  //     case "Sedang Diproduksi": return "bg-blue-500";
+  //     case "Selesai Produksi": return "bg-green-500";
+  //     default: return "bg-gray-400";
+  //   }
+  // };
 
-  const getStatusPengirimanClass = (status) => {
-    switch (status) {
-      case "Belum Dikirim": return "bg-red-500";
-      case "Dikirim": return "bg-blue-500";
-      case "Diterima": return "bg-green-500";
-      default: return "bg-gray-400";
-    }
-  };
+  // const getStatusPengirimanClass = (status) => {
+  //   switch (status) {
+  //     case "Belum Dikirim": return "bg-red-500";
+  //     case "Dikirim": return "bg-blue-500";
+  //     case "Diterima": return "bg-green-500";
+  //     default: return "bg-gray-400";
+  //   }
+  // };
 
   const getStatusPengirimanText = (order) => order.statusPengiriman || "-";
 
@@ -35,6 +35,7 @@ export const useProduksiPengiriman = () => {
   const handleDetail = (order) => {
     navigate('/pabrik/detail-produksi/sedang-produksi', { state: { order } });
   };
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -53,15 +54,16 @@ export const useProduksiPengiriman = () => {
 
           switch (order.status) {
             case "processing":
-              statusProduksi = "Sedang Diproduksi";
+              statusProduksi = "processing"; 
+              statusPengiriman = "Belum Dikirim"; // ga ada di colorMap, harus tambahin
               break;
             case "shipped":
-              statusProduksi = "Selesai Produksi";
-              statusPengiriman = "Dikirim";
+              statusProduksi = "shipped";   
+              statusPengiriman = "shipped"; 
               break;
             case "delivered":
-              statusProduksi = "Selesai Produksi";
-              statusPengiriman = "Diterima";
+              statusProduksi = "delivered"; 
+              statusPengiriman = "delivered";
               break;
             default:
               statusProduksi = "-";
@@ -80,8 +82,8 @@ export const useProduksiPengiriman = () => {
             statusPengiriman,
             statusProduksiText: statusProduksi,
             statusPengirimanText: statusPengiriman,
-            statusProduksiClass: getStatusProduksiClass(statusProduksi),
-            statusPengirimanClass: getStatusPengirimanClass(statusPengiriman),
+            //statusProduksiClass: getStatusProduksiClass(statusProduksi),
+            //statusPengirimanClass: getStatusPengirimanClass(statusPengiriman),
           };
         });
 

@@ -49,9 +49,6 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     const dataWithIndex = orders.map((order, idx) => ({
         ...order,
         no: idx + 1,
-        //jumlahProduk: order.products?.reduce((sum, p) => sum + p.quantity, 0) || 0,
-        //products: order.products.length,
-        //jumlahProduk: order.products?.length || 0,
         jumlahProduk: order.products?.length || 0, 
     }));
 

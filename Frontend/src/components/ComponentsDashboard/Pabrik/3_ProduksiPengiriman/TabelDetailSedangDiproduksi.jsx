@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-import ReusableTable from '../../Common/ReusableTable'; // pastikan path sesuai
+import ReusableTable from '../../Common/ReusableTable'; 
 
 const TabelDetailSedangDiproduksi = ({ order }) => {
   const { products = [] } = order;
 
-  const [statusProduksi, setStatusProduksi] = useState(order.status);
+  const [statusProduksi, setStatusProduksi] = useState(order.statusProduksi);
   const [noResi, setNoResi] = useState('');
+
 
   const showConfirmation = async (title, text, confirmButtonText) => {
     const result = await Swal.fire({
@@ -68,7 +69,7 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
   };
 
   const columns = [
-    { key: 'name', label: 'Nama Produk' },
+    { key: 'product_name', label: 'Nama Produk' },
     { key: 'quantity', label: 'Jumlah Produk' },
     {
       key: 'statusProduksi',
@@ -89,7 +90,7 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
         </p>
         <p>
           <strong>Distributor:</strong> {order.distributor} |{' '}
-          <strong>Agen ID:</strong> {order.agentId} |{' '}
+          <strong>Agen:</strong> {order.agentName} |{' '}
           <strong>Status:</strong>{' '}
           <span
             className={`text-white text-xs px-2 py-1 rounded ${
@@ -106,7 +107,7 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
       </div>
 
       {/* Tabel Produk */}
-      <div className="rounded-xl border border-gray-200 shadow overflow-hidden">
+      <div className="border border-gray-200 shadow overflow-hidden">
         <ReusableTable columns={columns} data={products} />
       </div>
 
@@ -129,11 +130,11 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
           <div className="flex gap-2">
             <button
               onClick={handleSelesaiProduksi}
-              disabled={statusProduksi !== 'Sedang Diproduksi'}
+              disabled={statusProduksi !== 'processing'}
               className={`px-4 py-2 rounded text-white ${
-                statusProduksi !== 'Sedang Diproduksi'
+                statusProduksi !== 'processing'
                   ? 'bg-btn-disabled cursor-not-allowed'
-                  : 'bg-btn-success hover:bg-green-700'
+                  : 'bg-btn-dark hover:bg-gray-800'
               }`}
             >
               Selesai
@@ -144,7 +145,7 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
               disabled={statusProduksi !== 'Selesai Produksi'}
               className={`px-4 py-2 rounded text-white ${
                 statusProduksi === 'Selesai Produksi'
-                  ? 'bg-btn-info hover:bg-blue-700'
+                  ? 'bg-btn-dark hover:bg-gray-800'
                   : 'bg-btn-disabled cursor-not-allowed'
               }`}
             >

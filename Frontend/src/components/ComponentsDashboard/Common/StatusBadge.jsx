@@ -10,17 +10,19 @@ const StatusBadge = ({ status }) => {
         delivered: 'bg-green-700',
         unpaid: 'bg-red-600',
         paid: 'bg-green-500',
+        'belum dikirim': 'bg-[#FF2F00]',
     };
 
     const labelMap = {
         pending: 'Tertunda',
         approved: 'Disetujui',
         shipped: 'Dikirim',
-        processing: 'Diproses',
+        processing: 'Sedang Diproduksi',
         cancelled: 'Ditolak',
         delivered: 'Diterima',
         unpaid: 'Belum Dibayar',
         paid: 'Lunas',
+        'belum dikirim': 'Belum Dikirim',
     };
 
     const key = (status || '').toLowerCase();
@@ -41,3 +43,5 @@ const StatusBadge = ({ status }) => {
 };
 
 export default StatusBadge;
+
+
