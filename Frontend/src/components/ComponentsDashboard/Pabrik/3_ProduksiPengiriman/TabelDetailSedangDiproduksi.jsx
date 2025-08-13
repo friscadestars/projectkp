@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
 import Swal from 'sweetalert2';
-import ReusableTable from '../../Common/ReusableTable'; 
+import ReusableTable from '../../Common/ReusableTable';
+import { useOrder } from '../../../../Context/OrderContext';
+import { updateOrderStatus } from '../../../../services/ordersApi';
 
 const TabelDetailSedangDiproduksi = ({ order }) => {
   const { products = [] } = order;
 
-  const [statusProduksi, setStatusProduksi] = useState(order.statusProduksi);
-  const [noResi, setNoResi] = useState('');
+  // Context biar halaman utama ikut update
+  const { updateOrderStatusInContext } = useOrder();
 
+  const [statusProduksi, setStatusProduksi] = useState(order.statusProduksiText);
+  const [noResi, setNoResi] = useState('');
 
   const showConfirmation = async (title, text, confirmButtonText) => {
     const result = await Swal.fire({
@@ -40,33 +44,106 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
     );
 
     if (confirmed) {
-      setStatusProduksi('Selesai Produksi');
-      showSuccess('Berhasil!', 'Produksi telah diselesaikan.');
+      try {
+        // 1️⃣ Ubah status lokal di detail
+        setStatusProduksi('Selesai Produksi');
+
+        // 2️⃣ Update context → backend status "shipped", tapi UI override
+        updateOrderStatusInContext(order.orderId, 'shipped', {
+          statusPengiriman: 'Belum Dikirim',
+          statusProduksiText: 'Selesai Produksi',
+          overrideForUI: true // tanda kalau ini harus override tampilan di tabel
+        });
+
+        // 3️⃣ Simpan ke backend
+        await updateOrderStatus(order.id, 'shipped');
+
+        showSuccess('Berhasil!', 'Produksi telah diselesaikan.');
+      } catch (err) {
+        console.error('Gagal update status', err);
+        Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
+      }
     }
   };
+
+  // const handleKirim = async () => {
+  //   if (!noResi) {
+  //     Swal.fire({
+  //       title: 'Nomor Resi Kosong',
+  //       text: 'Silakan masukkan nomor resi sebelum mengirim.',
+  //       icon: 'error',
+  //       confirmButtonColor: '#3085d6',
+  //     });
+  //     return;
+  //   }
+
+  //   const confirmed = await showConfirmation(
+  //     'Konfirmasi Kirim Order',
+  //     `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
+  //     'Ya, Kirim'
+  //   );
+
+  //   if (confirmed) {
+  //     try {
+  //       // Produksi tetap "Selesai Produksi"
+  //       setStatusProduksi('Selesai Produksi');
+
+  //       // Update context: produksi = selesai, pengiriman = dikirim
+  //       updateOrderStatusInContext(order.orderId, 'shipped');
+
+  //       // Simpan ke backend → status = shipped
+  //       await updateOrderStatus(order.id, 'shipped');
+
+  //       showSuccess(
+  //         'Berhasil!',
+  //         `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`
+  //       );
+  //     } catch (err) {
+  //       console.error('Gagal kirim order', err);
+  //       Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
+  //     }
+  //   }
+  // };
 
   const handleKirim = async () => {
-    if (!noResi) {
-      Swal.fire({
-        title: 'Nomor Resi Kosong',
-        text: 'Silakan masukkan nomor resi sebelum mengirim.',
-        icon: 'error',
-        confirmButtonColor: '#3085d6',
-      });
-      return;
-    }
+  if (!noResi) {
+    Swal.fire({
+      title: 'Nomor Resi Kosong',
+      text: 'Silakan masukkan nomor resi sebelum mengirim.',
+      icon: 'error',
+      confirmButtonColor: '#3085d6',
+    });
+    return;
+  }
 
-    const confirmed = await showConfirmation(
-      'Konfirmasi Kirim Order',
-      `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
-      'Ya, Kirim'
-    );
+  const confirmed = await showConfirmation(
+    'Konfirmasi Kirim Order',
+    `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
+    'Ya, Kirim'
+  );
 
-    if (confirmed) {
+  if (confirmed) {
+    try {
+      // ✅ Ubah status lokal jadi "Dikirim"
       setStatusProduksi('Dikirim');
-      showSuccess('Berhasil!', `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`);
+
+      // ✅ Update context → backend status "shipped"
+      updateOrderStatusInContext(order.orderId, 'shipped');
+
+      // ✅ Simpan ke backend
+      await updateOrderStatus(order.id, 'shipped');
+
+      showSuccess(
+        'Berhasil!',
+        `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`
+      );
+    } catch (err) {
+      console.error('Gagal kirim order', err);
+      Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
     }
-  };
+  }
+};
+
 
   const columns = [
     { key: 'product_name', label: 'Nama Produk' },
@@ -74,7 +151,7 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
     {
       key: 'statusProduksi',
       label: 'Status Produksi',
-      render: (_, __, ___) =>
+      render: () =>
         statusProduksi === 'Dikirim' || statusProduksi === 'Selesai Produksi'
           ? 'Selesai'
           : 'Menunggu Produksi',
@@ -130,9 +207,9 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
           <div className="flex gap-2">
             <button
               onClick={handleSelesaiProduksi}
-              disabled={statusProduksi !== 'processing'}
+              disabled={statusProduksi !== 'Sedang Diproduksi'}
               className={`px-4 py-2 rounded text-white ${
-                statusProduksi !== 'processing'
+                statusProduksi !== 'Sedang Diproduksi'
                   ? 'bg-btn-disabled cursor-not-allowed'
                   : 'bg-btn-dark hover:bg-gray-800'
               }`}

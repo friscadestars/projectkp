@@ -19,11 +19,24 @@ const TableProduksiPengiriman = () => {
     { label: 'Distributor', key: 'distributor' },
     { label: 'Alamat Agen', key: 'alamat' },
     { label: 'Jumlah Produk', key: 'jumlahProduk' },
+    // {
+    //   label: 'Status Produksi',
+    //   key: 'statusProduksi',
+    //   render: (value) => <StatusBadge status={value} type="produksi" />,
+    // },
     {
       label: 'Status Produksi',
       key: 'statusProduksi',
-      render: (value) => <StatusBadge status={value} type="produksi" />,
+      render: (_, row) => (
+        <StatusBadge
+          status={row.statusProduksi}           // ini buat warna
+          labelOverride={row.statusProduksiText} // ini buat teks custom
+        />
+      ),
     },
+
+
+
     {
       label: 'Status Pengiriman',
       key: 'statusPengiriman',

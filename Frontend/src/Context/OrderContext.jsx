@@ -272,12 +272,27 @@ export const OrderProvider = ({ children }) => {
         }
     };
 
-    const updateOrderStatusInContext = (orderId, newStatus) => {
-        updateOrder(orderId, (order) => ({
-            ...order,
-            status: newStatus,
-        }));
+
+
+    // const updateOrderStatusInContext = (orderId, newStatus) => {
+    //     updateOrder(orderId, (order) => ({
+    //         ...order,
+    //         status: newStatus,
+    //     }));
+    // };
+
+    // Rabu 
+
+    const updateOrderStatusInContext = (orderId, newStatus, extraFields = {}) => {
+    setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+        o.orderId === orderId
+            ? { ...o, status: newStatus, ...extraFields }
+            : o
+        )
+    );
     };
+
 
 
     return (
