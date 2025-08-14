@@ -306,17 +306,46 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const userId = Number(user?.id);
+
     const DONE = new Set(['delivered', 'selesai', 'rejected', 'cancelled']);
 
+    // Fungsi normalisasi status
+    const normalizeStatus = (status) => {
+        const map = {
+            'Menunggu Validasi': 'pending',
+            'Tertunda': 'approved',
+            'Disetujui': 'approved',
+            'Diproses': 'processing',
+            'Dikirim': 'shipped',
+            'Selesai': 'delivered',
+            'Ditolak': 'cancelled',
+        };
+        return map[status] || status?.toLowerCase();
+    };
+
+    // Debug log isi data
+    console.log({ raw, userId, role, DONE });
+    raw.forEach(o => {
+        console.log("Order Debug:", {
+            id: o.id,
+            status: o.status,
+            statusNormalized: normalizeStatus(o.status),
+            agen_id: o.agen_id,
+            distributor_id: o.distributor_id,
+            pabrik_id: o.pabrik_id
+        });
+    });
+
     const filtered = (Array.isArray(raw) ? raw : []).filter((o) => {
-        const statusMatch = DONE.has(String(o.status || '').toLowerCase());
+        const statusMatch = DONE.has(normalizeStatus(o.status));
 
         if (role === 'agen') {
             return Number(o.agen_id) === userId && statusMatch;
         } else if (role === 'distributor') {
             return Number(o.distributor_id) === userId && statusMatch;
+        } else if (role === 'pabrik') {
+            return statusMatch; // tampilkan semua order selesai untuk pabrik
         }
-
         return false;
     });
 
@@ -344,13 +373,12 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             totalHargaPabrik: o.totalHargaPabrik ?? 0,
             hargaJual: o.hargaJual ?? 0,
             statusPembayaran: o.statusPembayaran ?? 'Belum Lunas',
-            status: o.status ?? '-',
+            status: normalizeStatus(o.status) ?? '-',
             products,
             totalPrice,
         };
     });
 }
-
 
 
 export async function fetchInvoicesForAgent() {
@@ -440,6 +468,5 @@ export async function updateMonitoringOrderStatus(orderId, status) {
 }
 
 
-// selasa 12 - 08
 
 
