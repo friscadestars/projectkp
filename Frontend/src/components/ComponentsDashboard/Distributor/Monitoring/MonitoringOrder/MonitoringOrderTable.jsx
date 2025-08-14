@@ -33,6 +33,10 @@ const MonitoringOrderTable = ({ orders }) => {
         due_date: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString().split('T')[0],
         notes: ''
     });
+
+    const [message, setMessage] = useState('');
+    const [messageType, setMessageType] = useState('success');
+
     const formatDate = (val) => {
         if (!val) return '-';
         const date = new Date(val);
@@ -52,10 +56,10 @@ const MonitoringOrderTable = ({ orders }) => {
             : null;
 
         if (!agenId) {
-            alert('Data agen tidak valid. Tidak dapat membuat invoice.');
+            setMessage('Data agen tidak valid. Tidak dapat membuat invoice.');
+            setMessageType('error');
             return;
         }
-
         try {
             const res = await fetch(`${API_BASE}/orders/${order.orderId}`, {
                 headers: {
@@ -101,7 +105,7 @@ const MonitoringOrderTable = ({ orders }) => {
 
                 const generatedInvoiceNumber = resInvoice.ok && invoiceData?.invoice_number
                     ? invoiceData.invoice_number
-                    : 'GAGAL_GENERATE';
+                    : `INV-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${mappedOrder.distributorId}-${mappedOrder.orderCode}`;
 
                 setInvoiceForm({
                     ...invoiceForm,
@@ -120,14 +124,15 @@ const MonitoringOrderTable = ({ orders }) => {
 
             console.log('selectedOrder.order_items:', mappedOrder.order_items);
 
-            const checkInvoice = await fetch(`${API_BASE}/invoices/order/${mappedOrder.id}`, {
+            const checkInvoice = await fetch(`${API_BASE}/invoices/order/${mappedOrder.id}?distributorId=${mappedOrder.distributorId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             const invoiceCheckData = await checkInvoice.json();
             const isInvoiceExist = checkInvoice.ok && invoiceCheckData?.exists;
 
             if (isInvoiceExist) {
-                alert('Invoice untuk order ini sudah pernah dibuat.');
+                setMessage('Invoice untuk order ini sudah pernah dibuat untuk distributor ini.');
+                setMessageType('error');
                 return;
             }
 
@@ -144,6 +149,13 @@ const MonitoringOrderTable = ({ orders }) => {
         setSelectedOrder(null);
         setShowInvoiceModal(false);
     };
+
+    useEffect(() => {
+        if (message) {
+            const timer = setTimeout(() => setMessage(''), 5000);
+            return () => clearTimeout(timer);
+        }
+    }, [message]);
 
     const columns = [
         {
@@ -211,7 +223,8 @@ const MonitoringOrderTable = ({ orders }) => {
 
     const handleCreateInvoice = async () => {
         if (!selectedOrder || !selectedOrder.order_items || selectedOrder.order_items.length === 0) {
-            alert('Data order tidak lengkap.');
+            setMessage('Data order tidak lengkap.');
+            setMessageType('error');
             return;
         }
 
@@ -227,7 +240,7 @@ const MonitoringOrderTable = ({ orders }) => {
             order_item_ids: selectedOrder.order_items.map((item) => item.id),
             agen_id: selectedOrder.agen_id,
             distributor_id: selectedOrder.distributorId,
-            invoice_number: invoiceForm.invoice_number || `INV-${selectedOrder.orderCode}`,
+            invoice_number: invoiceForm.invoice_number || `INV-${new Date().toISOString().split('T')[0].replace(/-/g, '')}-${selectedOrder.distributorId}-${selectedOrder.orderCode}`,
             invoice_date: invoiceForm.invoice_date,
             due_date: invoiceForm.due_date,
             amount_total:
@@ -258,11 +271,12 @@ const MonitoringOrderTable = ({ orders }) => {
             }
 
             if (response.ok) {
-                alert('Invoice berhasil dibuat dan dikirim ke agen.');
+                setMessage('Invoice berhasil dibuat dan dikirim ke agen.');
+                setMessageType('success');
                 setShowInvoiceModal(false);
             } else {
-                console.error('Gagal membuat invoice:', data);
-                alert(`Gagal membuat invoice: ${data.message || 'Terjadi kesalahan'}`);
+                setMessage(`Gagal membuat invoice: ${data.message || 'Terjadi kesalahan'}`);
+                setMessageType('error');
             }
         } catch (err) {
             console.error('Terjadi kesalahan saat mengirim invoice:', err);
@@ -275,6 +289,11 @@ const MonitoringOrderTable = ({ orders }) => {
 
     return (
         <>
+            {message && (
+                <div className={`px-4 py-2 mb-2 rounded ${messageType === 'success' ? 'bg-green-200 text-green-800' : 'bg-red-200 text-red-800'}`}>
+                    {message}
+                </div>
+            )}
             <ReusableTable
                 columns={columns}
                 data={orders}

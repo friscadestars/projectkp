@@ -1,98 +1,121 @@
-import React from "react";
+// src/components/ComponentsDashboard/Pabrik/4_Riwayat/TabelRiwayatDetail.jsx
+import React from 'react';
+import ReusableTable from '../../Common/ReusableTable';
+import StatusBadge from '../../Common/StatusBadge';
 
-const TabelRiwayatDetail = ({ order }) => {
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-';
+  const safeDateStr = dateStr.replace(' ', 'T');
+  const date = new Date(safeDateStr);
+  if (isNaN(date)) return '-';
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+const getStatusPembayaran = (_, row) => {
+  const status = (
+    row.paymentStatus ??
+    row.statusPembayaran ??
+    row.invoice_status ??
+    ''
+  ).toString().toLowerCase();
+
+  if (status === 'lunas' || status === 'paid') return 'Lunas';
+  if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid') return 'Belum Dibayar';
+  return '-';
+};
+
+// Tabel info order
+const OrderInfoTable = ({ order }) => {
+  if (!order) return null;
+
+  const columns = [
+    { header: 'Order ID', key: 'orderCode', render: (v) => v?.toUpperCase() ?? '-' },
+    { header: 'Agen', key: 'agenName', render: (v) => v ?? '-' },
+    { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
+    { header: 'Tanggal Pengiriman', key: 'deliveryDate', render: formatDate },
+    {
+      header: 'Status Order',
+      key: 'status',
+      render: (v) => <StatusBadge status={v ?? '-'} />
+    },
+    {
+      header: 'Status Pembayaran',
+      key: 'paymentStatus',
+      render: (_, row) => {
+        const status = getStatusPembayaran(_, row);
+        return (
+          <span
+            className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
+              }`}
+          >
+            {status}
+          </span>
+        );
+      }
+    }
+  ];
+
   return (
-    <div className="space-y-6">
-      {/* Detail Order */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Detail Order</h2>
-        <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
-          <table className="min-w-full text-sm text-center">
-            {/* ✅ Header biru gelap */}
-            <thead className="bg-blue-900 text-white">
-              <tr>
-                <th className="px-4 py-2">Order ID</th>
-                <th className="px-4 py-2">Agen ID</th>
-                <th className="px-4 py-2">Tanggal Order</th>
-                <th className="px-4 py-2">Tanggal Pengiriman</th>
-                <th className="px-4 py-2">Status Order</th>
-                <th className="px-4 py-2">Status Pembayaran</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="text-center">
-                <td className="px-4 py-2">{order.orderId}</td>
-                <td className="px-4 py-2">{order.agentId}</td>
-                <td className="px-4 py-2">{order.orderDate}</td>
-                <td className="px-4 py-2">{order.shippingDate || "-"}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`text-white px-2 py-1 rounded text-sm ${
-                      order.status === "Diterima"
-                        ? "bg-btn-confirm"
-                        : "bg-btn-info"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
-                </td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`text-white px-2 py-1 rounded text-sm ${
-                      order.paymentStatus === "Lunas"
-                        ? "bg-btn-success"
-                        : "bg-btn-danger"
-                    }`}
-                  >
-                    {order.paymentStatus || "Belum Dibayar"}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Rincian Produk */}
-      <div>
-        <h2 className="text-lg font-semibold mb-2">Rincian Produk</h2>
-        <div className="rounded-lg border border-gray-200 shadow overflow-hidden">
-          <table className="min-w-full text-sm text-center">
-            {/* ✅ Header biru gelap */}
-            <thead className="bg-blue-900 text-white">
-              <tr>
-                <th className="px-4 py-2">Nama Produk</th>
-                <th className="px-4 py-2">Jumlah</th>
-                <th className="px-4 py-2">Harga Satuan Agen</th>
-                <th className="px-4 py-2">Harga Satuan Pabrik</th>
-              </tr>
-            </thead>
-            <tbody>
-              {order.products.map((product, index) => (
-                <tr
-                  key={index}
-                  className="text-center border-b border-gray-200"
-                >
-                  <td className="px-4 py-2">{product.name}</td>
-                  <td className="px-4 py-2">{product.quantity}</td>
-                  <td className="px-4 py-2">
-                    {product.agentPrice
-                      ? `Rp ${product.agentPrice.toLocaleString()}`
-                      : "-"}
-                  </td>
-                  <td className="px-4 py-2">
-                    {product.factoryPrice
-                      ? `Rp ${product.factoryPrice.toLocaleString()}`
-                      : "-"}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div className="mb-6">
+      <h2 className="font-semibold text-md mb-3">Detail Order</h2>
+      <ReusableTable columns={columns} data={[order]} />
     </div>
   );
 };
+
+// Tabel detail produk
+const ProductDetailTable = ({ products }) => {
+  const columns = [
+    { header: 'Nama Produk', key: 'name' },
+    { header: 'Jumlah', key: 'quantity' },
+    {
+      header: 'Harga Satuan Agen',
+      key: 'hargaAgen',
+      render: (value) => `Rp. ${Number(value ?? 0).toLocaleString('id-ID')}`
+    },
+    {
+      header: 'Harga Satuan Pabrik',
+      key: 'hargaPabrik',
+      render: (value) => `Rp. ${Number(value ?? 0).toLocaleString('id-ID')}`
+    }
+  ];
+
+  return (
+    <div className="mb-6">
+      <h2 className="font-semibold text-md mb-3">Rincian Produk</h2>
+      <ReusableTable columns={columns} data={products} />
+    </div>
+  );
+};
+
+const TabelRiwayatDetail = ({ order }) => {
+  if (!order || !Array.isArray(order.products) || order.products.length === 0) {
+    return <div className="text-red-600">Data order belum lengkap.</div>;
+  }
+
+  const products = order.products.map((p) => ({
+    name: p.nama ?? p.productName ?? '-',
+    quantity: Number(p.jumlah ?? p.quantity ?? 0),
+    hargaAgen: Number(p.hargaAgen ?? p.requested_price ?? 0),
+    hargaPabrik: Number(p.harga_pabrik ?? 0)
+  }));
+
+  console.log('Mapped products:', products);
+
+  return (
+    <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
+      <OrderInfoTable order={order} />
+      <ProductDetailTable
+        products={products.map(p => ({
+          ...p,
+        }))}
+      />
+    </div>
+  );
+};
+
 
 export default TabelRiwayatDetail;

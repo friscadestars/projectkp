@@ -489,33 +489,56 @@ class InvoiceController extends ResourceController
 
     public function generateInvoiceNumber($type = 'distributor', $id = null)
     {
-        helper('text');
         $model = new \App\Models\InvoiceModel();
-
-        $today = date('Ymd');
-
-        if ($type === 'distributor') {
-            $prefix = "INV/$today/";
-            $filterField = 'distributor_id';
-        } elseif ($type === 'pabrik') {
-            $prefix = "INVPB/$today/";
-            $filterField = 'pabrik_id';
-        } else {
-            return $this->fail('Tipe invoice tidak valid.');
-        }
 
         if (!$id) {
             return $this->fail('ID distributor atau pabrik tidak diberikan.');
         }
 
-        $count = $model
-            ->like('invoice_number', $prefix, 'after')
-            ->where($filterField, $id)
-            ->countAllResults();
+        if ($type === 'distributor') {
+            $prefix = "INV/" . date('Ymd') . "/";
+            $filterField = 'distributor_id';
+        } elseif ($type === 'pabrik') {
+            $prefix = "INVPBR/" . date('Ymd') . "/";
+            $filterField = 'pabrik_id';
+        } else {
+            return $this->fail('Tipe invoice tidak valid.');
+        }
 
-        $number = str_pad($count + 1, 4, '0', STR_PAD_LEFT);
+        // Ambil invoice terakhir untuk pabrik/distributor ini
+        $lastInvoice = $model
+            ->where($filterField, $id)
+            ->orderBy('id', 'DESC')
+            ->first();
+
+        if ($lastInvoice) {
+            $parts = explode('/', $lastInvoice['invoice_number']);
+            $lastNumber = intval(end($parts));
+            $number = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        } else {
+            $number = '0001';
+        }
 
         $invoiceNumber = $prefix . $number;
+
+        // Cek apakah invoice_number sudah ada untuk distributor yang sama
+        $exists = $model
+            ->where('invoice_number', $invoiceNumber)
+            ->where($filterField, $id)
+            ->first();
+
+        if ($exists) {
+            // Kalau sudah ada, increment terus sampai ketemu nomor unik untuk distributor yang sama
+            do {
+                $lastNumber++;
+                $number = str_pad($lastNumber, 4, '0', STR_PAD_LEFT);
+                $invoiceNumber = $prefix . $number;
+                $exists = $model
+                    ->where('invoice_number', $invoiceNumber)
+                    ->where($filterField, $id)
+                    ->first();
+            } while ($exists);
+        }
 
         return $this->respond([
             'invoice_number' => $invoiceNumber
@@ -543,5 +566,90 @@ class InvoiceController extends ResourceController
                 'exists' => false,
             ]);
         }
+    }
+
+    public function createInvoiceForPabrik()
+    {
+        $data = $this->request->getJSON(true);
+
+        if (!isset($data['distributor_id'], $data['order_id'], $data['products'])) {
+            return $this->failValidationErrors('Distributor ID, Order ID, dan Produk wajib diisi.');
+        }
+
+        $user = $this->getUserFromToken();
+        if (!$user || !isset($user['id'])) {
+            return $this->failUnauthorized('User tidak terautentikasi');
+        }
+
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoiceItemModel = new \App\Models\InvoiceItemModel();
+        $notifModel = new \App\Models\NotificationModel();
+        $orderModel = new \App\Models\OrderModel();
+
+        $order = $orderModel->find($data['order_id']);
+        if (!$order) {
+            return $this->failNotFound('Order tidak ditemukan');
+        }
+
+        // Hitung total dari produk
+        $amountTotal = 0;
+        foreach ($data['products'] as $p) {
+            $amountTotal += ($p['quantity'] ?? 0) * ($p['unitPrice'] ?? 0);
+        }
+
+        // Generate invoice_number otomatis
+        $prefix = "INVPBR/" . date('Ymd') . "/";
+        $lastInvoice = $invoiceModel->where('pabrik_id', $user['id'])->orderBy('id', 'DESC')->first();
+        $number = $lastInvoice ? str_pad(intval(explode('/', $lastInvoice['invoice_number'])[2]) + 1, 4, '0', STR_PAD_LEFT) : '0001';
+        $invoiceNumber = $prefix . $number;
+
+        // Siapkan data invoice
+        $invoiceData = [
+            'invoice_number' => $invoiceNumber,
+            'order_id'       => $data['order_id'],
+            'pabrik_id'      => $user['id'],  // wajib diisi
+            'distributor_id' => $data['distributor_id'],
+            'agen_id'        => null,
+            'amount_total'   => $amountTotal,
+            'status'         => 'unpaid',
+            'invoice_date'   => $data['invoice_date'] ?? date('Y-m-d H:i:s'),
+            'due_date'       => $data['due_date'] ?? null,
+            'notes'          => $data['notes'] ?? null,
+            'role'           => 'pabrik',
+            'created_at'     => date('Y-m-d H:i:s'),
+            'updated_at'     => date('Y-m-d H:i:s'),
+        ];
+
+        if (!$invoiceModel->insert($invoiceData)) {
+            return $this->failValidationErrors($invoiceModel->errors());
+        }
+
+        $invoiceId = $invoiceModel->getInsertID();
+
+        // Simpan produk ke invoice_items
+        foreach ($data['products'] as $p) {
+            $invoiceItemModel->insert([
+                'invoice_id'    => $invoiceId,
+                'order_item_id' => $p['id'],
+                'quantity'      => $p['quantity'],
+                'unit_price'    => $p['unitPrice'],
+            ]);
+        }
+
+        // Notifikasi ke distributor
+        $notifModel->insert([
+            'user_id'    => $data['distributor_id'],
+            'title'      => 'Tagihan Baru dari Pabrik',
+            'message'    => 'Anda menerima tagihan baru dari pabrik untuk pesanan #' . $data['order_id'] . '.',
+            'type'       => 'invoice_from_pabrik',
+            'is_read'    => 0,
+            'created_at' => date('Y-m-d H:i:s'),
+        ]);
+
+        return $this->respondCreated([
+            'message' => 'Invoice berhasil dibuat oleh pabrik',
+            'invoice_id' => $invoiceId,
+            'invoice_number' => $invoiceNumber
+        ]);
     }
 }

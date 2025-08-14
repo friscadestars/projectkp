@@ -23,6 +23,7 @@ class InvoiceModel extends Model
         'updated_at',
         'agen_id',
         'distributor_id',
+        'pabrik_id',
     ];
     protected $useTimestamps = true;
 }

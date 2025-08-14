@@ -315,6 +315,8 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             return Number(o.agen_id) === userId && statusMatch;
         } else if (role === 'distributor') {
             return Number(o.distributor_id) === userId && statusMatch;
+        } else if (role === 'pabrik') {
+            return statusMatch;
         }
 
         return false;
@@ -326,6 +328,7 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             jumlah: i.quantity,
             hargaAgen: i.requested_price ?? i.unit_price,
             hargaPabrik: i.unit_price,
+            kodeProduk: i.kode_produk,
         })) : [];
 
         const totalPrice = Array.isArray(o.items)
@@ -340,6 +343,7 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             distributorName: o.distributor ?? '-',
             orderDate: (o.order_date || '').split(' ')[0] || '-',
             receivedDate: (o.accepted_at || o.received_date || '').split(' ')[0] || '-',
+            deliveryDate: (o.delivery_date || o.deliveryDate || '').split(' ')[0] || '-',
             trackingNumber: o.resi ?? '-',
             totalHargaPabrik: o.totalHargaPabrik ?? 0,
             hargaJual: o.hargaJual ?? 0,
@@ -350,8 +354,6 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
         };
     });
 }
-
-
 
 export async function fetchInvoicesForAgent() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');

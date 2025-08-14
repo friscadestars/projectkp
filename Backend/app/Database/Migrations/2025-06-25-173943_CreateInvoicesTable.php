@@ -93,7 +93,7 @@ class CreateInvoicesTable extends Migration
         ]);
 
         $this->forge->addPrimaryKey('id');
-        $this->forge->addUniqueKey('invoice_number');
+        $this->forge->addUniqueKey(['invoice_number', 'distributor_id']);
 
         // Tambahkan foreign key jika relasi sudah ada (optional, tergantung kebutuhan)
         $this->forge->addForeignKey('agen_id', 'users', 'id', 'SET NULL', 'CASCADE');
