@@ -43,6 +43,11 @@ export const useProduksiPengiriman = () => {
               statusProduksiText = "Sedang Diproduksi";
               statusPengiriman = "Belum Dikirim";
               break;
+            case "produced": // ✅ status baru
+              statusProduksi = "produced";
+              statusProduksiText = "Selesai Produksi";
+              statusPengiriman = "Belum Dikirim";
+              break;
             case "shipped":
               statusProduksi = "shipped";
               statusProduksiText = "Selesai Produksi";

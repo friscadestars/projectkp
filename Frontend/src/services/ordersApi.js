@@ -168,7 +168,7 @@ export async function fetchOrderById(idOrCode) {
 //     return res.json();
 // }
 
-export async function updateOrderStatus(id, status, pabrikId = 1) {
+export async function updateOrderStatus(id, status, pabrikId = 1, resi = null, deliveryDate = null) {
     const order = await fetchOrderById(id); // ambil data dulu
 
     const isDelivered = status.toLowerCase() === 'delivered';
@@ -182,6 +182,10 @@ export async function updateOrderStatus(id, status, pabrikId = 1) {
         order_date: order.orderDate + ' 00:00:00',
         note: order.alamat,
         status: status,
+        resi: resi, // <-- kirim nomor resi
+        delivery_date: deliveryDate 
+            ? new Date(deliveryDate).toISOString().slice(0, 19).replace('T', ' ')
+            : null, // <-- kirim delivery date
         ...(isDelivered && { accepted_at: acceptedAt })
     };
 
@@ -316,6 +320,7 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
             'Tertunda': 'approved',
             'Disetujui': 'approved',
             'Diproses': 'processing',
+            'Selesai Produksi': 'produced',
             'Dikirim': 'shipped',
             'Selesai': 'delivered',
             'Ditolak': 'cancelled',
@@ -467,3 +472,4 @@ export async function updateMonitoringOrderStatus(orderId, status) {
     if (!res.ok) throw new Error('Gagal update status order');
     return res.json();
 }
+
