@@ -40,7 +40,7 @@ const ValidasiActions = ({ orderId, onKirim, handleTolak }) => {
                     )
                 }
             >
-                Kirim
+                Setujui & Kirim
             </button>
 
             {/* TOMBOL TOLAK */}

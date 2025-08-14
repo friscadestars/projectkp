@@ -314,7 +314,7 @@ const MonitoringOrderTable = ({ orders }) => {
                     <div className="space-y-4">
                         {/* Informasi Order */}
                         <div className="space-y-1">
-                            <p><strong>Order ID:</strong> {selectedOrder.orderCode}</p>
+                            <p><strong>Order ID:</strong> {selectedOrder.orderCode?.toUpperCase()}</p>
                             <p><strong>Agen:</strong> {selectedOrder.agenName}</p>
                             <p><strong>Pabrik:</strong> {selectedOrder.pabrikName}</p>
                             <p><strong>Tanggal Order:</strong> {formatDate(selectedOrder.orderDate)}</p>

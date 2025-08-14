@@ -27,7 +27,7 @@ const ValidasiOrderPage = () => {
             await Swal.fire({
                 icon: 'success',
                 title: 'Order Disetujui',
-                text: `Order ${orderId} berhasil dikirim ke pabrik dan status berubah menjadi approved.`,
+                text: `Order berhasil dikirim ke pabrik`,
                 confirmButtonColor: '#2563eb',
             });
 
