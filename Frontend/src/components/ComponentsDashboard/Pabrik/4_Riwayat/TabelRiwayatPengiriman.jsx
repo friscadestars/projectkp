@@ -70,7 +70,7 @@ const TabelRiwayatPengiriman = () => {
     });
 
     if (result.isConfirmed) {
-      setDeletedOrderIds(prev => [...prev, orderId]); // tambahkan ke list deleted
+      setDeletedOrderIds(prev => [...prev, orderId]);
       Swal.fire({
         title: 'Terhapus!',
         text: 'Riwayat order berhasil dihapus dari tampilan.',
@@ -84,7 +84,7 @@ const TabelRiwayatPengiriman = () => {
     { header: 'No', key: 'no', render: (_, __, index) => index + 1 },
     { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase() },
     { header: 'Distributor', key: 'distributorName' },
-    { header: 'Tanggal Terima', key: 'deliveryDate', render: formatDate },
+    { header: 'Tanggal Pengiriman', key: 'deliveryDate', render: formatDate },
     { header: 'No. Resi', key: 'trackingNumber' },
     {
       header: 'Total Harga',
@@ -127,7 +127,10 @@ const TabelRiwayatPengiriman = () => {
       <div className="mt-4">
         <ReusableTable
           columns={columns}
-          data={filteredOrders.slice(0, entries)}
+          data={[...filteredOrders]
+            .sort((a, b) => new Date(b.receivedDate) - new Date(a.receivedDate))
+            .slice(0, entries)
+          }
           footer={
             <tr className="px-4 py-3 text-right text-gray-600 font-medium">
               <td colSpan={columns.length} className="py-2 px-4 text-right">

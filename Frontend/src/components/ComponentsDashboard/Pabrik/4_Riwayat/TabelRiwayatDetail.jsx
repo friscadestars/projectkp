@@ -19,18 +19,14 @@ const formatDate = (dateStr) => {
 
 const getStatusPembayaran = (_, row) => {
   const status = (
-    row.paymentStatus ||
     row.statusPembayaran ||
+    row.status_pembayaran ||
     row.invoice_status ||
     ''
   ).toLowerCase();
 
   if (status === 'lunas' || status === 'paid') return 'Lunas';
-  if (
-    status === 'belum dibayar' ||
-    status === 'belum lunas' ||
-    status === 'unpaid'
-  )
+  if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid')
     return 'Belum Dibayar';
   return '-';
 };
@@ -42,15 +38,10 @@ const OrderInfoTable = ({ order }) => {
     { header: 'Order ID', key: 'orderCode', render: (v) => v?.toUpperCase() },
     { header: 'Agen', key: 'agenName' },
     { header: 'Tanggal Order', key: 'orderDate', render: formatDate },
-    { header: 'Tanggal Pengiriman', key: 'deliveryDate', render: formatDate },
-    {
-      header: 'Status Order',
-      key: 'status',
-      render: (v) => <StatusBadge status={v} />,
-    },
+    { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
     {
       header: 'Status Pembayaran',
-      key: 'paymentStatus',
+      key: 'statusPembayaran',
       render: (_, row) => {
         const status = getStatusPembayaran(_, row);
         return (
@@ -62,6 +53,11 @@ const OrderInfoTable = ({ order }) => {
           </span>
         );
       },
+    },
+    {
+      header: 'Status Order',
+      key: 'status',
+      render: (v) => <StatusBadge status={v} />,
     },
   ];
 
@@ -80,19 +76,21 @@ const ProductDetailTable = ({ products }) => {
     { header: 'Nama Produk', key: 'name' },
     { header: 'Jumlah', key: 'quantity' },
     {
-      header: 'Harga Satuan Agen',
-      key: 'hargaAgen',
-      render: (value) =>
-        typeof value === 'number'
-          ? `Rp.${value.toLocaleString('id-ID')}`
-          : '-',
+      header: 'Harga Satuan Distributor',
+      key: 'unitPrice',
+      render: (_, row) => {
+        const harga = row.status === 'Tertunda' ? row.requestedPrice : row.unitPrice;
+        return typeof harga === 'number'
+          ? `Rp. ${harga.toLocaleString('id-ID')}`
+          : '-';
+      },
     },
     {
       header: 'Harga Satuan Pabrik',
       key: 'hargaPabrik',
       render: (value) =>
         typeof value === 'number'
-          ? `Rp.${value.toLocaleString('id-ID')}`
+          ? `Rp. ${value.toLocaleString('id-ID')}`
           : '-',
     },
   ];
@@ -106,24 +104,21 @@ const ProductDetailTable = ({ products }) => {
 };
 
 const TabelRiwayatDetail = ({ order }) => {
-  if (!order || !Array.isArray(order.products)) {
+  if (!order || !Array.isArray(order.items)) {
     return <div className="text-red-600">Data order belum lengkap.</div>;
   }
 
-
-  const products = order.products.map((p) => ({
-    name: p.name,
-    quantity: p.quantity,
-    hargaAgen: Number(p.requestedPrice ?? 0), // harga ke agen/distributor
-    hargaPabrik: Number(p.unitPrice ?? 0), // harga dari pabrik
+  const products = order.items.map((item) => ({
+    name: item.product_name,
+    quantity: item.quantity,
+    requestedPrice: item.requested_price,
+    unitPrice: Number(item.unit_price ?? 0),
+    status: order.status,
+    hargaPabrik: Number(item.harga_pabrik ?? item.hargaPabrik ?? 0), // pastikan ambil dari dua kemungkinan field
   }));
 
-  // Debug: cek data produk dari API
-  console.log('Raw order.products:', order.products);
-  console.log('Mapped products:', products);
-
   return (
-    <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
+    <div>
       <OrderInfoTable order={order} />
       <ProductDetailTable products={products} />
     </div>

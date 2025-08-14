@@ -1,46 +1,60 @@
-// useDetailRiwayat.js
 import { useEffect, useState } from 'react';
 import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
 import { API_BASE, getAuthHeader } from '../../../services/apiConfig';
 
 export const useDetailRiwayat = () => {
   const [orders, setOrders] = useState([]);
-  const [productPrices, setProductPrices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch orders
+  // fungsi normalisasi supaya pencocokan lebih fleksibel
+  const normalize = (str) => (str || '').replace(/\s+/g, '').toLowerCase();
+
   useEffect(() => {
-    const fetchOrders = async () => {
+    const fetchAll = async () => {
       try {
-        const result = await fetchCompletedOrdersForHistory('pabrik');
-        setOrders(result);
+        const [ordersResult, pricesRes] = await Promise.all([
+          fetchCompletedOrdersForHistory('pabrik'),
+          fetch(`${API_BASE}/prices?role=pabrik`, {
+            headers: {
+              'Content-Type': 'application/json',
+              ...getAuthHeader(),
+            },
+          }).then((res) => res.json()),
+        ]);
+
+        const mergedOrders = ordersResult.map((order) => ({
+          ...order,
+          products: order.products.map((p) => {
+            const hargaPabrikData = pricesRes.find((price) => {
+              return (
+                normalize(price.kode_produk) === normalize(p.code) ||
+                normalize(price.nama_produk) === normalize(p.name)
+              );
+            });
+
+            if (!hargaPabrikData) {
+              console.warn('[PRICE MISSING] Tidak ada harga pabrik untuk:', p);
+            }
+
+            return {
+              ...p,
+              hargaPabrik: hargaPabrikData
+                ? Number(hargaPabrikData.harga)
+                : Number(p.unitPrice ?? 0),
+            };
+          }),
+        }));
+
+        setOrders(mergedOrders);
       } catch (err) {
         setError(err);
       } finally {
         setLoading(false);
       }
     };
-    fetchOrders();
-  }, []);
 
-  // Fetch harga pabrik
-  useEffect(() => {
-    const fetchPrices = async () => {
-      try {
-        const res = await fetch(`${API_BASE}/prices?role=pabrik`, {
-          headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-          },
-        });
-        const data = await res.json();
-        setProductPrices(data || []);
-      } catch (err) {
-        console.error('Gagal fetch harga pabrik:', err);
-      }
-    };
-    fetchPrices();
+    fetchAll();
   }, []);
 
   const handleDelete = async (id) => {
@@ -58,5 +72,5 @@ export const useDetailRiwayat = () => {
     }
   };
 
-  return { orders, productPrices, loading, error, handleDelete };
+  return { orders, loading, error, handleDelete };
 };
