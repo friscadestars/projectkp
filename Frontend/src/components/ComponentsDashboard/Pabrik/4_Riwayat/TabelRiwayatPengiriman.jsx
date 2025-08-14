@@ -125,7 +125,7 @@ const TabelRiwayatPengiriman = ({ entries, onEntriesChange, orders, onDelete, lo
                 <div className="flex gap-2 justify-center">
                     <button
                         className="bg-blue-900 text-white px-3 py-1 text-sm rounded font-bold"
-                        onClick={() => navigate(`/pabrik/detail-riwayat-pengiriman/${row.id}`)}
+                        onClick={() => navigate(`/pabrik/detail-riwayat/${row.id}`)}
                     >
                         Detail
                     </button>

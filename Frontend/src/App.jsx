@@ -113,7 +113,7 @@ function App() {
         <Route path="/pabrik/produksi-pengiriman" element={<ProduksiPengiriman />} />
         <Route path="/pabrik/detail-produksi/sedang-produksi" element={<SedangDiproduksi />} />
         <Route path="/pabrik/riwayat-pengiriman" element={<Riwayat />} />
-        <Route path="/pabrik/detail-riwayat" element={<DetailRiwayat />} />
+        <Route path="/pabrik/detail-riwayat/:orderId" element={<DetailRiwayat />} />
         <Route path="/pabrik/monitoring-distributor" element={<MonitoringDistributor />} />
         <Route path="/pabrik/daftar-harga" element={<DaftarHarga />} />
       </Routes>
