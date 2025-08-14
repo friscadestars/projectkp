@@ -135,7 +135,7 @@ class OrderController extends ResourceController
 
         $rules = [
             'agen_id'    => 'required|integer',
-            'status'     => 'required|in_list[pending,processing,shipped,delivered,cancelled,approved]',
+            'status'     => 'required|in_list[pending,processing, produced, shipped,delivered,cancelled,approved]',
             'order_date' => 'required|valid_date[Y-m-d H:i:s]',
         ];
 
@@ -671,7 +671,7 @@ class OrderController extends ResourceController
             ->join('users agen', 'o.agen_id = agen.id', 'left')
             ->join('users pabrik', 'o.pabrik_id = pabrik.id', 'left')
             ->join('invoices i', 'i.order_id = o.id', 'left')
-            ->whereIn('o.status', ['approved', 'processing', 'shipped'])
+            ->whereIn('o.status', ['approved', 'processing', 'produced','shipped'])
             ->orderBy('o.created_at', 'DESC')
             ->get()
             ->getResultArray();

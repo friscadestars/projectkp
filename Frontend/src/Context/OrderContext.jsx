@@ -19,6 +19,7 @@ const normalizeStatus = (status) => {
         'Tertunda': 'approved',
         'Disetujui': 'approved',
         'Diproses': 'processing',
+        'Selesai Produksi': 'produced',
         'Dikirim': 'shipped',
         'Selesai': 'delivered',
         'Ditolak': 'cancelled',
@@ -109,7 +110,7 @@ export const OrderProvider = ({ children }) => {
             ));
 
             setMonitoringOrders(sorted.filter(order =>
-                ['approved', 'processing', 'shipped'].includes(order.status)
+                ['approved', 'processing', 'produced', 'shipped'].includes(order.status)
             ));
 
             setOrdersMasukPabrik(sorted.filter(order =>
