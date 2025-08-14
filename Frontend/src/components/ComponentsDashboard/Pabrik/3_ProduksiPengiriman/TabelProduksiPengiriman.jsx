@@ -13,7 +13,7 @@ const TableProduksiPengiriman = () => {
     handleDetail,
     getStatusPengirimanText,
     isInvoiceEnabled,
-    invoiceStatus,
+    //invoiceStatus,
     markInvoiceCreated
   } = useProduksiPengiriman();
 

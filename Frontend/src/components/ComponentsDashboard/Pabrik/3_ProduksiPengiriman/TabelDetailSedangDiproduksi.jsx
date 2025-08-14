@@ -45,18 +45,16 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
 
     if (confirmed) {
       try {
-        // 1️⃣ Ubah status lokal di detail
         setStatusProduksi('Selesai Produksi');
 
-        // 2️⃣ Update context → backend status "shipped", tapi UI override
-        updateOrderStatusInContext(order.orderId, 'shipped', {
+        // ✅ Update context → status baru "produced"
+        updateOrderStatusInContext(order.orderId, 'produced', {
           statusPengiriman: 'Belum Dikirim',
           statusProduksiText: 'Selesai Produksi',
-          overrideForUI: true // tanda kalau ini harus override tampilan di tabel
         });
 
-        // 3️⃣ Simpan ke backend
-        await updateOrderStatus(order.id, 'shipped');
+        // ✅ Simpan ke backend
+        await updateOrderStatus(order.id, 'produced');
 
         showSuccess('Berhasil!', 'Produksi telah diselesaikan.');
       } catch (err) {
@@ -66,84 +64,51 @@ const TabelDetailSedangDiproduksi = ({ order }) => {
     }
   };
 
-  // const handleKirim = async () => {
-  //   if (!noResi) {
-  //     Swal.fire({
-  //       title: 'Nomor Resi Kosong',
-  //       text: 'Silakan masukkan nomor resi sebelum mengirim.',
-  //       icon: 'error',
-  //       confirmButtonColor: '#3085d6',
-  //     });
-  //     return;
-  //   }
-
-  //   const confirmed = await showConfirmation(
-  //     'Konfirmasi Kirim Order',
-  //     `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
-  //     'Ya, Kirim'
-  //   );
-
-  //   if (confirmed) {
-  //     try {
-  //       // Produksi tetap "Selesai Produksi"
-  //       setStatusProduksi('Selesai Produksi');
-
-  //       // Update context: produksi = selesai, pengiriman = dikirim
-  //       updateOrderStatusInContext(order.orderId, 'shipped');
-
-  //       // Simpan ke backend → status = shipped
-  //       await updateOrderStatus(order.id, 'shipped');
-
-  //       showSuccess(
-  //         'Berhasil!',
-  //         `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`
-  //       );
-  //     } catch (err) {
-  //       console.error('Gagal kirim order', err);
-  //       Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
-  //     }
-  //   }
-  // };
-
   const handleKirim = async () => {
-  if (!noResi) {
-    Swal.fire({
-      title: 'Nomor Resi Kosong',
-      text: 'Silakan masukkan nomor resi sebelum mengirim.',
-      icon: 'error',
-      confirmButtonColor: '#3085d6',
-    });
-    return;
-  }
-
-  const confirmed = await showConfirmation(
-    'Konfirmasi Kirim Order',
-    `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
-    'Ya, Kirim'
-  );
-
-  if (confirmed) {
-    try {
-      // ✅ Ubah status lokal jadi "Dikirim"
-      setStatusProduksi('Dikirim');
-
-      // ✅ Update context → backend status "shipped"
-      updateOrderStatusInContext(order.orderId, 'shipped');
-
-      // ✅ Simpan ke backend
-      await updateOrderStatus(order.id, 'shipped');
-
-      showSuccess(
-        'Berhasil!',
-        `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`
-      );
-    } catch (err) {
-      console.error('Gagal kirim order', err);
-      Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
+    if (!noResi) {
+      Swal.fire({
+        title: 'Nomor Resi Kosong',
+        text: 'Silakan masukkan nomor resi sebelum mengirim.',
+        icon: 'error',
+        confirmButtonColor: '#3085d6',
+      });
+      return;
     }
-  }
-};
 
+    const confirmed = await showConfirmation(
+      'Konfirmasi Kirim Order',
+      `Apakah Anda yakin ingin mengirim order ${order.orderId} dengan No. Resi ${noResi}?`,
+      'Ya, Kirim'
+    );
+
+    if (confirmed) {
+      try {
+        // ✅ Ubah status lokal jadi "Dikirim"
+        setStatusProduksi('Dikirim');
+
+        // ✅ Update context → backend status "shipped"
+        updateOrderStatusInContext(order.orderId, 'shipped');
+
+        // ✅ Simpan ke backend
+        //await updateOrderStatus(order.id, 'shipped');
+        await updateOrderStatus(
+          order.id,
+          'shipped',
+          1,                     // pabrikId
+          noResi,                 // nomor resi
+          new Date() 
+        );
+
+        showSuccess(
+          'Berhasil!',
+          `Order ${order.orderId} sudah dikirim dengan No. Resi: ${noResi}`
+        );
+      } catch (err) {
+        console.error('Gagal kirim order', err);
+        Swal.fire('Error', 'Gagal menyimpan status ke server.', 'error');
+      }
+    }
+  };
 
   const columns = [
     { key: 'product_name', label: 'Nama Produk' },
