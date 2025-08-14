@@ -3,6 +3,7 @@ import React from 'react';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
+// Format tanggal
 const formatDate = (dateStr) => {
   if (!dateStr) return '-';
   const safeDateStr = dateStr.replace(' ', 'T');
@@ -14,16 +15,15 @@ const formatDate = (dateStr) => {
   return `${day}/${month}/${year}`;
 };
 
+// Status pembayaran
 const getStatusPembayaran = (_, row) => {
   const status = (
-    row.paymentStatus ??
-    row.statusPembayaran ??
-    row.invoice_status ??
-    ''
+    row.paymentStatus ?? row.statusPembayaran ?? row.invoice_status ?? ''
   ).toString().toLowerCase();
 
   if (status === 'lunas' || status === 'paid') return 'Lunas';
-  if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid') return 'Belum Dibayar';
+  if (status === 'belum dibayar' || status === 'belum lunas' || status === 'unpaid')
+    return 'Belum Dibayar';
   return '-';
 };
 
@@ -91,16 +91,22 @@ const ProductDetailTable = ({ products }) => {
   );
 };
 
+// Komponen utama
 const TabelRiwayatDetail = ({ order }) => {
-  if (!order || !Array.isArray(order.products) || order.products.length === 0) {
-    return <div className="text-red-600">Data order belum lengkap.</div>;
+  if (!order) return <div className="text-red-600">Data order belum lengkap.</div>;
+
+  // Gunakan order.products atau fallback ke order.items
+  const productList = order.products ?? order.items ?? [];
+  if (!Array.isArray(productList) || productList.length === 0) {
+    return <div className="text-red-600">Data produk belum tersedia.</div>;
   }
 
-  const products = order.products.map((p) => ({
-    name: p.nama ?? p.productName ?? '-',
-    quantity: Number(p.jumlah ?? p.quantity ?? 0),
-    hargaAgen: Number(p.hargaAgen ?? p.requested_price ?? 0),
-    hargaPabrik: Number(p.harga_pabrik ?? 0)
+  // Mapping produk secara fleksibel
+  const products = productList.map((item) => ({
+    name: item.product_name ?? item.productName ?? item.nama ?? '-',
+    quantity: Number(item.quantity ?? item.jumlah ?? item.qty ?? 0),
+    hargaAgen: Number(item.requested_price ?? item.hargaAgen ?? 0),
+    hargaPabrik: Number(item.harga_pabrik ?? item.hargaPabrik ?? 0)
   }));
 
   console.log('Mapped products:', products);
@@ -108,14 +114,9 @@ const TabelRiwayatDetail = ({ order }) => {
   return (
     <div className="detail-order-container max-w-screen-2xl w-full mx-auto px-4 sm:px-8 lg:px-8">
       <OrderInfoTable order={order} />
-      <ProductDetailTable
-        products={products.map(p => ({
-          ...p,
-        }))}
-      />
+      <ProductDetailTable products={products} />
     </div>
   );
 };
-
 
 export default TabelRiwayatDetail;
