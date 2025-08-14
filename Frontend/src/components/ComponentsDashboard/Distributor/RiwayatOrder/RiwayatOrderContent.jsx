@@ -116,9 +116,11 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabri
             render: (_, row) => {
                 const status = getStatusPembayaran(_, row);
                 return (
-                    <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'}`}>
-                        {status}
-                    </span>
+                    <div className="flex justify-center"> {/* <-- tambah flex untuk background full*/}
+                        <span className={`text-white text-sm px-2 py-1 rounded font-bold ${status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'}`}>
+                            {status}
+                        </span>
+                    </div>
                 );
             }
         },

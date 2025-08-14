@@ -105,7 +105,7 @@ const TabelRiwayatPengiriman = ({ entries, onEntriesChange, orders, onDelete, lo
           render: (_, row) => {
             const status = getStatusPembayaran(_, row);
               return  (
-                <div className="flex justify-center"> {/* <-- tambah flex */}
+                <div className="flex justify-center"> {/* <-- tambah flex untuk bg full*/}
                   <span
                     className={`text-white text-sm px-2 py-1 rounded font-bold ${
                       status === 'Lunas' ? 'bg-green-600' : 'bg-red-600'
