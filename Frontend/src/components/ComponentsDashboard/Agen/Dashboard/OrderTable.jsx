@@ -22,7 +22,7 @@ const OrderTable = ({ orders, detailPath = '', showAction = true }) => {
         {
             header: 'Jumlah Produk',
             key: 'products',
-            render: (products) => Number(products?.reduce((sum, p) => sum + p.quantity, 0)) || 0
+            render: (products) => products?.reduce((sum, p) => sum + (+p.quantity || 0), 0) || 0
         },
         { header: 'Status Order', key: 'status', render: (value) => <StatusBadge status={value} /> },
         ...(showAction

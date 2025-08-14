@@ -168,12 +168,46 @@ export async function fetchOrderById(idOrCode) {
 //     return res.json();
 // }
 
-export async function updateOrderStatus(id, status, pabrikId = 1, resi = null, deliveryDate = null) {
-    const order = await fetchOrderById(id); // ambil data dulu
+export async function updateOrderStatus(
+    id,
+    status,
+    pabrikId = 1,
+    resi = null,
+    deliveryDate = null
+) {
+    const order = await fetchOrderById(id);
+
+    if (typeof status !== 'string') {
+        throw new Error('Status harus berupa string');
+    }
 
     const isDelivered = status.toLowerCase() === 'delivered';
     const now = new Date();
-    const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' ');
+
+    // accepted_at pakai waktu lokal saat ini
+    const formatToDB = (date) => {
+        const d = new Date(date);
+        if (isNaN(d)) return null;
+        const yyyy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        const ss = String(d.getSeconds()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+    };
+
+    const acceptedAt = formatToDB(now);
+
+    let deliveryDateISO = null;
+    if (deliveryDate) {
+        // Jika deliveryDate sudah dalam format DB (YYYY-MM-DD HH:mm:ss), kirim langsung
+        if (typeof deliveryDate === 'string') {
+            deliveryDateISO = deliveryDate;
+        } else {
+            deliveryDateISO = formatToDB(deliveryDate);
+        }
+    }
 
     const payload = {
         agen_id: order.agentId,
@@ -181,12 +215,10 @@ export async function updateOrderStatus(id, status, pabrikId = 1, resi = null, d
         pabrik_id: pabrikId,
         order_date: order.orderDate + ' 00:00:00',
         note: order.alamat,
-        status: status,
-        resi: resi, // <-- kirim nomor resi
-        delivery_date: deliveryDate 
-            ? new Date(deliveryDate).toISOString().slice(0, 19).replace('T', ' ')
-            : null, // <-- kirim delivery date
-        ...(isDelivered && { accepted_at: acceptedAt })
+        status,
+        resi,
+        ...(deliveryDateISO && { delivery_date: deliveryDateISO }),
+        ...(isDelivered && { accepted_at: acceptedAt }),
     };
 
     const res = await fetch(`${API_BASE}/orders/${id}`, {
@@ -198,11 +230,13 @@ export async function updateOrderStatus(id, status, pabrikId = 1, resi = null, d
         body: JSON.stringify(payload),
     });
 
-    if (!res.ok) throw new Error('Gagal update status order');
+    if (!res.ok) {
+        const text = await res.text();
+        throw new Error(`Gagal update status order: ${text}`);
+    }
 
     return res.json();
 }
-
 
 // Update harga produk dalam order (by ID)
 export async function updateOrderItemPrice(id, productName, price) {

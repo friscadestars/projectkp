@@ -3,6 +3,7 @@ import Swal from 'sweetalert2';
 import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import { useOrder } from '../../../../Context/OrderContext';
+import StatusBadge from '../../Common/StatusBadge';
 
 const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDetail }) => {
     const { moveToHistory, setOrderToApproved } = useOrder();
@@ -59,8 +60,8 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
         { header: 'Tanggal Order', key: 'orderDate', render: parseDate },
         {
             header: 'Tanggal Pengiriman',
-            key: 'deliveryEstimate',
-            render: (_, row) => getEstimatedDate(row),
+            key: 'deliveryDate',
+            render: parseDate
         },
         {
             header: 'No. Resi',
@@ -70,11 +71,9 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
         {
             header: 'Status Order',
             key: 'status',
-            render: (value) => (
-                <span className={`status-badge ${getStatusClasses(value)}`}>
-                    {value}
-                </span>
-            ),
+            render: (value, row) => {
+                return <StatusBadge status={row.rawStatus} />;
+            }
         },
         {
             header: 'Aksi',

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { fetchOrders } from '../../../services/ordersApi';
 
 // Hapus 'delivered' agar tidak ditampilkan di monitoring
-const allowedStatuses = ['approved', 'processing', 'shipped'];
+const allowedStatuses = ['approved', 'processing', 'shipped', 'produced'];
 
 export const toLabel = (status) => {
     const map = {
@@ -12,7 +12,7 @@ export const toLabel = (status) => {
         shipped: 'Dikirim',
         delivered: 'Diterima',
         cancelled: 'Dibatalkan',
-        pending: 'Menunggu',
+        pending: 'Tertunda',
     };
     return map[status?.toLowerCase()] || status;
 };

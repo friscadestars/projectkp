@@ -64,7 +64,7 @@ export const OrderProvider = ({ children }) => {
             console.log("📡 Status response:", response.status);
             if (!response.ok) throw new Error("Gagal fetch orders");
 
-            const data = await response.json(); // ✅ ini harus di atas
+            const data = await response.json();
             const ordersRaw = data.data || data;
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const userId = Number(user?.id);
@@ -72,7 +72,7 @@ export const OrderProvider = ({ children }) => {
             const normalized = ordersRaw.map(order => ({
                 ...order,
                 id: order.id,
-                pabrikId: order.pabrik_id, // ⬅️ Tambahan penting!
+                pabrikId: order.pabrik_id,
                 status: normalizeStatus(order.status),
                 distributorId: order.distributor_id,
                 agentId: order.agen_id,
@@ -88,7 +88,7 @@ export const OrderProvider = ({ children }) => {
                     quantity: p.quantity ?? p.jumlah ?? 0,
                 })),
             }))
-            // ✨ Filter hanya milik distributor yang login
+            // Filter hanya milik distributor yang login
             // .filter(order => String(order.distributorId) === String(userId));
             const filtered = normalized.filter(order => {
                 const role = (user.role || '').toLowerCase();
@@ -104,7 +104,6 @@ export const OrderProvider = ({ children }) => {
             const sorted = sortOrders(filtered);
             setOrders(sorted);
 
-            // ✅ Pisahkan berdasarkan status
             setValidasiOrders(sorted.filter(order =>
                 ['pending'].includes(order.status)
             ));
@@ -115,7 +114,7 @@ export const OrderProvider = ({ children }) => {
 
             setOrdersMasukPabrik(sorted.filter(order =>
                 ['approved'].includes(order.status)
-                 //order.status === 'approved' && (order.pabrikId === null || order.pabrikId === undefined)
+                //order.status === 'approved' && (order.pabrikId === null || order.pabrikId === undefined)
             ));
 
         } catch (error) {
@@ -258,11 +257,33 @@ export const OrderProvider = ({ children }) => {
 
             const id = order.id;
 
-            await updateOrderStatus(id, 'delivered');
+            let deliveryDateISO = null;
+            if (order.deliveryDate) {
+                const d = new Date(order.deliveryDate);
+                if (!isNaN(d)) {
+                    const yyyy = d.getFullYear();
+                    const mm = String(d.getMonth() + 1).padStart(2, '0');
+                    const dd = String(d.getDate()).padStart(2, '0');
+                    const hh = String(d.getHours()).padStart(2, '0');
+                    const min = String(d.getMinutes()).padStart(2, '0');
+                    const ss = String(d.getSeconds()).padStart(2, '0');
+                    deliveryDateISO = `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+                }
+            }
+
+            await updateOrderStatus(
+                id,
+                'delivered',
+                order.pabrikId || 1,
+                order.noResi || null,
+                deliveryDateISO
+            );
 
             updateOrder(orderId, (order) => ({
                 ...order,
                 status: 'delivered',
+                deliveryDate: deliveryDateISO,
+                noResi: order.noResi,
                 receivedDate: new Date().toLocaleDateString('id-ID'),
             }));
 
@@ -272,8 +293,6 @@ export const OrderProvider = ({ children }) => {
             throw error;
         }
     };
-
-
 
     // const updateOrderStatusInContext = (orderId, newStatus) => {
     //     updateOrder(orderId, (order) => ({
@@ -285,13 +304,13 @@ export const OrderProvider = ({ children }) => {
     // Rabu 
 
     const updateOrderStatusInContext = (orderId, newStatus, extraFields = {}) => {
-    setOrders((prevOrders) =>
-        prevOrders.map((o) =>
-        o.orderId === orderId
-            ? { ...o, status: newStatus, ...extraFields }
-            : o
-        )
-    );
+        setOrders((prevOrders) =>
+            prevOrders.map((o) =>
+                o.orderId === orderId
+                    ? { ...o, status: newStatus, ...extraFields }
+                    : o
+            )
+        );
     };
 
 

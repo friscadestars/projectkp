@@ -76,6 +76,7 @@ const MonitoringOrderTable = ({ orders }) => {
 
             const mappedOrder = {
                 ...fullOrder,
+                status: (order.status || order.status_order || '').toLowerCase(),
                 orderCode: fullOrder.order_code ?? fullOrder.orderCode,
                 agenName: fullOrder.agen ?? fullOrder.agenName,
                 pabrikName: pabrikName,
@@ -83,6 +84,8 @@ const MonitoringOrderTable = ({ orders }) => {
                 factoryName: fullOrder.pabrik_name ?? fullOrder.pabrikName,
                 orderDate: (fullOrder.order_date || fullOrder.orderDate || '').split(' ')[0],
                 invoiceNumber: invoiceForm.invoice_number || `INV-${(fullOrder.order_code || fullOrder.orderCode || '').toUpperCase()}`,
+                deliveryDate: fullOrder.delivery_date ?? fullOrder.deliveryDate ?? '-',
+                noResi: fullOrder.resi ?? order.noResi ?? '-',
                 invoiceDate: invoiceForm.invoice_date,
                 dueDate: invoiceForm.due_date,
                 note: fullOrder.note ?? '',
@@ -189,7 +192,7 @@ const MonitoringOrderTable = ({ orders }) => {
             header: 'Aksi',
             key: 'aksi',
             render: (_, row) => {
-                const isInvoiceAllowed = ['processing', 'shipped'].includes(row.status?.toLowerCase());
+                const isInvoiceAllowed = ['processing', 'shipped',].includes(row.status?.toLowerCase());
                 const isInvoiceExist = row?.invoiceExist;
                 const isDisabled = !isInvoiceAllowed || isInvoiceExist;
 

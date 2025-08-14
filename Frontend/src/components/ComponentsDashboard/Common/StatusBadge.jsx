@@ -5,18 +5,19 @@ const StatusBadge = ({ status, labelOverride }) => {
     const colorMap = {
         pending: 'bg-yellow-500',
         approved: 'bg-green-600',
-        //shipped: 'bg-cyan-600',
-        shipped: 'bg-[#4EA63A]',
+        shipped: 'bg-cyan-600',
+        // shipped: 'bg-[#4EA63A]',
         processing: 'bg-blue-500',
         produced: 'bg-[#4EA63A]',
+        'selesai produksi': 'bg-[#4EA63A]',
         cancelled: 'bg-red-500',
         //delivered: 'bg-green-700',
         delivered: 'bg-[#4EA63A]',
         unpaid: 'bg-red-600',
         paid: 'bg-green-500',
         'belum dikirim': 'bg-[#FF2F00]',
-        'dikirim' : 'bg-[#17A2B8]',
-        'diterima' : 'bg-[#009970]',
+        'dikirim': 'bg-[#17A2B8]',
+        'diterima': 'bg-[#009970]',
     };
 
     const labelMap = {
@@ -24,7 +25,8 @@ const StatusBadge = ({ status, labelOverride }) => {
         approved: 'Disetujui',
         shipped: 'Dikirim',
         processing: 'Sedang Diproduksi',
-        prduced: 'Selesai Produksi',
+        produced: 'Selesai Produksi',
+        'selesai produksi': 'Selesai Produksi',
         cancelled: 'Ditolak',
         delivered: 'Diterima',
         unpaid: 'Belum Dibayar',

@@ -51,6 +51,7 @@ const useRingkasanOrder = () => {
                         ? new Date(order.delivery_date).toLocaleDateString('id-ID')
                         : null,
                     noResi: order.resi || '-',
+                    rawStatus: order.status,              // simpan status asli
                     status: mapStatus(order.status),
                     products: order.items || [],
                 }));
@@ -72,6 +73,7 @@ const useRingkasanOrder = () => {
             approved: 'Disetujui',
             processing: 'Diproses',
             shipped: 'Dikirim',
+            produced: 'Selesai Produksi',
             delivered: 'Selesai'
         };
         return mapping[status] || status;
@@ -124,6 +126,8 @@ const useRingkasanOrder = () => {
                 return 'bg-[#17A2B8] text-white font-bold';
             case 'Selesai':
                 return 'bg-green-700 text-white font-bold';
+            case 'Selesai Diproduksi':
+                return 'bg-green-600 text-white font-bold';
             default:
                 return '';
         }
@@ -146,11 +150,11 @@ const useRingkasanOrder = () => {
         return new Date(y, m - 1, d);
     };
 
-    const allowedStatuses = ['Tertunda', 'Disetujui', 'Diproses', 'Ditolak', 'Dikirim'];
+    const allowedStatuses = ['pending', 'approved', 'processing', 'shipped', 'produced', 'delivered', 'cancelled'];
 
     const filteredOrders = orders
         .filter(order =>
-            allowedStatuses.includes(order.status) &&
+            allowedStatuses.includes(order.rawStatus) &&  // gunakan status mentah
             (
                 (order.orderId && order.orderId.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (order.distributor && order.distributor.toLowerCase().includes(searchTerm.toLowerCase())) ||
