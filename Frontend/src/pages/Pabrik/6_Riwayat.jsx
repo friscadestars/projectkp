@@ -10,8 +10,7 @@ import iconRiwayat from '../../assets/IconHeader/IconRiwayat.png';
 const RiwayatPengiriman = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [entries, setEntries] = useState(10);
-
-    const { orders, productPrices, loading } = useRiwayatPengiriman();
+    const { orders, productPrices, handleDelete, loading } = useRiwayatPengiriman();
     const { handleNavigation } = useNavigation(pabrikMenuItems);
 
     return (
@@ -29,6 +28,7 @@ const RiwayatPengiriman = () => {
                     entries={entries}
                     onEntriesChange={setEntries}
                     orders={orders}
+                    onDelete={handleDelete}
                     pabrikPrices={productPrices || []}
                     loading={loading}
                 />

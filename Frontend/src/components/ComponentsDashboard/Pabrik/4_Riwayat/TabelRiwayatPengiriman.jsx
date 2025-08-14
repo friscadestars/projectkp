@@ -14,7 +14,16 @@ const TabelRiwayatPengiriman = ({ entries, onEntriesChange, orders, onDelete, lo
         setFilteredOrders(orders);
     }, [orders]);
 
-    const handleDelete = (orderId) => {
+    const handleDelete = (row) => {
+    // pilih identifier yang tersedia (id, orderId, orderCode)
+    const idToSend = row?.id ?? row?.orderId ?? row?.order_id ?? row?.orderCode;
+
+        if (!idToSend) {
+            console.error("Tidak menemukan identifier untuk delete pada row:", row);
+            Swal.fire('Gagal!', 'ID order tidak ditemukan.', 'error');
+            return;
+        }
+
         Swal.fire({
             title: 'Yakin ingin menghapus?',
             text: 'Data yang sudah dihapus tidak dapat dikembalikan!',
@@ -24,15 +33,14 @@ const TabelRiwayatPengiriman = ({ entries, onEntriesChange, orders, onDelete, lo
             cancelButtonColor: '#d33',
             confirmButtonText: 'Ya, hapus!',
             cancelButtonText: 'Batal',
-        }).then((result) => {
-            if (result.isConfirmed) {
-                onDelete(orderId);
-                Swal.fire({
-                    title: 'Terhapus!',
-                    text: 'Riwayat pengiriman berhasil dihapus.',
-                    icon: 'success',
-                    confirmButtonColor: '#2563eb',
-                });
+        }).then(async (result) => {
+            if (!result.isConfirmed) return;
+            try {
+            await onDelete(idToSend); // ⬅️ TUNGGU sampai server OK & state ter-update
+            Swal.fire('Terhapus!', 'Riwayat pengiriman berhasil dihapus.', 'success');
+            } catch (err) {
+            const msg = err?.message || 'Terjadi kesalahan saat menghapus.';
+            Swal.fire('Gagal!', msg, 'error');
             }
         });
     };
@@ -131,7 +139,8 @@ const TabelRiwayatPengiriman = ({ entries, onEntriesChange, orders, onDelete, lo
                     </button>
                     <button
                         className="bg-red-600 text-white px-3 py-1 text-sm rounded font-bold"
-                        onClick={() => handleDelete(row.id)}
+                        //onClick={() => handleDelete(row.id)}
+                        onClick={() => handleDelete(row)}
                     >
                         Hapus
                     </button>
