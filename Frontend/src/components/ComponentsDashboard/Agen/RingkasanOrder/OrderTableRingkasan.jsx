@@ -23,13 +23,13 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
 
         if (result.isConfirmed) {
             try {
-                Swal.showLoading(); // tampilkan loading
+                Swal.showLoading();
                 await setOrderToApproved(orderId);
                 moveToHistory(orderId);
 
                 Swal.fire({
                     title: 'Berhasil!',
-                    text: `Order ${orderId} telah dikonfirmasi diterima.`,
+                    text: `Order telah berhasil diterima.`,
                     icon: 'success',
                     confirmButtonColor: '#2563eb',
                 }).then(() => {

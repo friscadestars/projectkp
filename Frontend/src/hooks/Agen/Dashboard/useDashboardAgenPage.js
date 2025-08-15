@@ -68,7 +68,7 @@ export const useDashboardAgenPage = () => {
 
     const totalAktif = filteredOrders.filter((o) => {
         const status = normalize(o.status);
-        return !['delivered', 'diterima'].includes(status);
+        return ['pending', 'approved', 'processing', 'produced', 'shipped'].includes(status);
     }).length;
 
     const stats = {

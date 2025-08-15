@@ -11,16 +11,21 @@ export const useRiwayatOrderDistributor = () => {
     const [error, setError] = useState(null);
 
     const { token } = useAuth();
+    const authHeader = { Authorization: `Bearer ${token}` };
 
-    const authHeader = {
-        Authorization: `Bearer ${token}`,
-    };
+    // Ambil daftar ID yang dihapus dari localStorage
+    const getDeletedIds = () => JSON.parse(localStorage.getItem('deletedOrderIds') || '[]');
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 const result = await fetchCompletedOrdersForHistory('distributor');
-                setOrders(result);
+
+                // Filter agar tidak menampilkan order yang sudah dihapus di UI sebelumnya
+                const deletedIds = getDeletedIds();
+                const filtered = result.filter(order => !deletedIds.includes(order.id));
+
+                setOrders(filtered);
             } catch (err) {
                 setError(err);
             } finally {
@@ -42,7 +47,7 @@ export const useRiwayatOrderDistributor = () => {
                 });
 
                 const data = await res.json();
-                setProductPrices(data || []); // tidak perlu data.data karena controller-mu langsung return array
+                setProductPrices(data || []);
             } catch (err) {
                 console.error('Gagal fetch harga pabrik:', err);
             }
@@ -51,20 +56,16 @@ export const useRiwayatOrderDistributor = () => {
         fetchProductPrices();
     }, [token]);
 
-    const handleDelete = async (id) => {
-        try {
-            await fetch(`${API_BASE}/orders/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...authHeader
-                }
-            });
-            setOrders((prev) => prev.filter((order) => order.id !== String(id)));
-        } catch (err) {
-            console.error('Gagal menghapus order:', err);
+    // Hapus hanya di UI dan simpan di localStorage
+    const handleDelete = (id) => {
+        setOrders((prev) => prev.filter((order) => order.id !== String(id)));
+
+        const deletedIds = getDeletedIds();
+        if (!deletedIds.includes(id)) {
+            localStorage.setItem('deletedOrderIds', JSON.stringify([...deletedIds, id]));
         }
     };
 
     return { orders, productPrices, loading, error, handleDelete };
 };
+

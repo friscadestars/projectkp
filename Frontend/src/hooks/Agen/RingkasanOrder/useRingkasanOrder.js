@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { agenMenuItems } from '../../../Components/ComponentsDashboard/Constants/menuItems';
 import { useNavigation } from '../../useNavigation';
 
-// Ubah sesuai alamat API kamu
 const API_BASE_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
 
 const useRingkasanOrder = () => {
@@ -22,7 +21,7 @@ const useRingkasanOrder = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
-                const token = localStorage.getItem('token'); // atau ambil dari user.token jika kamu simpan di situ
+                const token = localStorage.getItem('token');
 
                 const response = await fetch(`${API_BASE_URL}/orders`, {
                     headers: {
@@ -51,7 +50,7 @@ const useRingkasanOrder = () => {
                         ? new Date(order.delivery_date).toLocaleDateString('id-ID')
                         : null,
                     noResi: order.resi || '-',
-                    rawStatus: order.status,              // simpan status asli
+                    rawStatus: order.status,
                     status: mapStatus(order.status),
                     products: order.items || [],
                 }));
@@ -150,11 +149,11 @@ const useRingkasanOrder = () => {
         return new Date(y, m - 1, d);
     };
 
-    const allowedStatuses = ['pending', 'approved', 'processing', 'shipped', 'produced', 'delivered', 'cancelled'];
+    const allowedStatuses = ['pending', 'approved', 'processing', 'shipped', 'produced'];
 
     const filteredOrders = orders
         .filter(order =>
-            allowedStatuses.includes(order.rawStatus) &&  // gunakan status mentah
+            allowedStatuses.includes(order.rawStatus) &&
             (
                 (order.orderId && order.orderId.toLowerCase().includes(searchTerm.toLowerCase())) ||
                 (order.distributor && order.distributor.toLowerCase().includes(searchTerm.toLowerCase())) ||

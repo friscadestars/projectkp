@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useOrder } from '../../../../Context/OrderContext';
 import ValidasiOrderContent from './DetailOrderContent';
-import { updateOrderStatus } from '../../../../services/ordersApi'; // pastikan ini ada
+import { updateOrderStatus } from '../../../../services/ordersApi';
 
 const ValidasiOrderPage = () => {
     const { orderId } = useParams();

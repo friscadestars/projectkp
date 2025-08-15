@@ -372,12 +372,32 @@ class OrderController extends ResourceController
         if (isset($payload['status'])) {
             $notifModel = new NotificationModel();
 
+            $statusMap = [
+                'pending'           => 'Tertunda',
+                'approved'          => 'Disetujui',
+                'shipped'           => 'Dikirim',
+                'processing'        => 'Sedang Diproduksi',
+                'produced'          => 'Selesai Produksi',
+                'selesai produksi'  => 'Selesai Produksi',
+                'cancelled'         => 'Ditolak',
+                'delivered'         => 'Diterima',
+                'unpaid'            => 'Belum Dibayar',
+                'paid'              => 'Lunas',
+                'belum dikirim'     => 'Belum Dikirim',
+                'dikirim'           => 'Dikirim',
+                'diterima'          => 'Diterima',
+            ];
+
+            // Normalisasi & ambil terjemahan
+            $statusKey = strtolower(trim($payload['status']));
+            $statusIndo = $statusMap[$statusKey] ?? $payload['status'];
+
             // Notif ke agen
             if (!empty($order['agen_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['agen_id'],
                     'title'      => 'Status Pesanan Diperbarui',
-                    'message'    => 'Selamat pesanan Anda sekarang berstatus: ' . $payload['status'],
+                    'message'    => 'Selamat pesanan Anda sekarang berstatus: ' . $statusIndo,
                     'type'       => 'order_updated',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -389,7 +409,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['distributor_id'],
                     'title'      => 'Status Pesanan Diubah',
-                    'message'    => 'Pesanan dari ' . ($agen['name'] ?? '-') . ' kini berstatus: ' . $payload['status'],
+                    'message'    => 'Pesanan dari ' . ($agen['name'] ?? '-') . ' kini berstatus: ' . $statusIndo,
                     'type'       => 'order_status_change',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -401,7 +421,7 @@ class OrderController extends ResourceController
                 $notifModel->insert([
                     'user_id'    => $order['pabrik_id'],
                     'title'      => 'Status Order dari Distributor Diubah',
-                    'message'    => 'Order dengan kode ' . $order['order_code'] . ' sekarang berstatus: ' . $payload['status'],
+                    'message'    => 'Order dengan kode ' . $order['order_code'] . ' sekarang berstatus: ' . $statusIndo,
                     'type'       => 'order_status_change',
                     'is_read'    => 0,
                     'created_at' => date('Y-m-d H:i:s'),
@@ -671,7 +691,7 @@ class OrderController extends ResourceController
             ->join('users agen', 'o.agen_id = agen.id', 'left')
             ->join('users pabrik', 'o.pabrik_id = pabrik.id', 'left')
             ->join('invoices i', 'i.order_id = o.id', 'left')
-            ->whereIn('o.status', ['approved', 'processing', 'produced','shipped'])
+            ->whereIn('o.status', ['approved', 'processing', 'produced', 'shipped'])
             ->orderBy('o.created_at', 'DESC')
             ->get()
             ->getResultArray();

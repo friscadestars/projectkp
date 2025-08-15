@@ -85,7 +85,7 @@ export const useValidasiOrderPage = () => {
             Swal.fire({
                 icon: 'success',
                 title: 'Berhasil!',
-                text: `Order ${orderId} disetujui.`,
+                text: 'Order berhasil disetujui dan dikirim ke pabrik.',
                 confirmButtonColor: '#3085d6',
             }).then(() => {
                 navigate('/distributor/monitoring-order');
@@ -101,7 +101,7 @@ export const useValidasiOrderPage = () => {
             Swal.fire({
                 icon: 'info',
                 title: 'Order Ditolak',
-                text: `Order ${orderId} telah ditolak.`,
+                text: `Order berhasil ditolak.`,
                 confirmButtonColor: '#d33',
             }).then(() => {
                 navigate('/distributor/validasi-order');

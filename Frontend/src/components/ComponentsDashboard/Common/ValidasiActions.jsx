@@ -31,7 +31,7 @@ const ValidasiActions = ({ orderId, onKirim, handleTolak }) => {
         <div className="mt-6 flex gap-4">
             {/* TOMBOL KIRIM */}
             <button
-                className="bg-blue-800 hover:bg-blue-900 text-white px-6 py-1 rounded font-bold"
+                className="bg-blue-700 hover:bg-blue-900 text-white px-6 py-1 rounded font-bold"
                 onClick={() =>
                     showConfirmation(
                         'Kirim Order',
@@ -40,7 +40,7 @@ const ValidasiActions = ({ orderId, onKirim, handleTolak }) => {
                     )
                 }
             >
-                Setujui & Kirim
+                Terima & Kirim Ke Pabrik
             </button>
 
             {/* TOMBOL TOLAK */}
