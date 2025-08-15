@@ -23,7 +23,7 @@ const TableDaftarPengirimanAktif = ({ orders }) => {
     orderId: order.orderId,
     agenName: order.agenName,
     distributor: order.distributor,
-    delivery_date: order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : '-',
+    delivery_date: order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : '-',
     products: order.products.length,
     noResi: order.noResi,
     status: order.status,
