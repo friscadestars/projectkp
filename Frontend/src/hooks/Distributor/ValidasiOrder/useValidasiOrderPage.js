@@ -13,9 +13,11 @@ export const useValidasiOrderPage = () => {
 
     const [order, setOrder] = useState(null);
     const [inputPrices, setInputPrices] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         (async () => {
+            setLoading(true);
             try {
                 const fetchedOrder = await fetchOrderById(orderId);
                 const pabrikPrices = await fetchPabrikPrices();
@@ -56,6 +58,8 @@ export const useValidasiOrderPage = () => {
             } catch (e) {
                 console.error('Gagal memuat order:', e?.message ?? e);
                 Swal.fire('Gagal memuat order', e?.message ?? 'Terjadi kesalahan', 'error');
+            } finally {
+                setLoading(false);
             }
         })();
     }, [orderId]);
@@ -71,7 +75,6 @@ export const useValidasiOrderPage = () => {
 
     const handleKirim = async () => {
         try {
-            // Update harga tiap item
             for (let i = 0; i < inputPrices.length; i++) {
                 const item = inputPrices[i];
                 const price = parseInt(String(item.price).replace(/[^\d]/g, ''), 10);
@@ -117,6 +120,7 @@ export const useValidasiOrderPage = () => {
         handleSetHarga,
         handleKirim,
         handleTolak,
+        loading,
         layoutProps: {
             menuItems: distributorMenuItems,
             activeLabel: 'Validasi Order',

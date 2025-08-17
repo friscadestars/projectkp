@@ -48,9 +48,6 @@ const ValidasiOrder = () => {
         }
     };
 
-    if (loading) return <div>Memuat...</div>;
-    if (err) return <div className="text-red-500">Error: {err}</div>;
-
     return (
         <Layout
             menuItems={distributorMenuItems}
@@ -65,6 +62,7 @@ const ValidasiOrder = () => {
                 orders={orders}
                 handleTerima={handleTerima}
                 handleTolak={handleTolak}
+                loading={loading}
             />
         </Layout>
     );

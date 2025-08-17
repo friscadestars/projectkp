@@ -49,6 +49,7 @@ const ValidasiOrderPage = () => {
             handleSetHarga={handleSetHarga}
             handleKirim={handleKirim}
             handleTolak={handleTolak}
+            loading={loading}
             pageTitleProps={{ title: 'Validasi Order', icon: '📦' }}
         />
     );

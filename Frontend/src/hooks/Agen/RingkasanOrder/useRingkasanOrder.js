@@ -11,6 +11,7 @@ const useRingkasanOrder = () => {
     const [showModal, setShowModal] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const navigate = useNavigate();
     const { handleNavigation } = useNavigation(agenMenuItems);
@@ -21,6 +22,7 @@ const useRingkasanOrder = () => {
     useEffect(() => {
         const fetchOrders = async () => {
             try {
+                setLoading(true);
                 const token = localStorage.getItem('token');
 
                 const response = await fetch(`${API_BASE_URL}/orders`, {
@@ -58,6 +60,8 @@ const useRingkasanOrder = () => {
                 setOrders(transformed);
             } catch (error) {
                 console.error('Gagal mengambil data order:', error);
+            } finally {
+                setLoading(false); // selesai fetch
             }
         };
 
@@ -180,6 +184,7 @@ const useRingkasanOrder = () => {
         cancelReceipt,
         getStatusClasses,
         getEstimatedDate,
+        loading,
     };
 };
 

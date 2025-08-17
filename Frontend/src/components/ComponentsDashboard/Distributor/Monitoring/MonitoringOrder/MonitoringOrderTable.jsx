@@ -21,7 +21,7 @@ const getPabrikNameById = async (id, token) => {
     }
 };
 
-const MonitoringOrderTable = ({ orders }) => {
+const MonitoringOrderTable = ({ orders, loading }) => {
     const { user, token } = useAuth();
     const navigate = useNavigate();
     const [showInvoiceModal, setShowInvoiceModal] = useState(false);
@@ -300,6 +300,7 @@ const MonitoringOrderTable = ({ orders }) => {
             <ReusableTable
                 columns={columns}
                 data={orders}
+                loading={loading}
                 footer={
                     <tr>
                         <td

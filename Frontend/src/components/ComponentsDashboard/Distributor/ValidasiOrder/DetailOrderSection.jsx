@@ -15,8 +15,14 @@ function formatRupiah(value) {
     });
 }
 
-const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, handleTolak }) => {
-    if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia</p>;
+const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, handleTolak, loading }) => {
+    if (loading) {
+        return <p className="text-grey-500 font-medium italic">Memuat data.....</p>;
+    }
+
+    if (!order) {
+        return <p className="text-gray-500 italic">Data order tidak tersedia</p>;
+    }
 
     // === Order Info Table Columns ===
     const orderColumns = [
@@ -109,6 +115,7 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
                 <ReusableTable
                     columns={orderColumns}
                     data={[order]}
+                    loading={loading}
                     footer={
                         <tr>
                             <td
@@ -126,6 +133,7 @@ const DetailOrderSection = ({ order, inputPrices, handleSetHarga, handleTerima, 
                 <ReusableTable
                     columns={produkColumns}
                     data={order.products}
+                    loading={loading}
                     footer={
                         <tr>
                             <td

@@ -17,6 +17,7 @@ const PriceListTable = ({
     handleEdit,
     handleSave,
     handleDelete,
+    loading,
     hargaHeader = "Harga Pabrik",
     canEdit = true
 }) => {
@@ -153,6 +154,7 @@ const PriceListTable = ({
             <ReusableTable
                 columns={columns}
                 data={filteredProduk}
+                loading={loading}
                 footer={
                     <tr className="border-t border-gray-300">
                         <td colSpan={columns.length}></td>

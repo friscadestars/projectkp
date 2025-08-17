@@ -11,7 +11,7 @@ const PermintaanOrderContent = ({
   handleSubmit,
   orderId,
   agentName, distributorName,
-  orderDate
+  orderDate, loading
 }) => {
   return (
     <>
@@ -32,6 +32,7 @@ const PermintaanOrderContent = ({
         agentName={agentName}
         distributorName={distributorName}
         orderDate={orderDate}
+        loading={loading}
       >
         <SubmitButton onClick={handleSubmit} />
       </OrderForm>

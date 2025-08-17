@@ -8,7 +8,7 @@ import MonitoringOrderContent from '../../components/ComponentsDashboard/Distrib
 const MonitoringOrder = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const { handleNavigation } = useNavigation(distributorMenuItems);
-    const { search, setSearch, filteredOrders } = useMonitoringOrderPage();
+    const { search, setSearch, filteredOrders, loading } = useMonitoringOrderPage();
 
     const mappedOrders = filteredOrders.map((o) => ({
         ...o,
@@ -28,6 +28,7 @@ const MonitoringOrder = () => {
                 search={search}
                 setSearch={setSearch}
                 filteredOrders={mappedOrders}
+                loading={loading}
             />
         </Layout>
     );

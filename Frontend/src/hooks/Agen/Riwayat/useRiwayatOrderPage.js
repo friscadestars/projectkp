@@ -11,7 +11,9 @@ export const useRiwayatOrderPage = () => {
         handleDetail,
         completedOrders,
         entries,
-        setEntries
+        setEntries,
+        loading,
+        error,
     } = useRiwayatOrder();
 
     const { handleNavigation } = useNavigation(agenMenuItems);
@@ -33,7 +35,9 @@ export const useRiwayatOrderPage = () => {
             onDelete: handleDelete,
             onDetail: handleDetail,
             entries,
-            onEntriesChange: setEntries
+            onEntriesChange: setEntries,
+            loading,
+            error,
         }
     };
 };

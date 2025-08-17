@@ -5,7 +5,7 @@ import ReusableTable from '../../Common/ReusableTable';
 import { useOrder } from '../../../../Context/OrderContext';
 import StatusBadge from '../../Common/StatusBadge';
 
-const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDetail }) => {
+const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDetail, loading }) => {
     const { moveToHistory, setOrderToApproved } = useOrder();
     const navigate = useNavigate();
 
@@ -101,6 +101,7 @@ const OrderTableRingkasan = ({ orders, getEstimatedDate, getStatusClasses, onDet
         <ReusableTable
             columns={columns}
             data={orders}
+            loading={loading}
             footer={
                 <tr>
                     <td colSpan={columns.length} className="px-4 py-3 text-right font-medium text-gray-600">

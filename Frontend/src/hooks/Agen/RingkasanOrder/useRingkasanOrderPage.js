@@ -11,7 +11,8 @@ export const useRingkasanOrderPage = () => {
         showModal, filteredOrders,
         handleDetail, handleConfirm,
         confirmReceipt, cancelReceipt,
-        getStatusClasses, getEstimatedDate
+        getStatusClasses, getEstimatedDate,
+        loading
     } = useRingkasanOrder();
 
     const { handleNavigation } = useNavigation(agenMenuItems);
@@ -43,6 +44,7 @@ export const useRingkasanOrderPage = () => {
             onConfirm: confirmReceipt,
             onCancel: cancelReceipt
         },
-        showModal
+        showModal,
+        loading
     };
 };

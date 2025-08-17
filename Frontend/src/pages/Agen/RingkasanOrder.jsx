@@ -10,12 +10,13 @@ const RingkasanOrder = () => {
 
     return (
         <Layout {...props.layoutProps}
-        role="agen" 
+            role="agen"
         >
             <PageHeaderWithIcon {...props.pageHeaderProps} />
             <div className="bg-white border border-gray-200 shadow-md rounded-lg p-6">
                 <SearchInput {...props.searchInputProps} />
-                <OrderTableRingkasan {...props.orderTableProps} />
+                <OrderTableRingkasan {...props.orderTableProps}
+                    loading={props.loading} />
             </div>
         </Layout>
     );

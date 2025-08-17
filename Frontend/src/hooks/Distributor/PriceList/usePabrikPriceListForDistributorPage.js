@@ -12,6 +12,7 @@ export const usePabrikPriceListForDistributorPage = () => {
         searchTerm,
         setSearchTerm,
         filteredProduk,
+        loading,
         handleAdd,
         handleEdit,
         handleSave,
@@ -27,6 +28,7 @@ export const usePabrikPriceListForDistributorPage = () => {
     return {
         form,
         setForm,
+        loading,
         searchTerm,
         setSearchTerm,
         filteredProduk,

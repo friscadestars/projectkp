@@ -10,7 +10,8 @@ const DetailOrderContent = ({
     handleSetHarga,
     handleKirim,
     handleTolak,
-    pageTitleProps
+    pageTitleProps,
+    loading
 }) => {
     return (
         <>
@@ -20,6 +21,7 @@ const DetailOrderContent = ({
                     order={order}
                     inputPrices={inputPrices}
                     handleSetHarga={handleSetHarga}
+                    loading={loading}
                 />
                 <ValidasiActions
                     orderId={order?.orderId}

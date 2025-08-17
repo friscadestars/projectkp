@@ -9,10 +9,6 @@ const DetailValidasiOrder = () => {
 
     const props = useValidasiOrderPage();
 
-    if (!props.order) {
-        return <div className="p-8 text-red-500"></div>;
-    }
-
     return (
         <Layout
             {...props.layoutProps}
@@ -20,9 +16,10 @@ const DetailValidasiOrder = () => {
             toggleDropdown={toggleDropdown}
             role="distributor"
         >
-            <ValidasiOrderContent {...props} />
+            <ValidasiOrderContent {...props} loading={props.loading} />
         </Layout>
     );
 };
+
 
 export default DetailValidasiOrder;

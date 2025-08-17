@@ -4,7 +4,7 @@ import ReusableTable from '../../Common/ReusableTable';
 const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     const columns = [
         { label: 'No', key: 'no' },
-        { label: 'Order ID', key: 'orderId' },
+        { label: 'Order ID', key: 'orderCode', render: (v) => v?.toUpperCase() },
         { label: 'Distributor', key: 'distributorName' },
         { label: 'Agen', key: 'agenName' },
         { label: 'Alamat Agen', key: 'alamat' },
@@ -49,7 +49,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
     const dataWithIndex = orders.map((order, idx) => ({
         ...order,
         no: idx + 1,
-        jumlahProduk: order.products?.length || 0, 
+        jumlahProduk: order.products?.length || 0,
     }));
 
     return (

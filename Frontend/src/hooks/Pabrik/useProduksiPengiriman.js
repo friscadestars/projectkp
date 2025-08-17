@@ -13,7 +13,7 @@ export const useProduksiPengiriman = () => {
 
   // Load invoice status from localStorage first
   const savedInvoiceStatus = JSON.parse(localStorage.getItem("invoiceStatus") || "{}");
-  const [invoiceStatus, setInvoiceStatus] = useState(savedInvoiceStatus); // { [orderId]: true/false }
+  const [invoiceStatus, setInvoiceStatus] = useState(savedInvoiceStatus);
 
   const getStatusPengirimanText = (order) => order.statusPengirimanText || "-";
   const isInvoiceEnabled = (order) => order.statusProduksiText?.toLowerCase() === "selesai produksi";
@@ -43,19 +43,19 @@ export const useProduksiPengiriman = () => {
               statusProduksiText = "Sedang Diproduksi";
               statusPengiriman = "Belum Dikirim";
               break;
-            case "produced": // ✅ status baru
+            case "produced":
               statusProduksi = "produced";
               statusProduksiText = "Selesai Produksi";
               statusPengiriman = "Belum Dikirim";
               break;
             case "shipped":
               statusProduksi = "shipped";
-              statusProduksiText = "Selesai Produksi";
+              statusProduksiText = "Dikirim";
               statusPengiriman = "Dikirim";
               break;
             case "delivered":
               statusProduksi = "delivered";
-              statusProduksiText = "Selesai Produksi";
+              statusProduksiText = "Diterima";
               statusPengiriman = "Diterima";
               break;
           }

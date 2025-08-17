@@ -9,6 +9,7 @@ const PabrikPriceList = () => {
     const {
         layoutProps,
         pageTitleProps,
+        loading,
         ...restProps
     } = usePabrikPriceListForDistributorPage();
 
@@ -20,6 +21,7 @@ const PabrikPriceList = () => {
                 hargaLabel="Harga Pabrik"
                 hargaHeader="Harga Pabrik"
                 canEdit={false}
+                loading={loading}
             />
         </Layout>
     );

@@ -15,8 +15,9 @@ export const useDistributorPriceListPage = () => {
         form, setForm,
         searchTerm, setSearchTerm,
         filteredProduk,
+        loading,
         handleAdd, handleEdit, handleSave, handleDelete
-    } = usePriceListByRole('distributor', distributorId); // ✅ kirim userId
+    } = usePriceListByRole('distributor', distributorId);
 
     return {
         form,
@@ -25,6 +26,7 @@ export const useDistributorPriceListPage = () => {
         setSearchTerm,
         filteredProduk,
         handleAdd,
+        loading,
         handleEdit,
         handleSave,
         handleDelete,

@@ -1,10 +1,10 @@
 import React from 'react';
-import ReusableTable from '../../Common/ReusableTable'; 
+import ReusableTable from '../../Common/ReusableTable';
 
 const getStatusClasses = (status) => {
     switch (status) {
         case 'Belum Dikirim': return 'bg-btn-danger text-white font-bold';
-        case 'Sedang Diproduksi': return 'bg-blue-500 text-white font-bold'; 
+        case 'Sedang Diproduksi': return 'bg-blue-500 text-white font-bold';
         case 'Diproduksi': return 'bg-yellow-500 text-white font-bold';
         case 'Dikirim': return 'bg-blue-500 text-white font-bold';
         case 'Selesai': return 'bg-green-700 text-white font-bold';
@@ -16,7 +16,7 @@ const TabelDetailOrder = ({ order }) => {
     if (!order) return <p className="text-gray-500 italic">Data order tidak tersedia.</p>;
 
     const columns = [
-        { key: 'orderId', label: 'Order ID' },
+        { label: 'Order ID', key: 'orderCode', render: (v) => v?.toUpperCase() },
         { key: 'distributorName', label: 'Distributor' },
         { key: 'agenName', label: 'Agen' },
         { key: 'alamat', label: 'Alamat Agen' },

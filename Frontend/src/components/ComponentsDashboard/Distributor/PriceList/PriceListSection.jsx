@@ -16,31 +16,39 @@ const PriceListSection = ({
     handleDelete,
     hargaLabel = "Harga",
     hargaHeader = "Harga",
-
-    canEdit = true
+    canEdit = true,
+    loading = false,
 }) => {
     return (
         <div className="bg-white border border-gray-300 rounded-lg shadow-sm p-4">
-            {canEdit && (
-                <PriceListForm
-                    form={form}
-                    setForm={setForm}
-                    handleAdd={handleAdd}
-                    hargaLabel={hargaLabel}
-                />
+            {loading ? (
+                <div className="flex justify-center items-center py-10">
+                    <span className="ml-2 text-gray-600">Menuat data....</span>
+                </div>
+            ) : (
+                <>
+                    {canEdit && (
+                        <PriceListForm
+                            form={form}
+                            setForm={setForm}
+                            handleAdd={handleAdd}
+                            hargaLabel={hargaLabel}
+                        />
+                    )}
+                    <PriceListSearch
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                    <PriceListTable
+                        filteredProduk={filteredProduk}
+                        handleEdit={canEdit ? handleEdit : undefined}
+                        handleSave={canEdit ? handleSave : undefined}
+                        handleDelete={canEdit ? handleDelete : undefined}
+                        hargaHeader={hargaHeader}
+                        canEdit={canEdit}
+                    />
+                </>
             )}
-            <PriceListSearch
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-            />
-            <PriceListTable
-                filteredProduk={filteredProduk}
-                handleEdit={canEdit ? handleEdit : undefined}
-                handleSave={canEdit ? handleSave : undefined}
-                handleDelete={canEdit ? handleDelete : undefined}
-                hargaHeader={hargaHeader}
-                canEdit={canEdit}
-            />
         </div>
     );
 };

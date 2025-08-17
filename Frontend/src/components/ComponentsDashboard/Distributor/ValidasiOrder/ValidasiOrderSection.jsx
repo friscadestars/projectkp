@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import SearchInput from '../../Common/SearchInput';
 import ValidasiOrderTable from './ValidasiOrderTable';
 
-const ValidasiOrderSection = ({ orders, handleTerima, handleTolak }) => {
+const ValidasiOrderSection = ({ orders, handleTerima, handleTolak, loading }) => {
     const [searchText, setSearchText] = useState('');
 
     return (
@@ -15,6 +15,7 @@ const ValidasiOrderSection = ({ orders, handleTerima, handleTolak }) => {
                 orders={orders.filter(order => order.status?.toLowerCase() === 'pending')}
                 handleTerima={handleTerima}
                 handleTolak={handleTolak}
+                loading={loading}
             />
         </div>
     );

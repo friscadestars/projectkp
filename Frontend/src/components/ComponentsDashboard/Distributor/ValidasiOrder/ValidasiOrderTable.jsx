@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import ReusableTable from '../../Common/ReusableTable';
 import StatusBadge from '../../Common/StatusBadge';
 
-const ValidasiOrderTable = ({ orders }) => {
+const ValidasiOrderTable = ({ orders, loading }) => {
     const navigate = useNavigate();
 
     const columns = [
@@ -67,6 +67,7 @@ const ValidasiOrderTable = ({ orders }) => {
         <ReusableTable
             columns={columns}
             data={orders}
+            loading={loading}
             footer={
                 <tr>
                     <td

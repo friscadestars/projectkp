@@ -1,9 +1,57 @@
 import React from 'react';
 
-const ReusableTable = ({ columns = [], data = [] }) => {
+const ReusableTable = ({ columns = [], data = [], loading = false, error = null }) => {
+    // Prioritas kondisi: loading > error > data > kosong
+    const renderContent = () => {
+        if (loading) {
+            return (
+                <tr>
+                    <td colSpan={columns.length} className="text-center py-4 italic text-gray-500">
+                        Memuat data....
+                    </td>
+                </tr>
+            );
+        }
+
+        if (error) {
+            return (
+                <tr>
+                    <td colSpan={columns.length} className="text-center py-4 text-red-600 font-medium">
+                        {error.message || "Terjadi kesalahan saat memuat data"}
+                    </td>
+                </tr>
+            );
+        }
+
+        if (data.length > 0) {
+            return data.map((row, rowIndex) => (
+                <tr key={row.id ?? rowIndex} className="border-b hover:bg-gray-50 transition">
+                    {columns.map((col, colIndex) => (
+                        <td
+                            key={col.key ?? colIndex}
+                            className="px-3 py-2 lg:px-4 lg:py-3 text-center align-middle break-words whitespace-normal"
+                        >
+                            {typeof col.render === "function"
+                                ? col.render(row[col.key], row, rowIndex)
+                                : row[col.key] ?? "-"}
+                        </td>
+                    ))}
+                </tr>
+            ));
+        }
+
+        return (
+            <tr>
+                <td colSpan={columns.length} className="text-center py-4 italic text-gray-500">
+                    Tidak ada data.
+                </td>
+            </tr>
+        );
+    };
+
     return (
         <div className="w-full">
-            {/* Table view - hanya di desktop ≥1024px */}
+            {/* Table view - desktop ≥1024px */}
             <div className="hidden lg:block overflow-x-auto">
                 <table className="table-auto w-full text-xs lg:text-sm text-left border-collapse">
                     <thead className="bg-blue-900 text-white">
@@ -18,37 +66,23 @@ const ReusableTable = ({ columns = [], data = [] }) => {
                             ))}
                         </tr>
                     </thead>
-                    <tbody>
-                        {data.length > 0 ? (
-                            data.map((row, rowIndex) => (
-                                <tr key={row.id ?? rowIndex} className="border-b hover:bg-gray-50 transition">
-                                    {columns.map((col, colIndex) => (
-                                        <td
-                                            key={col.key ?? colIndex}
-                                            className="px-3 py-2 lg:px-4 lg:py-3 text-center align-middle break-words whitespace-normal"
-                                        >
-                                            {typeof col.render === 'function'
-                                                ? col.render(row[col.key], row, rowIndex)
-                                                : (row[col.key] ?? '-')}
-                                        </td>
-                                    ))}
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={columns.length} className="text-center py-4 italic text-gray-500">
-                                    Tidak ada data.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
+                    <tbody>{renderContent()}</tbody>
                 </table>
             </div>
 
-            {/* Card view - untuk layar <1024px, dibungkus agar center */}
+            {/* Card view - mobile <1024px */}
             <div className="block lg:hidden">
                 <div className="max-w-md mx-auto px-4 space-y-4">
-                    {data.length > 0 ? (
+                    {loading ? (
+                        <>
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                            <div className="text-center py-4 italic text-gray-500">Memuat data....</div>
+                        </>
+                    ) : error ? (
+                        <div className="text-center py-4 text-red-600 font-medium">
+                            {error.message || "Terjadi kesalahan saat memuat data"}
+                        </div>
+                    ) : data.length > 0 ? (
                         data.map((row, rowIndex) => (
                             <div key={row.id ?? rowIndex} className="border rounded-lg p-3 shadow-sm bg-white">
                                 {columns.map((col, colIndex) => (
@@ -59,18 +93,17 @@ const ReusableTable = ({ columns = [], data = [] }) => {
                                         <span className="font-semibold text-xs break-words whitespace-normal">
                                             {col.label || col.header}
                                         </span>
-
-                                        {col.key === 'aksi' ? (
+                                        {col.key === "aksi" ? (
                                             <div className="flex flex-col gap-1 w-full sm:w-auto mt-1">
-                                                {typeof col.render === 'function'
+                                                {typeof col.render === "function"
                                                     ? col.render(row[col.key], row, rowIndex)
-                                                    : (row[col.key] ?? '-')}
+                                                    : row[col.key] ?? "-"}
                                             </div>
                                         ) : (
                                             <span className="text-sm break-words whitespace-normal max-w-[65%] text-right">
-                                                {typeof col.render === 'function'
+                                                {typeof col.render === "function"
                                                     ? col.render(row[col.key], row, rowIndex)
-                                                    : (row[col.key] ?? '-')}
+                                                    : row[col.key] ?? "-"}
                                             </span>
                                         )}
                                     </div>

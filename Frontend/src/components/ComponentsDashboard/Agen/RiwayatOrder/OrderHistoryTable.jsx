@@ -14,7 +14,7 @@ const formatDate = (date) => {
 
 const formatPrice = (value) => value ? `Rp ${value.toLocaleString('id-ID')}` : '-';
 
-const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
+const OrderHistoryTable = ({ orders, onDelete, onDetail, loading }) => {
     const columns = [
         { header: 'No', key: 'no', render: (_, __, i) => i + 1 },
         {
@@ -56,6 +56,7 @@ const OrderHistoryTable = ({ orders, onDelete, onDetail }) => {
         <ReusableTable
             columns={columns}
             data={orders}
+            loading={loading}
             footer={
                 <tr>
                     <td colSpan={columns.length} className="px-4 py-3 text-right font-medium text-gray-600">

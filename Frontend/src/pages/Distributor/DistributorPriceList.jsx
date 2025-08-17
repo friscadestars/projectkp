@@ -7,7 +7,7 @@ import PageHeader from '../../components/ComponentsDashboard/Common/PageHeader';
 const DistributorPriceList = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const toggleDropdown = () => setShowDropdown(prev => !prev);
-    const { layoutProps, pageTitleProps, ...restProps } = useDistributorPriceListPage();
+    const { layoutProps, pageTitleProps, loading, ...restProps } = useDistributorPriceListPage();
 
     return (
         <Layout
@@ -18,7 +18,8 @@ const DistributorPriceList = () => {
         >
             <PageHeader {...pageTitleProps} />
             <PriceListSection {...restProps}
-                canEdit={true} />
+                canEdit={true}
+                loading={loading} />
         </Layout>
     );
 };

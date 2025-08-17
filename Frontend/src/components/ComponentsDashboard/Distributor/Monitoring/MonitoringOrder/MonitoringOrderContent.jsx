@@ -4,7 +4,7 @@ import SearchInput from '../../../Common/SearchInput';
 import MonitoringOrderTable from './MonitoringOrderTable';
 import iconMonitoring from '../../../../../assets/IconHeader/MonitoringIcon.png';
 
-const MonitoringOrderContent = ({ search, setSearch, filteredOrders }) => (
+const MonitoringOrderContent = ({ search, setSearch, filteredOrders, loading }) => (
     <>
         <PageHeader icon={iconMonitoring} title="Monitoring Order" />
 
@@ -15,7 +15,7 @@ const MonitoringOrderContent = ({ search, setSearch, filteredOrders }) => (
                 placeholder="Cari Order ID"
                 className="mb-4"
             />
-            <MonitoringOrderTable orders={filteredOrders} />
+            <MonitoringOrderTable orders={filteredOrders} loading={loading} />
         </div>
     </>
 );

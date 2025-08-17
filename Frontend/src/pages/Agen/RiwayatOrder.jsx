@@ -16,7 +16,7 @@ const formatDate = (date) => {
 
 const RiwayatOrder = () => {
     const props = useRiwayatOrderPage();
-    const { loading, error, orderTableProps } = props;
+    const { error, orderTableProps } = props;
 
     const [filteredOrders, setFilteredOrders] = useState([]);
     const [allOrders, setAllOrders] = useState([]);
@@ -78,14 +78,15 @@ const RiwayatOrder = () => {
                     onResetFilter={onResetFilter}
                 />
                 <div className="mt-4">
-                    {loading ? (
-                        <div className="text-center py-4 text-gray-500">Memuat data...</div>
-                    ) : error ? (
+                    {error ? (
                         <div className="text-red-500 text-center py-4">
                             {error.message || 'Terjadi kesalahan saat memuat data'}
                         </div>
                     ) : (
-                        <OrderHistoryTable {...orderTableProps} orders={filteredOrders} />
+                        <OrderHistoryTable
+                            {...orderTableProps}
+                            orders={filteredOrders}
+                        />
                     )}
                 </div>
             </div>

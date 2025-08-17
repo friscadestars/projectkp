@@ -9,8 +9,13 @@ import { usePermintaanOrderPage } from "../../hooks/Agen/PermintaanOrder/usePerm
 const PermintaanOrder = () => {
     const props = usePermintaanOrderPage();
 
-    // Jika masih loading, tidak render apapun
-    if (props.loading) return null;
+    if (props.loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <p className="text-gray-600 text-lg">Memuat data....</p>
+            </div>
+        );
+    }
 
     // Tampilkan error jika ada
     if (props.error) {
