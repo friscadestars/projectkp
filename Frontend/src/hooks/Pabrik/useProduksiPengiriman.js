@@ -16,7 +16,13 @@ export const useProduksiPengiriman = () => {
   const [invoiceStatus, setInvoiceStatus] = useState(savedInvoiceStatus);
 
   const getStatusPengirimanText = (order) => order.statusPengirimanText || "-";
-  const isInvoiceEnabled = (order) => order.statusProduksiText?.toLowerCase() === "selesai produksi";
+
+  const isInvoiceEnabled = (order) => {
+    const produksi = order.statusProduksiText?.toLowerCase();
+    const pengiriman = order.statusPengirimanText?.toLowerCase();
+
+    return produksi === "selesai produksi" || pengiriman === "dikirim";
+  };
 
   const handleDetail = (order) => {
     navigate("/pabrik/detail-produksi/sedang-produksi", { state: { order } });

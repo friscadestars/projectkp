@@ -27,6 +27,7 @@ export const useMonitoringOrderPage = () => {
         (async () => {
             try {
                 const allOrders = await fetchOrders();
+                console.log("DEBUG ORDERS ===>", allOrders);
                 setOrders(
                     allOrders.filter((o) =>
                         allowedStatuses.includes((o.status || '').toLowerCase())
@@ -56,6 +57,9 @@ export const useMonitoringOrderPage = () => {
                 status: o.status,
                 products: o.products ?? [],
                 invoiceExist: o.invoiceExist,
+                invoice: o.invoice ?? null,
+                payment_status: o.statusPembayaran ?? o.status_pembayaran ?? o.invoice_status ?? null,
+                invoice_id: o.invoiceId ?? o.invoice_id ?? null,
             }))
             .filter(
                 (o) =>

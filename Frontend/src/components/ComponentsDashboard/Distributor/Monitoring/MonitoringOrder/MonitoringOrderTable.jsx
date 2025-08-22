@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import StatusBadge from '../../../Common/StatusBadge';
 import ReusableTable from '../../../Common/ReusableTable';
 import Modal from '../../../Common/Modal';
-import { API_BASE } from '../../../../../services/ordersApi';
+import { API_BASE, approvePaymentByDistributor, rejectPaymentByDistributor } from '../../../../../services/ordersApi';
 import { useAuth } from '../../../../../Context/AuthContext';
+import Swal from 'sweetalert2';
 
 const getPabrikNameById = async (id, token) => {
     try {
@@ -160,6 +161,12 @@ const MonitoringOrderTable = ({ orders, loading }) => {
         }
     }, [message]);
 
+    useEffect(() => {
+        if (orders?.length > 0) {
+            console.log("📦 Orders diterima di MonitoringOrderTable:", orders);
+        }
+    }, [orders]);
+
     const columns = [
         {
             header: 'No',
@@ -189,15 +196,107 @@ const MonitoringOrderTable = ({ orders, loading }) => {
             render: (val) => <StatusBadge status={val} />,
         },
         {
+            header: 'Validasi Pembayaran',
+            key: 'validasi',
+            render: (_, row) => {
+                const statusPembayaran = (row?.status_pembayaran || row?.payment_status || '').toLowerCase();
+                const invoiceId = row?.invoice_id;
+
+                console.log("🔎 Debug Validasi Pembayaran:", {
+                    orderId: row.orderId || row.id,
+                    statusPembayaran,
+                    invoiceId,
+                    fullRow: row
+                });
+
+                const isWaitingValidation = ['waiting_confirmation', 'menunggu validasi'].includes(statusPembayaran);
+                const isDisabled = statusPembayaran === 'unpaid' || !isWaitingValidation;
+
+                return (
+                    <div className="flex gap-2 justify-center">
+                        {/* Tombol Terima */}
+                        <button
+                            className={`px-4 py-1 text-sm rounded font-semibold ${isDisabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-green-600 text-white hover:bg-green-700'
+                                }`}
+                            disabled={isDisabled}
+                            onClick={async () => {
+                                if (isDisabled) return;
+                                const result = await Swal.fire({
+                                    title: 'Terima Pembayaran?',
+                                    text: 'Apakah Anda yakin ingin menyetujui pembayaran ini?',
+                                    icon: 'question',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#16a34a',
+                                    cancelButtonColor: '#d33',
+                                    confirmButtonText: 'Ya, Terima',
+                                    cancelButtonText: 'Batal',
+                                });
+                                if (result.isConfirmed) {
+                                    try {
+                                        await approvePaymentByDistributor(invoiceId);
+                                        Swal.fire('Berhasil', 'Pembayaran sudah disetujui.', 'success').then(() => {
+                                            window.location.reload();
+                                        });
+                                    } catch (err) {
+                                        Swal.fire('Gagal ❌', err.message, 'error');
+                                    }
+                                }
+                            }}
+                        >
+                            Terima
+                        </button>
+
+                        {/* Tombol Tolak */}
+                        <button
+                            className={`px-4 py-1 text-sm rounded font-semibold ${isDisabled
+                                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                : 'bg-red-600 text-white hover:bg-red-700'
+                                }`}
+                            disabled={isDisabled}
+                            onClick={async () => {
+                                if (isDisabled) return;
+                                const result = await Swal.fire({
+                                    title: 'Tolak Pembayaran?',
+                                    text: 'Apakah Anda yakin ingin menolak pembayaran ini?',
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#16a34a',
+                                    cancelButtonColor: '#d33',
+                                    confirmButtonText: 'Ya, Tolak',
+                                    cancelButtonText: 'Batal',
+                                });
+                                if (result.isConfirmed) {
+                                    try {
+                                        await rejectPaymentByDistributor(invoiceId);
+                                        Swal.fire('Ditolak', 'Pembayaran sudah ditolak.', 'success').then(() => {
+                                            window.location.reload();
+                                        });
+                                    } catch (err) {
+                                        Swal.fire('Gagal ❌', err.message, 'error');
+                                    }
+                                }
+                            }}
+                        >
+                            Tolak
+                        </button>
+                    </div>
+                );
+            }
+        },
+
+        {
             header: 'Aksi',
             key: 'aksi',
             render: (_, row) => {
-                const isInvoiceAllowed = ['processing', 'shipped',].includes(row.status?.toLowerCase());
+                const isInvoiceAllowed = ['processing', 'shipped'].includes(row.status?.toLowerCase());
                 const isInvoiceExist = row?.invoiceExist;
                 const isDisabled = !isInvoiceAllowed || isInvoiceExist;
 
                 return (
                     <div className="button-group flex flex-wrap gap-2 justify-center">
+                        {/* Tombol Detail */}
                         <button
                             className="px-4 py-1 bg-blue-900 text-white text-sm rounded font-semibold hover:opacity-90"
                             onClick={() =>
@@ -206,6 +305,8 @@ const MonitoringOrderTable = ({ orders, loading }) => {
                         >
                             Detail
                         </button>
+
+                        {/* Tombol Buat Invoice */}
                         <button
                             className={`px-4 py-1 text-sm rounded font-semibold ${isDisabled
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -221,7 +322,7 @@ const MonitoringOrderTable = ({ orders, loading }) => {
                     </div>
                 );
             }
-        }
+        },
     ];
 
     const handleCreateInvoice = async () => {
@@ -297,9 +398,15 @@ const MonitoringOrderTable = ({ orders, loading }) => {
                     {message}
                 </div>
             )}
+
             <ReusableTable
                 columns={columns}
-                data={orders}
+                data={orders.map(o => ({
+                    ...o,
+                    // pastikan field status pembayaran dan invoice_id ikut terbawa
+                    status_pembayaran: o.status_pembayaran || o.payment_status || '',
+                    invoice_id: o.invoice_id || null,
+                }))}
                 loading={loading}
                 footer={
                     <tr>

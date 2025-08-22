@@ -1,12 +1,13 @@
-import React, { useEffect } from 'react';
+import { confirmPaymentByAgent, fetchOrderById } from '/src/services/ordersApi.js';
+import { useEffect } from 'react';
 import Swal from 'sweetalert2';
 
-const PaymentConfirmation = ({ onConfirm }) => {
+const PaymentConfirmation = ({ invoiceId, onSuccess, setInvoiceData }) => {
     useEffect(() => {
         const showConfirmation = async () => {
             const result = await Swal.fire({
                 title: 'Konfirmasi Pembayaran',
-                text: 'Apakah Anda yakin ingin mengonfirmasi pembayaran?',
+                text: 'Apakah Anda yakin sudah melakukan pembayaran?',
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#16a34a',
@@ -16,20 +17,41 @@ const PaymentConfirmation = ({ onConfirm }) => {
             });
 
             if (result.isConfirmed) {
-                onConfirm();
-                Swal.fire({
-                    title: 'Berhasil!',
-                    text: 'Pembayaran telah dikonfirmasi.',
-                    icon: 'success',
-                    confirmButtonColor: '#2563eb',
-                });
+                try {
+                    // Panggil API konfirmasi pembayaran
+                    await confirmPaymentByAgent(invoiceId);
+
+                    // Update state lokal jadi "menunggu validasi"
+                    if (setInvoiceData) {
+                        setInvoiceData(prev => ({
+                            ...prev,
+                            tagihan: {
+                                ...prev.tagihan,
+                                status: 'waiting_confirmation',
+                            },
+                            statusPembayaran: 'Menunggu Validasi',
+                        }));
+                    }
+
+                    Swal.fire({
+                        title: 'Menunggu Validasi',
+                        text: 'Pembayaran Anda sedang menunggu validasi dari distributor.',
+                        icon: 'info',
+                        confirmButtonColor: '#2563eb',
+                    });
+
+                    // callback tambahan
+                    onSuccess?.();
+                } catch (err) {
+                    Swal.fire('Gagal', err.message, 'error');
+                }
             }
         };
 
-        showConfirmation(); // otomatis tampil saat komponen dirender
-    }, [onConfirm]);
+        showConfirmation();
+    }, [invoiceId, onSuccess, setInvoiceData]);
 
-    return null; // tidak merender apa-apa karena SweetAlert sudah tampil sebagai modal
+    return null;
 };
 
 export default PaymentConfirmation;

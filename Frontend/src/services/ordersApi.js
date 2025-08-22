@@ -40,7 +40,8 @@ export const mapOrder = async (o) => {
 
         receivedDate: o.accepted_at?.split(' ')[0] ?? o.received_date?.split(' ')[0] ?? '-',
         trackingNumber: o.resi ?? o.no_resi ?? o.noResi ?? '-',
-        statusPembayaran: o.status_pembayaran ?? 'Belum Lunas',
+        statusPembayaran: o.statusPembayaran ?? o.status_pembayaran ?? 'unpaid',
+        invoiceId: o.invoiceId ?? o.invoice_id ?? null,
 
         products: (o.items || []).map(i => ({
             id: i.id,
@@ -507,3 +508,44 @@ export async function updateMonitoringOrderStatus(orderId, status) {
     return res.json();
 }
 
+// Agen konfirmasi pembayaran -> status jadi waiting_confirmation
+export async function confirmPaymentByAgent(invoiceId) {
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}/confirm-payment`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeader(),
+        },
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Gagal konfirmasi pembayaran');
+    }
+
+    return res.json();
+}
+
+export async function approvePaymentByDistributor(invoiceId) {
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Gagal menyetujui pembayaran');
+    }
+    return res.json();
+}
+
+export async function rejectPaymentByDistributor(invoiceId) {
+    const res = await fetch(`${API_BASE}/invoices/${invoiceId}/reject`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    });
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.message || 'Gagal menolak pembayaran');
+    }
+    return res.json();
+}

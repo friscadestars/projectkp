@@ -111,18 +111,27 @@ class OrderController extends ResourceController
         $invoiceModel = new \App\Models\InvoiceModel();
         $invoices = $invoiceModel->whereIn('order_id', $orderIds)->findAll();
 
-        // Petakan status invoice berdasarkan order_id
+        // Petakan invoice berdasarkan order_id
         $invoiceMap = [];
         foreach ($invoices as $inv) {
-            $invoiceMap[$inv['order_id']] = $inv['status'];
+            $invoiceMap[$inv['order_id']] = [
+                'id'     => $inv['id'],
+                'status' => $inv['status']
+            ];
         }
 
-        // Tambahkan status pembayaran ke setiap order
+        // Tambahkan status pembayaran & invoice_id ke setiap order
         foreach ($orders as &$order) {
-            $statusInvoice = $invoiceMap[$order['id']] ?? null;
-            $order['status_pembayaran'] = $statusInvoice === 'paid' ? 'Lunas' : 'Belum Dibayar';
-        }
+            $invoice = $invoiceMap[$order['id']] ?? null;
 
+            if ($invoice) {
+                $order['invoiceId'] = $invoice['id']; // camelCase
+                $order['statusPembayaran'] = strtolower($invoice['status']); // camelCase
+            } else {
+                $order['invoiceId'] = null;
+                $order['statusPembayaran'] = 'unpaid';
+            }
+        }
         return $this->respond($orders);
     }
 
@@ -687,7 +696,7 @@ class OrderController extends ResourceController
         $db = \Config\Database::connect();
 
         $orders = $db->table('orders o')
-            ->select('o.*, i.status as invoice_status, agen.name as agenName, pabrik.name as pabrikName')
+            ->select('o.*, i.id as invoice_id, i.status as invoice_status, agen.name as agenName, pabrik.name as pabrikName')
             ->join('users agen', 'o.agen_id = agen.id', 'left')
             ->join('users pabrik', 'o.pabrik_id = pabrik.id', 'left')
             ->join('invoices i', 'i.order_id = o.id', 'left')
@@ -712,7 +721,6 @@ class OrderController extends ResourceController
         if (!isset($json->status)) {
             return $this->failValidationErrors('Status tidak boleh kosong.');
         }
-
         $update = $db->table('orders')
             ->where('id', $orderId)
             ->update(['status' => $json->status]);

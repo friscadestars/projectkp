@@ -71,6 +71,8 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('invoices/generate/distributor/(:num)', 'InvoiceController::generateInvoiceNumber/distributor/$1');
     $routes->get('invoices/generate/pabrik/(:num)', 'InvoiceController::generateInvoiceNumber/pabrik/$1');
     $routes->get('invoices/order/(:num)', 'InvoiceController::checkInvoiceByOrder/$1');
+    $routes->post('invoices/(:num)/approve', 'InvoiceController::approve/$1');
+    $routes->post('invoices/(:num)/reject', 'InvoiceController::reject/$1');
 
     $routes->get('shipments', 'ShipmentController::index');
     $routes->get('shipments/(:num)', 'ShipmentController::show/$1');

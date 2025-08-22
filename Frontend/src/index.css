@@ -138,6 +138,12 @@ header {
     @apply bg-red-600 text-white font-bold;
   }
 
+  .status-badge.payment-menunggu-validasi {
+    background-color: #f0c000;
+    color: #fefefe;
+    border: 1px solid #f0b400;
+  }
+
   .payment-unknown {
     @apply bg-gray-400 text-white font-bold;
   }

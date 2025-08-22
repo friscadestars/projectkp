@@ -9,6 +9,9 @@ const getStatusPembayaranClass = (status) => {
             return 'status-badge payment-lunas';
         case 'belum dibayar':
             return 'status-badge payment-belum-lunas';
+        case 'menunggu validasi': // display status
+        case 'waiting_confirmation': // raw status
+            return 'status-badge payment-menunggu-validasi';
         default:
             return 'status-badge payment-unknown';
     }
@@ -92,7 +95,9 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
             key: 'statusPembayaran',
             render: (_, row) => {
                 const rawStatus = row?.tagihan?.statusPembayaran || row.statusPembayaran || 'unpaid';
-                const displayStatus = rawStatus === 'paid' ? 'Lunas' : 'Belum Dibayar';
+                let displayStatus = 'Belum Dibayar';
+                if (rawStatus === 'paid') displayStatus = 'Lunas';
+                else if (rawStatus === 'waiting_confirmation') displayStatus = 'Menunggu Validasi';
 
                 return <span className={getStatusPembayaranClass(displayStatus)}>{displayStatus}</span>;
             },

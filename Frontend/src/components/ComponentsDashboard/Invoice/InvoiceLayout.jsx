@@ -1,4 +1,5 @@
-import React from 'react';
+// InvoiceLayout.jsx
+import React, { useState } from 'react';
 import InvoiceDetails from './InvoiceDetails';
 import InvoiceTable from './InvoiceTable';
 import PaymentInstructions from './PaymentInstructions';
@@ -24,14 +25,15 @@ const InvoiceLayout = ({
     showAgen = false,
     showDistributor = false,
 }) => {
-
     if (!invoiceData) {
         return null;
     }
 
-    const invoice = invoiceData.tagihan || invoiceData.invoice;
+    const [invoice, setInvoice] = useState(invoiceData.tagihan || invoiceData.invoice);
     const invoiceStatus = invoice?.status?.toLowerCase();
+
     const isPaid = ['lunas', 'paid', 'dibayar'].includes(invoiceStatus);
+    const isWaiting = ['waiting_confirmation', 'menunggu validasi'].includes(invoiceStatus);
 
     const products = invoiceData.products || invoiceData.tagihan?.items || [];
     const bankData = invoiceData?.pengirim_bank || invoiceData?.invoice?.pengirim_bank || {};
@@ -60,19 +62,29 @@ const InvoiceLayout = ({
             {showConfirmationButton && (
                 <div className="text-center mt-4">
                     <button
-                        onClick={!isPaid ? onOpenModal : undefined}
-                        disabled={isPaid}
+                        onClick={!isPaid && !isWaiting ? onOpenModal : undefined}
+                        disabled={isPaid || isWaiting}
                         className={`px-6 py-2 rounded text-white transition
-        ${isPaid ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}
-      `}
+                            ${(isPaid || isWaiting)
+                                ? 'bg-gray-400 cursor-not-allowed'
+                                : 'bg-green-600 hover:bg-green-700'}
+                        `}
                     >
-                        {isPaid ? 'Pembayaran Sudah Lunas' : 'Konfirmasi Pembayaran'}
+                        {isPaid
+                            ? 'Pembayaran Sudah Lunas'
+                            : isWaiting
+                                ? 'Menunggu Validasi'
+                                : 'Konfirmasi Pembayaran'}
                     </button>
                 </div>
             )}
 
-            {showModal && !isPaid && (
-                <PaymentConfirmation onConfirm={onConfirmPayment} />
+            {showModal && !isPaid && !isWaiting && (
+                <PaymentConfirmation
+                    invoiceId={invoice?.id}
+                    onSuccess={onConfirmPayment}
+                    setInvoiceData={setInvoice}
+                />
             )}
         </div>
     );

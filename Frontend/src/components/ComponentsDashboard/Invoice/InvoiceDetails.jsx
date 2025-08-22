@@ -15,8 +15,15 @@ const formatDate = (dateStr) => {
 };
 
 const InvoiceDetails = ({ invoiceData, showAgen = false, showDistributor = false }) => {
-    const statusRaw = invoiceData?.tagihan?.status || invoiceData?.statusPembayaran || '';
-    const normalizedStatus = statusRaw.toLowerCase();
+    // Ambil status dari berbagai kemungkinan field
+    const statusRaw =
+        invoiceData?.tagihan?.status ||
+        invoiceData?.statusPembayaran ||
+        invoiceData?.status ||
+        invoiceData?.payment_status ||
+        '';
+
+    const normalizedStatus = statusRaw.toString().toLowerCase();
 
     // Data order yang mungkin tersedia
     const order = invoiceData?.order || {};
@@ -43,6 +50,20 @@ const InvoiceDetails = ({ invoiceData, showAgen = false, showDistributor = false
         invoiceData.invoice_date || // fallback terakhir
         null;
 
+    // Tentukan class & label status
+    let statusClass = 'bg-gray-600';
+    let statusLabel = 'Status Tidak Diketahui';
+
+    if (['unpaid', 'belum lunas'].includes(normalizedStatus)) {
+        statusClass = 'bg-red-600';
+        statusLabel = 'Belum Dibayar';
+    } else if (['paid', 'lunas', 'dibayar'].includes(normalizedStatus)) {
+        statusClass = 'bg-green-600';
+        statusLabel = 'Lunas';
+    } else if (['waiting_confirmation', 'menunggu validasi'].includes(normalizedStatus)) {
+        statusClass = 'bg-yellow-500';
+        statusLabel = 'Menunggu Validasi';
+    }
 
     return (
         <div className="text-gray-800 mb-6 space-y-2">
@@ -66,18 +87,9 @@ const InvoiceDetails = ({ invoiceData, showAgen = false, showDistributor = false
                 <strong>Status Pembayaran:</strong>
                 <button
                     disabled
-                    className={`px-3 py-1 rounded text-sm font-bold cursor-default ${['unpaid', 'belum lunas'].includes(normalizedStatus)
-                        ? 'bg-red-600'
-                        : ['paid', 'lunas', 'dibayar'].includes(normalizedStatus)
-                            ? 'bg-green-600'
-                            : 'bg-gray-600'
-                        } text-white`}
+                    className={`px-3 py-1 rounded text-sm font-bold cursor-default ${statusClass} text-white`}
                 >
-                    {['unpaid', 'belum lunas'].includes(normalizedStatus)
-                        ? 'Belum Dibayar'
-                        : ['paid', 'lunas', 'dibayar'].includes(normalizedStatus)
-                            ? 'Lunas'
-                            : 'Status Tidak Diketahui'}
+                    {statusLabel}
                 </button>
             </p>
         </div>

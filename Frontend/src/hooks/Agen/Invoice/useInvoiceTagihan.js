@@ -15,6 +15,21 @@ const useInvoiceTagihan = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
+    // 🔹 Helper: mapping status backend ke label UI
+    const mapStatusToLabel = (status) => {
+        switch (status?.toLowerCase()) {
+            case 'paid':
+            case 'lunas':
+            case 'dibayar':
+                return 'Lunas';
+            case 'waiting_confirmation':
+                return 'Menunggu Validasi';
+            case 'unpaid':
+            default:
+                return 'Belum Lunas';
+        }
+    };
+
     useEffect(() => {
         const loadData = async () => {
             const token = localStorage.getItem('token');
@@ -24,8 +39,7 @@ const useInvoiceTagihan = () => {
             }
             if (location.state?.tagihan) {
                 const tagihan = location.state.tagihan;
-                const status = tagihan.status?.toLowerCase();
-                const statusPembayaran = status === 'paid' ? 'Lunas' : 'Belum Lunas';
+                const statusPembayaran = mapStatusToLabel(tagihan.status);
 
                 // Ambil user pengirim (dari distributor_id atau pabrik_id)
                 const senderId = tagihan.distributorId || tagihan.distributor_id;
@@ -42,9 +56,7 @@ const useInvoiceTagihan = () => {
 
                         if (userRes.ok) {
                             const userJson = await userRes.json();
-                            console.log('🔍 FULL USER JSON:', userJson);
                             pengirim = userJson && userJson.id ? userJson : null;
-                            console.log('DATA PENGIRIM:', pengirim);
                         }
                     } catch (e) {
                         console.error('Gagal ambil pengirim:', e);
@@ -61,7 +73,7 @@ const useInvoiceTagihan = () => {
                             nama_rekening: pengirim.nama_rekening,
                             rekening: pengirim.rekening
                         }
-                        : null // ← SIMPAN DATA BANK DI SINI
+                        : null
                 });
 
                 setStatusPembayaran(statusPembayaran);
@@ -78,10 +90,7 @@ const useInvoiceTagihan = () => {
 
                     const { invoice, order, items } = await res.json();
 
-                    const status = invoice.status?.toLowerCase();
-                    const statusPembayaran = ['lunas', 'paid', 'dibayar'].includes(status)
-                        ? 'Lunas'
-                        : 'Belum Lunas';
+                    const statusPembayaran = mapStatusToLabel(invoice.status);
 
                     // Ambil user pengirim
                     const senderId = invoice.distributorId || invoice.distributor_id || invoice.pabrikId || invoice.pabrik_id;
@@ -147,13 +156,16 @@ const useInvoiceTagihan = () => {
             if (!invoiceData?.tagihan?.id) return;
 
             const token = localStorage.getItem('token');
-            const response = await fetch(`http://localhost:8080/api/invoices/${invoiceData.tagihan.id}/confirm-payment`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+            const response = await fetch(
+                `http://localhost:8080/api/invoices/${invoiceData.tagihan.id}/confirm-payment`,
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 }
-            });
+            );
 
             if (!response.ok) {
                 const errorData = await response.json();
@@ -162,19 +174,22 @@ const useInvoiceTagihan = () => {
 
             const result = await response.json();
 
-            // **PERBAIKAN UTAMA DI SINI:**
-            // Update objek invoiceData dengan status yang baru
+            // 🔥 Update objek invoiceData sesuai respon backend
             setInvoiceData(prevData => {
                 if (!prevData) return null;
+
+                const backendStatus = result.status || prevData.tagihan.status;
                 return {
                     ...prevData,
                     tagihan: {
                         ...prevData.tagihan,
-                        status: 'paid'
+                        status: backendStatus,
                     },
-                    statusPembayaran: 'Lunas'
+                    statusPembayaran: mapStatusToLabel(backendStatus),
                 };
             });
+
+            setStatusPembayaran(mapStatusToLabel(result.status));
 
             Swal.fire({
                 title: 'Berhasil!',

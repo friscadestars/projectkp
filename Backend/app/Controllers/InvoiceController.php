@@ -255,7 +255,7 @@ class InvoiceController extends ResourceController
 
         // Perbarui status invoice di database menjadi 'paid'
         $data = [
-            'status' => 'paid',
+            'status' => 'waiting_confirmation',
             'payment_date' => date('Y-m-d H:i:s'), // Opsional: catat waktu pembayaran
         ];
 
@@ -277,7 +277,7 @@ class InvoiceController extends ResourceController
             $notifModel->insert([
                 'user_id'    => $agenId,
                 'title'      => 'Pembayaran Dikonfirmasi',
-                'message'    => 'Pembayaran Anda telah dikonfirmasi. Status tagihan: Lunas.',
+                'message'    => 'Pembayaran Anda telah dikonfirmasi. Status tagihan: Menunggu Validasi.',
                 'type'       => 'invoice_paid',
                 'is_read'    => 0,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -290,7 +290,7 @@ class InvoiceController extends ResourceController
             $notifModel->insert([
                 'user_id'    => $distributorId,
                 'title'      => 'Pembayaran Tagihan Diterima',
-                'message'    => 'Pembayaran dari agen telah dikonfirmasi. Tagihan sudah lunas.',
+                'message'    => 'Silahkan lakukan validasi pembayaran untuk' .  $agenId . '.',
                 'type'       => 'invoice_paid_distributor',
                 'is_read'    => 0,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -300,7 +300,7 @@ class InvoiceController extends ResourceController
         return $this->respond([
             'message' => 'Pembayaran berhasil dikonfirmasi',
             'invoice_id' => $id,
-            'status' => 'paid'
+            'status' => 'waiting_confirmation'
         ]);
     }
 
@@ -362,7 +362,7 @@ class InvoiceController extends ResourceController
             $notifModel->insert([
                 'user_id'    => $distributorId,
                 'title'      => 'Tagihan Baru dari Pabrik',
-                'message'    => 'Anda menerima tagihan baru dari pabrik untuk pesanan #' . $orderId . '.',
+                'message'    => 'Anda menerima tagihan baru dari pabrik untuk pesanan ' . $orderId . '.',
                 'type'       => 'invoice_from_pabrik',
                 'is_read'    => 0,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -650,6 +650,44 @@ class InvoiceController extends ResourceController
             'message' => 'Invoice berhasil dibuat oleh pabrik',
             'invoice_id' => $invoiceId,
             'invoice_number' => $invoiceNumber
+        ]);
+    }
+
+    // Approve pembayaran oleh distributor
+    public function approve($id)
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoice = $invoiceModel->find($id);
+        if (!$invoice) return $this->failNotFound('Invoice tidak ditemukan');
+
+        $invoiceModel->update($id, [
+            'status' => 'paid',
+            'payment_date' => date('Y-m-d H:i:s')
+        ]);
+
+        return $this->respond([
+            'message' => 'Pembayaran disetujui',
+            'invoice_id' => $id,
+            'status' => 'paid'
+        ]);
+    }
+
+    // Reject pembayaran oleh distributor
+    public function reject($id)
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoice = $invoiceModel->find($id);
+        if (!$invoice) return $this->failNotFound('Invoice tidak ditemukan');
+
+        $invoiceModel->update($id, [
+            'status' => 'unpaid',
+            'payment_date' => null
+        ]);
+
+        return $this->respond([
+            'message' => 'Pembayaran ditolak',
+            'invoice_id' => $id,
+            'status' => 'unpaid'
         ]);
     }
 }
