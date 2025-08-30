@@ -41,7 +41,7 @@ class CreateInvoicesTable extends Migration
             ],
             'status' => [
                 'type'       => 'ENUM',
-                'constraint' => ['unpaid', 'paid', 'waiting_confirmation'],
+                'constraint' => ['unpaid', 'paid'],
                 'default'    => 'unpaid',
                 'null'       => false
             ],
