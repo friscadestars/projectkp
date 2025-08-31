@@ -85,6 +85,7 @@ const TabelRiwayatPengiriman = () => {
     { header: 'Order ID', key: 'orderCode', render: (value) => value?.toUpperCase() },
     { header: 'Distributor', key: 'distributorName' },
     { header: 'Tanggal Pengiriman', key: 'deliveryDate', render: formatDate },
+    { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
     { header: 'No. Resi', key: 'trackingNumber' },
     {
       header: 'Total Harga',
@@ -95,18 +96,19 @@ const TabelRiwayatPengiriman = () => {
       }
     },
     { header: 'Status Order', key: 'status', render: v => <StatusBadge status={v} /> },
-    { header: 'Tanggal Terima', key: 'receivedDate', render: formatDate },
     {
-      header: 'Aksi', key: 'aksi', render: (_, row) => (
+      header: 'Aksi',
+      key: 'aksi',
+      render: (_, row) => (
         <div className="flex gap-2">
           <button
-            className="bg-blue-900 text-white px-3 py-1 rounded"
+            className="bg-blue-900 text-white font-bold px-3 py-1 rounded"
             onClick={() => navigate(`/pabrik/detail-riwayat/${row.orderId}`, { state: { order: row } })}
           >
             Detail
           </button>
           <button
-            className="bg-red-600 text-white px-3 py-1 rounded"
+            className="bg-red-600 text-white font-bold px-3 py-1 rounded"
             onClick={() => handleDelete(row.orderId)}
           >
             Hapus

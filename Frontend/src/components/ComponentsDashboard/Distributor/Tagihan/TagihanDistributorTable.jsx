@@ -9,6 +9,9 @@ const getStatusPembayaranClass = (status) => {
             return 'status-badge payment-lunas';
         case 'belum dibayar':
             return 'status-badge payment-belum-lunas';
+        case 'menunggu validasi':
+        case 'waiting_confirmation':
+            return 'status-badge payment-menunggu-validasi';
         default:
             return 'status-badge payment-unknown';
     }
@@ -30,7 +33,7 @@ const formatDate = (dateStr) => {
 const TagihanDistributorTable = ({ orders = [], searchTerm = '', loading = false }) => {
     const navigate = useNavigate();
 
-    const allowed = ['diproses', 'processing', 'dikirim', 'shipped', 'selesai', 'delivered'];
+    const allowed = ['selesai produksi', 'produced', 'dikirim', 'shipped', 'selesai', 'delivered'];
 
     const filtered = orders.filter(order => {
         const orderStatus = (order.order_status || '').toLowerCase();
@@ -80,8 +83,23 @@ const TagihanDistributorTable = ({ orders = [], searchTerm = '', loading = false
             header: 'Status Pembayaran',
             key: 'statusPembayaran',
             render: (_, row) => {
-                const displayStatus = row.statusPembayaran || 'Belum Dibayar';
-                return <span className={getStatusPembayaranClass(displayStatus)}>{displayStatus}</span>;
+                // Ambil status dari invoice kalau ada
+                const rawStatus = (row.status || row.statusPembayaran || '').toLowerCase();
+
+                let displayStatus = 'Belum Dibayar';
+                if (rawStatus === 'waiting_confirmation') {
+                    displayStatus = 'Menunggu Validasi';
+                } else if (['paid', 'lunas'].includes(rawStatus)) {
+                    displayStatus = 'Lunas';
+                } else if (['unpaid', 'belum lunas', 'belum dibayar'].includes(rawStatus)) {
+                    displayStatus = 'Belum Dibayar';
+                }
+
+                return (
+                    <span className={getStatusPembayaranClass(displayStatus)}>
+                        {displayStatus}
+                    </span>
+                );
             },
         },
         {

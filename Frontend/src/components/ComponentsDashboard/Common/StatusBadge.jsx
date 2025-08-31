@@ -4,7 +4,7 @@ import React from 'react';
 const StatusBadge = ({ status, labelOverride }) => {
     const colorMap = {
         pending: 'bg-yellow-500',
-        approved: 'bg-green-600',
+        approved: 'bg-teal-500',
         shipped: 'bg-cyan-600',
         // shipped: 'bg-[#4EA63A]',
         processing: 'bg-blue-500',

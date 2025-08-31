@@ -95,11 +95,8 @@ class UserController extends ResourceController
             'message' => 'User berhasil dibuat',
             'id'      => $insertedId
         ]);
-
-        //return $this->respondCreated(['message' => 'User berhasil dibuat', 'id' => $this->userModel->getInsertID()]);
     }
 
-    // PUT /api/users/{id}
     public function update($id = null)
     {
         if (!$this->userModel->find($id)) {
@@ -127,11 +124,20 @@ class UserController extends ResourceController
             $payload['password'] = password_hash($data['password'], PASSWORD_BCRYPT);
         }
 
-        // Buang null agar tidak men‑overwrite kolom dengan null
+        // Buang null agar tidak men-overwrite kolom dengan null
         $payload = array_filter($payload, fn($v) => $v !== null);
 
         if (!$this->userModel->update($id, $payload)) {
             return $this->failValidationErrors($this->userModel->errors());
+        }
+
+        // Tambahan: sinkronisasi alamat ke tabel orders
+        if (isset($data['alamat'])) {
+            $db = \Config\Database::connect();
+            $db->table('orders')
+                ->where('agen_id', $id)
+                ->set(['note' => $data['alamat']])
+                ->update();
         }
 
         $updated = $this->userModel

@@ -48,8 +48,8 @@ const OrderForm = ({
                 type="text"
                 placeholder="Alamat Pengiriman"
                 value={alamat}
-                onChange={(e) => setAlamat(e.target.value)}
-                className={`border border-gray-400 px-3 py-2 rounded w-full text-xs sm:text-sm ${alamat ? 'text-black' : 'text-gray-400'}`}
+                readOnly
+                className="border border-gray-400 px-3 py-2 rounded text-xs sm:text-sm text-gray-400 w-full"
             />
 
             {/* Tambah Produk */}

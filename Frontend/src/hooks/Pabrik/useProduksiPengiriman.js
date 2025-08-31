@@ -129,17 +129,26 @@ export const useProduksiPengiriman = () => {
       const statusMap = {};
       for (let order of orders) {
         try {
-          const res = await fetch(`${BASE_URL}/invoices/check-order/${order.id}`, {
+          const res = await fetch(`${BASE_URL}/invoices/order/${order.id}`, {
             headers: { Authorization: `Bearer ${token}` },
           });
+
           if (res.ok) {
             const data = await res.json();
             statusMap[order.id] = data.exists || invoiceStatus[order.id] || false;
+          } else if (res.status === 404) {
+            // invoice belum dibuat
+            statusMap[order.id] = false;
+          } else {
+            console.error(`Gagal cek invoice order ${order.id}:`, res.statusText);
           }
+
         } catch (err) {
           console.error("Gagal cek invoice:", err);
+          statusMap[order.id] = false;
         }
       }
+
       const mergedStatus = { ...invoiceStatus, ...statusMap };
       setInvoiceStatus(mergedStatus);
       localStorage.setItem("invoiceStatus", JSON.stringify(mergedStatus));

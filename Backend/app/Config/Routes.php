@@ -37,7 +37,7 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->put('orders/(:num)/status', 'OrderController::updateOrderStatus/$1');
 
     // letakkan semua path “spesifik” SEBELUM (:segment) supaya tidak ketabrak
-    $routes->get('/orders/monitoring', 'OrderController::getMonitoringOrders');
+    $routes->get('orders/monitoring', 'OrderController::getMonitoringOrders');
     $routes->get('orders/find/by-agen-no', 'OrderController::findByAgenAndNo');
     $routes->get('orders/last', 'OrderController::countAgen');
     $routes->get('orders/last/(:num)', 'OrderController::countAgen/$1');
@@ -62,7 +62,7 @@ $routes->group('api', ['filter' => 'auth'], function ($routes) {
     $routes->get('invoices/getByDistributor/(:num)', 'InvoiceController::getByDistributor/$1');
     $routes->get('api/invoices/order/(:num)', 'InvoiceController::getByOrderId/$1');
     $routes->post('invoices/(:num)/confirm-payment', 'InvoiceController::confirmPayment/$1');
-    $routes->get('invoices/agent/(:num)', 'InvoiceController::getByAgent/$1');
+    $routes->get('invoices/agent', 'InvoiceController::getByAgent/$1');
     $routes->get('invoices', 'InvoiceController::index');
     $routes->get('invoices/(:num)', 'InvoiceController::show/$1');
     $routes->post('invoices', 'InvoiceController::create');

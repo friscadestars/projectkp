@@ -28,7 +28,11 @@ const useInvoiceData = (url, fallbackPath = '/') => {
 
                 const { invoice, items } = await res.json();
                 const status = invoice.status?.toLowerCase();
-                const pembayaranStatus = ['lunas', 'paid'].includes(status) ? 'Lunas' : 'Belum Lunas';
+                const pembayaranStatus = ['lunas', 'paid'].includes(status)
+                    ? 'Lunas'
+                    : status === 'waiting_confirmation'
+                        ? 'Menunggu Validasi'
+                        : 'Belum Lunas';
 
                 const mappedItems = items.map(item => ({
                     ...item,
@@ -205,23 +209,22 @@ const useInvoiceData = (url, fallbackPath = '/') => {
         if (!invoiceId) return;
 
         try {
-            const res = await fetch(`${BASE_URL}/invoices/${invoiceId}/konfirmasi-pembayaran`, {
-                method: 'PUT',
+            const res = await fetch(`${BASE_URL}/invoices/${invoiceId}/confirm-payment`, {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ status: 'paid' }),
             });
 
-            if (!res.ok) throw new Error('Gagal memperbarui status pembayaran');
+            if (!res.ok) throw new Error('Gagal mengirim konfirmasi pembayaran');
 
             setInvoiceData(prev => ({
                 ...prev,
-                status: 'paid',
-                statusPembayaran: 'Lunas',
+                status: 'waiting_confirmation',
+                statusPembayaran: 'Menunggu Validasi',
             }));
-            setStatusPembayaran('Lunas');
+            setStatusPembayaran('Menunggu Validasi');
         } catch (err) {
             console.error('Gagal konfirmasi pembayaran:', err);
         } finally {

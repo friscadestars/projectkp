@@ -9,8 +9,8 @@ const getStatusPembayaranClass = (status) => {
             return 'status-badge payment-lunas';
         case 'belum dibayar':
             return 'status-badge payment-belum-lunas';
-        case 'menunggu validasi': // display status
-        case 'waiting_confirmation': // raw status
+        case 'menunggu validasi':
+        case 'waiting_confirmation':
             return 'status-badge payment-menunggu-validasi';
         default:
             return 'status-badge payment-unknown';
@@ -30,6 +30,7 @@ const formatDate = (value) => {
     });
 };
 
+
 const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
     const navigate = useNavigate();
 
@@ -38,7 +39,7 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
     const filtered = safeInvoices
         .filter(order => {
             const status = (order.status || '').toLowerCase();
-            const allowed = ['diproses', 'processing', 'dikirim', 'shipped', 'diterima', 'delivered', 'paid', 'unpaid',];
+            const allowed = ['dikirim', 'shipped', 'diterima', 'delivered', 'paid', 'unpaid', 'waiting_confirmation', 'produced'];
             return allowed.includes(status) && (
                 (order.orderCode || order.orderId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
                 (order.distributorName || order.distributor || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -74,11 +75,7 @@ const TagihanTable = ({ invoices = [], searchTerm = '', role }) => {
         {
             header: 'Tanggal Order',
             key: 'orderDate',
-            render: (val) => {
-                if (!val) return '-';
-                const [y, m, d] = val.split('-');
-                return `${d}/${m}/${y}`;
-            },
+            render: formatDate,
         },
         {
             header: 'Tanggal Terima',

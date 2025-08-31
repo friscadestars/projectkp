@@ -222,22 +222,37 @@ class InvoiceController extends ResourceController
         return $this->respondDeleted(['message' => 'Invoice berhasil dihapus']);
     }
 
-    public function getByAgent($agentId = null)
+    public function getByAgent()
     {
-        if ($agentId === null) {
-            return $this->fail('agentId diperlukan');
+        $user = $this->getUserFromToken();
+        if (!$user || !isset($user['id'])) {
+            return $this->failUnauthorized('User tidak terautentikasi');
         }
 
-        $db = \Config\Database::connect();
+        $agentId = $user['id'];
 
+        $db = \Config\Database::connect();
         $invoices = $db->table('invoices i')
-            ->select('i.id, i.invoice_number, i.invoice_date, i.amount_total, i.status, i.order_id, o.order_code, o.order_date')
+            ->select('
+            i.id, 
+            i.invoice_number, 
+            i.invoice_date, 
+            i.amount_total, 
+            i.status, 
+            i.order_id, 
+            o.order_code, 
+            o.order_date
+        ')
             ->join('orders o', 'o.id = i.order_id', 'left')
             ->where('i.agen_id', $agentId)
+            ->orderBy('i.invoice_date', 'DESC')
             ->get()
             ->getResultArray();
 
-        return $this->respond($invoices);
+        return $this->respond([
+            'status' => 'success',
+            'invoices' => $invoices
+        ]);
     }
 
     public function confirmPayment($id = null)
@@ -278,6 +293,17 @@ class InvoiceController extends ResourceController
                 'user_id'    => $agenId,
                 'title'      => 'Pembayaran Dikonfirmasi',
                 'message'    => 'Pembayaran Anda telah dikonfirmasi. Status tagihan: Menunggu Validasi.',
+                'type'       => 'invoice_paid',
+                'is_read'    => 0,
+                'created_at' => date('Y-m-d H:i:s'),
+            ]);
+        }
+
+        if ($agenId) {
+            $notifModel->insert([
+                'user_id'    => $agenId,
+                'title'      => 'Validasi Pembayaran',
+                'message'    => 'Pembayaran Anda telah divalidasi. Status tagihan: Lunas.',
                 'type'       => 'invoice_paid',
                 'is_read'    => 0,
                 'created_at' => date('Y-m-d H:i:s'),
@@ -487,91 +513,87 @@ class InvoiceController extends ResourceController
         }
     }
 
-    public function generateInvoiceNumber($type = 'distributor', $id = null)
+    public function generateInvoiceNumber($role = 'distributor', $userId = null)
     {
         $model = new \App\Models\InvoiceModel();
 
-        if (!$id) {
-            return $this->fail('ID distributor atau pabrik tidak diberikan.');
+        if (!$userId) {
+            return $this->fail('ID user tidak diberikan.');
         }
 
-        if ($type === 'distributor') {
-            $prefix = "INV/" . date('Ymd') . "/";
-            $filterField = 'distributor_id';
-        } elseif ($type === 'pabrik') {
-            $prefix = "INVPBR/" . date('Ymd') . "/";
-            $filterField = 'pabrik_id';
-        } else {
-            return $this->fail('Tipe invoice tidak valid.');
+        switch ($role) {
+            case 'distributor':
+                $prefix = "INV/" . date('Ymd') . "/";
+                $filterField = 'distributor_id';
+                $extraWhere = ['agen_id IS NOT NULL']; // tetap pakai filter untuk distributor
+                break;
+            case 'pabrik':
+                $prefix = "INVPBR/" . date('Ymd') . "/";
+                $filterField = 'pabrik_id';
+                $extraWhere = [];
+                break;
+            case 'agen':
+                $prefix = "INV/" . date('Ymd') . "/";
+                $filterField = 'agen_id';
+                $extraWhere = [];
+                break;
+            default:
+                return $this->fail('Role invoice tidak valid.');
         }
 
-        // Ambil invoice terakhir untuk pabrik/distributor ini
-        $lastInvoice = $model
-            ->where($filterField, $id)
+        $builder = $model->where($filterField, intval($userId));
+
+        foreach ($extraWhere as $cond) {
+            $builder->where($cond);
+        }
+
+        // Ambil invoice terakhir
+        $lastInvoice = $builder
             ->orderBy('id', 'DESC')
             ->first();
 
+        $lastNumber = 0;
         if ($lastInvoice) {
             $parts = explode('/', $lastInvoice['invoice_number']);
             $lastNumber = intval(end($parts));
-            $number = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
-        } else {
-            $number = '0001';
         }
 
+        $number = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         $invoiceNumber = $prefix . $number;
 
-        // Cek apakah invoice_number sudah ada untuk distributor yang sama
-        $exists = $model
-            ->where('invoice_number', $invoiceNumber)
-            ->where($filterField, $id)
+        return $this->respond(['invoice_number' => $invoiceNumber]);
+    }
+
+    public function checkInvoiceByOrder($orderId)
+    {
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoice = $invoiceModel
+            ->where('order_id', $orderId)
+            ->where('pabrik_id !=', null)
             ->first();
 
-        if ($exists) {
-            // Kalau sudah ada, increment terus sampai ketemu nomor unik untuk distributor yang sama
-            do {
-                $lastNumber++;
-                $number = str_pad($lastNumber, 4, '0', STR_PAD_LEFT);
-                $invoiceNumber = $prefix . $number;
-                $exists = $model
-                    ->where('invoice_number', $invoiceNumber)
-                    ->where($filterField, $id)
-                    ->first();
-            } while ($exists);
+        if (!$invoice) {
+            return $this->respond([
+                'exists' => false,
+                'order_id' => $orderId
+            ]);
         }
 
         return $this->respond([
-            'invoice_number' => $invoiceNumber
+            'exists' => true,
+            'order_id' => $invoice['order_id'],
+            'invoice_number' => $invoice['invoice_number'],
+            'id' => $invoice['id'],
+            'status' => $invoice['status'],
+            'pabrik_id' => $invoice['pabrik_id'],
         ]);
-    }
-
-    public function checkInvoiceByOrder($orderId = null)
-    {
-        if (!$orderId) {
-            return $this->fail('Order ID tidak diberikan');
-        }
-
-        $invoice = $this->model
-            ->where('order_id', $orderId)
-            ->first();
-
-        if ($invoice) {
-            return $this->respond([
-                'exists' => true,
-                'invoice_id' => $invoice['id'],
-                'invoice_number' => $invoice['invoice_number'],
-            ]);
-        } else {
-            return $this->respond([
-                'exists' => false,
-            ]);
-        }
     }
 
     public function createInvoiceForPabrik()
     {
         $data = $this->request->getJSON(true);
 
+        // Validasi input
         if (!isset($data['distributor_id'], $data['order_id'], $data['products'])) {
             return $this->failValidationErrors('Distributor ID, Order ID, dan Produk wajib diisi.');
         }
@@ -591,23 +613,35 @@ class InvoiceController extends ResourceController
             return $this->failNotFound('Order tidak ditemukan');
         }
 
-        // Hitung total dari produk
+        $pabrikId = $data['pabrik_id'] ?? $user['id'];
+
+        // Hitung total
         $amountTotal = 0;
         foreach ($data['products'] as $p) {
             $amountTotal += ($p['quantity'] ?? 0) * ($p['unitPrice'] ?? 0);
         }
 
-        // Generate invoice_number otomatis
-        $prefix = "INVPBR/" . date('Ymd') . "/";
-        $lastInvoice = $invoiceModel->where('pabrik_id', $user['id'])->orderBy('id', 'DESC')->first();
-        $number = $lastInvoice ? str_pad(intval(explode('/', $lastInvoice['invoice_number'])[2]) + 1, 4, '0', STR_PAD_LEFT) : '0001';
-        $invoiceNumber = $prefix . $number;
+        // Ambil invoice terakhir pabrik dari database
+        $lastInvoice = $invoiceModel
+            ->where('pabrik_id', $pabrikId)
+            ->like('invoice_number', 'INVPBR/', 'after') // pastikan hanya cari prefix INVPBR/
+            ->orderBy('id', 'DESC')
+            ->first();
 
-        // Siapkan data invoice
+        $lastNumber = 0;
+        if ($lastInvoice && !empty($lastInvoice['invoice_number'])) {
+            $parts = explode('/', $lastInvoice['invoice_number']);
+            $lastNumber = intval(end($parts));  // Ambil angka terakhir
+        }
+
+        $nextNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
+        $invoiceNumber = "INVPBR/" . date('Ymd') . "/" . $nextNumber;
+
+        // Simpan invoice
         $invoiceData = [
             'invoice_number' => $invoiceNumber,
             'order_id'       => $data['order_id'],
-            'pabrik_id'      => $user['id'],  // wajib diisi
+            'pabrik_id'      => $pabrikId,
             'distributor_id' => $data['distributor_id'],
             'agen_id'        => null,
             'amount_total'   => $amountTotal,
@@ -626,7 +660,7 @@ class InvoiceController extends ResourceController
 
         $invoiceId = $invoiceModel->getInsertID();
 
-        // Simpan produk ke invoice_items
+        // Simpan invoice items
         foreach ($data['products'] as $p) {
             $invoiceItemModel->insert([
                 'invoice_id'    => $invoiceId,
@@ -636,7 +670,7 @@ class InvoiceController extends ResourceController
             ]);
         }
 
-        // Notifikasi ke distributor
+        // Kirim notifikasi ke distributor
         $notifModel->insert([
             'user_id'    => $data['distributor_id'],
             'title'      => 'Tagihan Baru dari Pabrik',

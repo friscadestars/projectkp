@@ -29,7 +29,7 @@ class OrderController extends ResourceController
 
     public function index()
     {
-        // 🔐 Ambil user dari token
+        //Ambil user dari token
         $authHeader = $this->request->getHeaderLine('Authorization');
         if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
             return $this->failUnauthorized('Token tidak ditemukan.');
@@ -46,7 +46,6 @@ class OrderController extends ResourceController
             return $this->failUnauthorized('Token tidak valid');
         }
 
-        // 🔍 Filter berdasarkan role
         $builder = $this->model->orderBy('id', 'DESC');
 
         if ($userRole === 'agen') {
@@ -91,7 +90,6 @@ class OrderController extends ResourceController
             }
         }
 
-        // Bentuk response akhir
         foreach ($orders as &$order) {
             $order['items'] = $grouped[$order['id']] ?? [];
 
@@ -104,32 +102,41 @@ class OrderController extends ResourceController
             $order['distributor_id'] = $order['distributor_id'] ?? null;
         }
 
-        // Ambil semua order ID
         $orderIds = array_column($orders, 'id');
 
-        // Ambil semua invoice berdasarkan order_id
         $invoiceModel = new \App\Models\InvoiceModel();
-        $invoices = $invoiceModel->whereIn('order_id', $orderIds)->findAll();
+        $invoices = $invoiceModel
+            ->whereIn('order_id', $orderIds)
+            ->where('pabrik_id', null)             // exclude pabrik
+            ->where('agen_id !=', null)            // agen wajib ada
+            ->where('distributor_id !=', null)     // distributor wajib ada
+            ->findAll();
 
         // Petakan invoice berdasarkan order_id
         $invoiceMap = [];
         foreach ($invoices as $inv) {
-            $invoiceMap[$inv['order_id']] = [
-                'id'     => $inv['id'],
-                'status' => $inv['status']
-            ];
+            if (!empty($inv['agen_id']) && !empty($inv['distributor_id']) && empty($inv['pabrik_id'])) {
+                $invoiceMap[$inv['order_id']] = [
+                    'id'     => $inv['id'],
+                    'status' => strtolower($inv['status']),
+                ];
+            }
         }
 
-        // Tambahkan status pembayaran & invoice_id ke setiap order
         foreach ($orders as &$order) {
+            unset($order['invoiceExist'], $order['invoiceId'], $order['statusPembayaran']);
+
+            // set default baru
+            $order['invoiceId'] = null;
+            $order['statusPembayaran'] = null;
+            $order['invoiceExist'] = false;
+
             $invoice = $invoiceMap[$order['id']] ?? null;
 
-            if ($invoice) {
-                $order['invoiceId'] = $invoice['id']; // camelCase
-                $order['statusPembayaran'] = strtolower($invoice['status']); // camelCase
-            } else {
-                $order['invoiceId'] = null;
-                $order['statusPembayaran'] = 'unpaid';
+            if ($invoice && !empty($invoice['id'])) {
+                $order['invoiceId'] = $invoice['id'];
+                $order['statusPembayaran'] = $invoice['status'];
+                $order['invoiceExist'] = true;
             }
         }
         return $this->respond($orders);
@@ -544,7 +551,7 @@ class OrderController extends ResourceController
                   i.status AS invoice_status, 
                   agen.name as agen, 
                   distributor.name as distributor')
-            ->join('invoices i', 'i.order_id = o.id', 'left')
+            ->join('invoices i', 'i.order_id = o.id AND i.agen_id IS NOT NULL', 'left')
             ->join('users agen', 'o.agen_id = agen.id', 'left')
             ->join('users distributor', 'o.distributor_id = distributor.id', 'left')
             ->whereIn('o.status', ['delivered', 'cancelled'])
@@ -693,22 +700,69 @@ class OrderController extends ResourceController
 
     public function getMonitoringOrders()
     {
-        $db = \Config\Database::connect();
+        $db = db_connect();
+        $session = session();
+        $userId = $session->get('user_id');
+
+        if (!$userId) {
+            return $this->failUnauthorized('User ID distributor tidak ditemukan.');
+        }
 
         $orders = $db->table('orders o')
-            ->select('o.*, i.id as invoice_id, i.status as invoice_status, agen.name as agenName, pabrik.name as pabrikName')
-            ->join('users agen', 'o.agen_id = agen.id', 'left')
-            ->join('users pabrik', 'o.pabrik_id = pabrik.id', 'left')
-            ->join('invoices i', 'i.order_id = o.id', 'left')
-            ->whereIn('o.status', ['approved', 'processing', 'produced', 'shipped'])
-            ->orderBy('o.created_at', 'DESC')
+            ->select("
+        o.id as order_id,
+        o.order_code,
+        o.status,
+        o.order_date,
+        o.pabrik_id,
+        o.agen_id,
+        o.distributor_id,
+        distributor.name as distributorName,
+        agen.name as agenName,
+        pabrik.name as pabrikName
+    ")
+            ->join('users distributor', 'distributor.id = o.distributor_id', 'left')
+            ->join('users agen', 'agen.id = o.agen_id', 'left')
+            ->join('users pabrik', 'pabrik.id = o.pabrik_id', 'left')
+            ->where('o.distributor_id', $userId)
+            ->where('o.agen_id IS NOT NULL')
+            ->where('o.pabrik_id IS NULL')
+            ->whereIn('o.status', ['approved', 'processing', 'produced', 'shipped', 'delivered'])
+            ->orderBy('o.order_date', 'DESC')
             ->get()
             ->getResultArray();
 
-        foreach ($orders as &$order) {
-            $order['invoiceExist'] = !empty($order['invoice_status']);
+        $invoiceModel = new \App\Models\InvoiceModel();
+        $invoices = $invoiceModel
+            ->whereIn('order_id', array_column($orders, 'order_id'))
+            ->where('pabrik_id', null)             // exclude pabrik
+            ->where('agen_id !=', null)            // agen wajib ada
+            ->where('distributor_id !=', null)     // distributor wajib ada
+            ->findAll();
+
+        $invoiceMap = [];
+        foreach ($invoices as $inv) {
+            if (!empty($inv['agen_id']) && !empty($inv['distributor_id']) && empty($inv['pabrik_id'])) {
+                $invoiceMap[$inv['order_id']] = [
+                    'id'     => $inv['id'],
+                    'status' => strtolower($inv['status']),
+                ];
+            }
         }
 
+        foreach ($orders as &$order) {
+            $invoice = $invoiceMap[$order['order_id']] ?? null;
+
+            if ($invoice) {
+                $order['invoiceId'] = $invoice['id'];
+                $order['statusPembayaran'] = $invoice['status'];
+                $order['invoiceExist'] = true;
+            } else {
+                $order['invoiceId'] = null;
+                $order['statusPembayaran'] = null;
+                $order['invoiceExist'] = false;
+            }
+        }
         return $this->respond($orders);
     }
 

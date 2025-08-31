@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { fetchOrders } from '../../../services/ordersApi';
 
-// Hapus 'delivered' agar tidak ditampilkan di monitoring
+// Hanya status tertentu yang ditampilkan
 const allowedStatuses = ['approved', 'processing', 'shipped', 'produced'];
 
 export const toLabel = (status) => {
@@ -27,7 +27,9 @@ export const useMonitoringOrderPage = () => {
         (async () => {
             try {
                 const allOrders = await fetchOrders();
-                console.log("DEBUG ORDERS ===>", allOrders);
+                console.log("DEBUG ORDERS dari API ===>", allOrders);
+
+                // filter status, bukan invoice
                 setOrders(
                     allOrders.filter((o) =>
                         allowedStatuses.includes((o.status || '').toLowerCase())
@@ -43,24 +45,29 @@ export const useMonitoringOrderPage = () => {
 
     const filteredOrders = useMemo(() => {
         const q = search.toLowerCase();
+
         return orders
-            .map((o) => ({
-                id: o.orderId,
-                orderId: o.orderId,
-                orderCode: o.orderCode,
-                agentId: o.agentId,
-                agen_id: o.agentId ?? o.agen_id ?? null,
-                agenName: o.agenName ?? o.agen ?? '-',
-                pabrikName: o.pabrikName ?? 'Pabrik tidak diketahui',
-                orderDate: o.orderDate ?? '-',
-                deliveryDate: o.deliveryDate ?? '-',
-                status: o.status,
-                products: o.products ?? [],
-                invoiceExist: o.invoiceExist,
-                invoice: o.invoice ?? null,
-                payment_status: o.statusPembayaran ?? o.status_pembayaran ?? o.invoice_status ?? null,
-                invoice_id: o.invoiceId ?? o.invoice_id ?? null,
-            }))
+            .map((o) => {
+                return {
+                    id: o.order_id ?? o.id,
+                    orderId: o.order_id ?? o.id,
+                    orderCode: o.order_code ?? o.orderCode,
+
+                    agen_id: o.agen_id ?? o.agentId ?? null,
+                    agenName: o.agenName ?? '-',
+
+                    pabrikName: o.pabrikName ?? o.pabrik_name ?? 'Pabrik tidak diketahui',
+                    orderDate: o.created_at ?? o.orderDate ?? '-',
+                    deliveryDate: o.deliveryDate ?? '-',
+                    status: o.status,
+                    products: o.products ?? [],
+                    distributorId: o.distributor_id ?? o.distributorId ?? null,
+
+                    invoiceExistDistributorToAgen: o.invoiceExist ?? false,
+                    invoiceId: o.invoiceId ?? null,
+                    payment_status: o.statusPembayaran ?? null,
+                };
+            })
             .filter(
                 (o) =>
                     (o.orderCode || '').toLowerCase().includes(q) ||

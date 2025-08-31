@@ -23,13 +23,30 @@ const BuatInvoiceModal = ({ order = {}, onClose }) => {
     useEffect(() => {
         const fetchInvoiceNumber = async () => {
             try {
-                const res = await fetch(
-                    `${import.meta.env.VITE_API_BASE_URL}/invoices/generate/distributor/${distributor_id}`
-                );
+                const token = localStorage.getItem('token');
+                let url = '';
+
+                if (order?.pabrik_id && distributor_id) {
+                    url = `${BASE_URL}/invoices/generate/pabrik/${order.pabrik_id}`;
+                } else if (distributor_id) {
+                    url = `${import.meta.env.VITE_API_BASE_URL}/invoices/generate/distributor/${distributor_id}`;
+                } else if (order?.agen_id) {
+                    url = `${import.meta.env.VITE_API_BASE_URL}/invoices/generate/agen/${order.agen_id}`;
+                }
+
+                if (!url) {
+                    setInvoiceNumber('INVALID_ROLE');
+                    setLoading(false);
+                    return;
+                }
+
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const data = await res.json();
 
-                if (res.ok && data?.invoice_number) {
-                    setInvoiceNumber(data.invoice_number);
+                if (res.ok) {
+                    setInvoiceNumber(data.invoice_number || 'TIDAK ADA');
                 } else {
                     console.error('Gagal ambil nomor invoice:', data.message);
                     setInvoiceNumber('GAGAL_GENERATE');
@@ -42,10 +59,10 @@ const BuatInvoiceModal = ({ order = {}, onClose }) => {
             }
         };
 
-        if (distributor_id) {
+        if (order?.pabrik_id || distributor_id || order?.agen_id) {
             fetchInvoiceNumber();
         }
-    }, [distributor_id]);
+    }, [order?.id, order?.pabrik_id, distributor_id, order?.agen_id]);
 
     return (
         <div className="bg-white p-6 rounded shadow-md w-full max-w-3xl mx-auto">

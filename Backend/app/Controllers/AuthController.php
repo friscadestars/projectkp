@@ -18,7 +18,7 @@ class AuthController extends ResourceController
         helper(['form', 'url']);
     }
 
-    // 🔐 API: REGISTER
+    // API: REGISTER
     public function register()
     {
         $authHeader = $this->request->getHeaderLine('Authorization');
@@ -113,14 +113,14 @@ class AuthController extends ResourceController
                 'created_at'     => date('Y-m-d H:i:s')
             ]);
         }
-        
+
         return $this->respondCreated([
             'message' => "User dengan role '{$allowedRole}' berhasil dibuat oleh {$creatorRole}",
             'user_id' => $newUserId
         ]);
     }
 
-    // 🔐 API: LOGIN
+    // API: LOGIN
     public function login()
     {
         $data = $this->request->getJSON(true);
@@ -130,14 +130,12 @@ class AuthController extends ResourceController
             return $this->failValidationErrors('Email dan password wajib diisi');
         }
 
-        // Ambil user berdasarkan email
         $user = $this->userModel->where('email', $data['email'])->first();
 
         if (!$user) {
             return $this->failUnauthorized('Email tidak ditemukan');
         }
 
-        // 🔒 Tambahan: cek apakah akun aktif
         if (isset($user['is_active']) && (int)$user['is_active'] === 0) {
             return $this->failUnauthorized('Akun Anda sedang tidak aktif. Silakan hubungi admin.');
         }
@@ -177,6 +175,7 @@ class AuthController extends ResourceController
                 'name'  => $user['name'],
                 'email' => $user['email'],
                 'role'  => $user['role'],
+                'alamat'   => $user['alamat'],
             ]
         ]);
     }

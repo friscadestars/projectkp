@@ -10,9 +10,27 @@ export const checkInvoiceExist = async (orderId) => {
             headers: { ...getAuthHeader() },
         });
         const json = await res.json();
-        return res.ok && json.exists;
+
+        if (!res.ok) return false;
+
+        // Case 1: API balikin { exists: true/false }
+        if (typeof json.exists !== "undefined") {
+            return Boolean(json.exists);
+        }
+
+        // Case 2: Array invoice
+        if (Array.isArray(json)) {
+            return json.length > 0;
+        }
+
+        // Case 3: Object invoice tunggal
+        if (json && typeof json === "object") {
+            return Boolean(json.id || json.invoice_id);
+        }
+
+        return false;
     } catch (err) {
-        console.error('Gagal cek invoice:', err.message);
+        console.error("Gagal cek invoice:", err.message);
         return false;
     }
 };
@@ -107,7 +125,6 @@ export async function fetchOrders() {
     const role = user?.role?.toLowerCase?.() || 'unknown';
     const userId = Number(user?.id);
 
-    // Filter dulu secara sync
     const filtered = (Array.isArray(data) ? data : []).filter((o) => {
         if (role === 'agen') {
             return Number(o.agen_id) === userId;
@@ -118,12 +135,10 @@ export async function fetchOrders() {
         }
     });
 
-    // Gunakan Promise.all untuk resolve semua mapping async
     const orders = await Promise.all(filtered.map(mapOrder));
     return orders;
 }
 
-// idOrCode bisa numeric (3) atau ord-001, tapi dari FE kita kirim id numerik
 export async function fetchOrderById(idOrCode) {
     const res = await fetch(`${API_BASE}/orders/${idOrCode}`, {
         headers: { ...getAuthHeader() }
@@ -133,41 +148,6 @@ export async function fetchOrderById(idOrCode) {
     const data = json.data || json;
     return await mapOrder(data);
 }
-
-// Update status by ID (PUT /orders/:id)
-// export async function updateOrderStatus(id, status) {
-//     const order = await fetchOrderById(id); // Ambil dulu data lengkap order-nya
-
-//     // Cek apakah statusnya delivered
-//     const isDelivered = status.toLowerCase() === 'delivered';
-
-//     // Format waktu saat ini untuk accepted_at (format: YYYY-MM-DD HH:mm:ss)
-//     const now = new Date();
-//     const acceptedAt = now.toISOString().slice(0, 19).replace('T', ' '); // "YYYY-MM-DD HH:mm:ss"
-
-//     const payload = {
-//         agen_id: order.agentId,
-//         distributor_id: order.distributorId,
-//         pabrik_id: 1,
-//         order_date: order.orderDate + ' 00:00:00',
-//         note: order.alamat,
-//         status: status,
-//         ...(isDelivered && { accepted_at: acceptedAt }) // hanya kirim accepted_at jika status = delivered
-//     };
-
-//     const res = await fetch(`${API_BASE}/orders/${id}`, {
-//         method: 'PUT',
-//         headers: {
-//             'Content-Type': 'application/json',
-//             ...getAuthHeader(),
-//         },
-//         body: JSON.stringify(payload),
-//     });
-
-//     if (!res.ok) throw new Error('Gagal update status order');
-
-//     return res.json();
-// }
 
 export async function updateOrderStatus(
     id,
@@ -202,7 +182,7 @@ export async function updateOrderStatus(
 
     let deliveryDateISO = null;
     if (deliveryDate) {
-        // Jika deliveryDate sudah dalam format DB (YYYY-MM-DD HH:mm:ss), kirim langsung
+
         if (typeof deliveryDate === 'string') {
             deliveryDateISO = deliveryDate;
         } else {
@@ -423,30 +403,18 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
 }
 
 export async function fetchInvoicesForAgent() {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const agenId = user?.id;
-
-    if (!agenId) {
-        throw new Error('Agen ID tidak ditemukan');
-    }
-
-    const res = await fetch(`${API_BASE}/invoices/agent/${agenId}`, {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE}/invoices/agent`, {
         headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeader(),
-        },
+            "Authorization": `Bearer ${token}`
+        }
     });
 
-    if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || 'Gagal mengambil data tagihan');
-    }
-
-    const json = await res.json();
-    const raw = json.data || json;
-
-    return Array.isArray(raw) ? raw : [];
+    if (!res.ok) throw new Error("Gagal fetch invoices");
+    const data = await res.json();
+    return data.invoices || [];
 }
+
 
 export async function deleteOrderById(id) {
     const res = await fetch(`${API_BASE}/orders/${id}`, {

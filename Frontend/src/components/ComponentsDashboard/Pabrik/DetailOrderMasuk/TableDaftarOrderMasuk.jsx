@@ -26,7 +26,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
                 }
 
                 return (
-                    <span className={`${bgClass} text-white px-3 py-1 rounded text-sm`}>
+                    <span className={`${bgClass} text-white px-3 py-1 rounded text-sm font-bold`}>
                         {label}
                     </span>
                 );
@@ -38,7 +38,7 @@ const TableDaftarOrderMasuk = ({ orders, onDetail }) => {
             render: (_, row) => (
                 <button
                     onClick={() => onDetail(row)}
-                    className="px-3 py-1 bg-primary-dark text-white rounded hover:bg-primary-darkest"
+                    className="px-3 py-1 bg-primary-dark text-white font-bold rounded hover:bg-primary-darkest"
                 >
                     Detail
                 </button>

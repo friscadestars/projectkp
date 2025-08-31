@@ -113,3 +113,12 @@ export const fetchAgentsByDistributor = async (distributorId, token) => {
     }
     return await res.json();
 };
+
+export const fetchUserById = async (id) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`${API_BASE}/users/${id}`, {
+        headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) throw new Error('Gagal fetch user');
+    return res.json();
+};

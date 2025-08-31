@@ -1,9 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useOrder } from "../../../Context/OrderContext";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
-// Fungsi untuk format tanggal ke format MySQL
 const toMySQLDatetime = (d = new Date()) =>
   d.toISOString().slice(0, 19).replace('T', ' ');
 
@@ -16,11 +15,19 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const [harga, setHarga] = useState("");
   const [alamat, setAlamat] = useState("");
   const [lastOrderId, setLastOrderId] = useState(null);
+
+  // Set alamat otomatis dari user login
+  useEffect(() => {
+    const user = JSON.parse(localStorage.getItem('user')) || {};
+    if (user.alamat) {
+      setAlamat(user.alamat);
+    }
+  }, []);
+
   const handleAddProduk = () => {
     const jumlahParsed = parseInt(jumlah, 10);
     const hargaParsed = parseInt(harga, 10);
 
-    console.log("Produk yang dipilih:", produk);
     if (!produk || !produk.kode_produk || isNaN(jumlahParsed) || isNaN(hargaParsed)) return;
 
     setProdukList((prev) => [
@@ -90,12 +97,10 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
       });
 
       setLastOrderId(data?.data?.id || null);
-
       setProdukList([]);
       setProduk("");
       setJumlah("");
       setHarga("");
-      setAlamat("");
 
       onSuccess?.();
       return { success: true };
@@ -116,7 +121,6 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
     setProduk,
     setJumlah,
     setHarga,
-    setAlamat,
     handleAddProduk,
     handleDeleteProduk,
     handleSubmit,
