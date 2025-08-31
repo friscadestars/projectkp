@@ -257,8 +257,8 @@ const TableProduksiPengiriman = () => {
             <button
               disabled={!canCreateInvoice || isLoading}
               className={`px-3 py-1 rounded text-xs font-bold ${(!canCreateInvoice || isLoading)
-                  ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
-                  : 'bg-btn-dark text-white hover:bg-gray-800'
+                ? 'bg-gray-300 text-gray-600 cursor-not-allowed'
+                : 'bg-btn-dark text-white hover:bg-gray-800'
                 }`}
               onClick={() => openInvoiceModal({ ...order, pabrik_id: order.pabrik?.id || order.pabrik_id })}
             >
@@ -270,14 +270,16 @@ const TableProduksiPengiriman = () => {
     },
   ];
 
-  const dataWithIndex = orders.map((order, idx) => ({
-    ...order,
-    no: idx + 1,
-    orderId: order.orderId?.toUpperCase() || '',
-    jumlahProduk: order.products?.reduce((sum, p) => sum + (p.quantity || 0), 0) || 0,
-    pabrikName: getPabrikName(order),
-    pabrik_id: order.pabrik?.id || order.pabrik_id
-  }));
+  const dataWithIndex = orders
+    .filter(order => order.statusPengiriman !== 'Diterima')
+    .map((order, idx) => ({
+      ...order,
+      no: idx + 1,
+      orderId: order.orderId?.toUpperCase() || '',
+      jumlahProduk: order.products?.reduce((sum, p) => sum + (p.quantity || 0), 0) || 0,
+      pabrikName: getPabrikName(order),
+      pabrik_id: order.pabrik?.id || order.pabrik_id
+    }));
 
   return (
     <div className="rounded border border-gray-200 shadow overflow-hidden">

@@ -3,6 +3,7 @@ import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
 import { useAuth } from '../../../Context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const LOCAL_STORAGE_KEY = 'deletedAgenOrderIds';
 
 export const useRiwayatPengiriman = () => {
     const [orders, setOrders] = useState([]);
@@ -16,12 +17,29 @@ export const useRiwayatPengiriman = () => {
         Authorization: `Bearer ${token}`,
     };
 
+    // Fungsi ambil deletedIds yang valid
+    // Ambil deletedIds yang valid
+    const getValidDeletedIds = (currentOrders) => {
+        const deletedKeys = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+        const currentKeys = currentOrders.map(o => `${o.orderId}-${o.distributorId}`);
+        const validDeletedKeys = deletedKeys.filter(key => currentKeys.includes(key));
+        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(validDeletedKeys));
+        return validDeletedKeys;
+    };
+
     // Ambil data order selesai untuk pabrik
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 const result = await fetchCompletedOrdersForHistory('pabrik');
-                setOrders(result);
+
+                const validDeletedKeys = getValidDeletedIds(result);
+
+                const filteredOrders = result.filter(
+                    o => !validDeletedKeys.includes(`${o.orderId}-${o.distributorId}`)
+                );
+
+                setOrders(filteredOrders);
             } catch (err) {
                 setError(err);
             } finally {
@@ -53,7 +71,7 @@ export const useRiwayatPengiriman = () => {
         fetchProductPrices();
     }, [token]);
 
-    const handleDelete = async (id) => {
+    const handleDelete = async (id, distributorId) => {
         try {
             await fetch(`${API_BASE}/orders/${id}`, {
                 method: 'DELETE',
@@ -62,7 +80,14 @@ export const useRiwayatPengiriman = () => {
                     ...authHeader
                 }
             });
-            setOrders((prev) => prev.filter((order) => order.id !== String(id)));
+
+            const deletedKeys = JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+            const key = `${id}-${distributorId}`;
+            if (!deletedKeys.includes(key)) {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...deletedKeys, key]));
+            }
+
+            setOrders(prev => prev.filter(o => `${o.orderId}-${o.distributorId}` !== key));
         } catch (err) {
             console.error('Gagal menghapus order:', err);
         }

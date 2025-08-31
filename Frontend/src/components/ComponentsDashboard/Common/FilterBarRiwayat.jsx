@@ -34,7 +34,7 @@ const FilterBarRiwayat = ({
                     onClick={handleFilter}
                     className="bg-green-600 text-white px-3 py-1 rounded text-sm font-bold w-full sm:w-auto max-w-full"
                 >
-                    Filter
+                    Cari
                 </button>
                 <button
                     onClick={onExportExcel}

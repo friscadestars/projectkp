@@ -7,16 +7,16 @@ import { distributorMenuItems } from '../../../components/ComponentsDashboard/Co
 export const useDistributorPriceListPage = () => {
     const { handleNavigation } = useNavigation(distributorMenuItems);
 
-    // Ambil user login dari localStorage atau context auth
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const distributorId = user?.id; // Pastikan ini adalah distributor_id dari user login
+    const distributorId = user?.id;
 
     const {
         form, setForm,
         searchTerm, setSearchTerm,
         filteredProduk,
         loading,
-        handleAdd, handleEdit, handleSave, handleDelete
+        handleAdd, handleEdit, handleSave, handleDelete,
+        handleImport
     } = usePriceListByRole('distributor', distributorId);
 
     return {
@@ -26,10 +26,11 @@ export const useDistributorPriceListPage = () => {
         setSearchTerm,
         filteredProduk,
         handleAdd,
-        loading,
         handleEdit,
         handleSave,
         handleDelete,
+        handleImport,
+        loading,
         layoutProps: {
             menuItems: distributorMenuItems,
             activeLabel: "Daftar Harga Distributor",

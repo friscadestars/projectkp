@@ -1,31 +1,37 @@
 import { useEffect, useState } from 'react';
 import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
-import { useAuth } from '../../../Context/AuthContext';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+const LOCAL_STORAGE_KEY = 'deletedDistributorOrderIds'; // gunakan key berbeda dari pabrik
 
 export const useRiwayatOrderDistributor = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [productPrices, setProductPrices] = useState([]);
     const [error, setError] = useState(null);
 
-    const { token } = useAuth();
-    const authHeader = { Authorization: `Bearer ${token}` };
-
-    // Ambil daftar ID yang dihapus dari localStorage
-    const getDeletedIds = () => JSON.parse(localStorage.getItem('deletedOrderIds') || '[]');
+    // Ambil deleted order ids dari localStorage
+    const getDeletedIds = () => {
+        return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
+    };
 
     useEffect(() => {
         const fetchOrders = async () => {
             try {
                 const result = await fetchCompletedOrdersForHistory('distributor');
 
-                // Filter agar tidak menampilkan order yang sudah dihapus di UI sebelumnya
+                // Jika jumlah order baru lebih besar dari sebelumnya, reset deletedIds
                 const deletedIds = getDeletedIds();
-                const filtered = result.filter(order => !deletedIds.includes(order.id));
+                const maxDeletedId = Math.max(...deletedIds.map(Number), 0);
+                const maxOrderId = Math.max(...result.map(o => Number(o.id)), 0);
 
-                setOrders(filtered);
+                let validDeletedIds = deletedIds;
+                if (maxOrderId > maxDeletedId) {
+                    validDeletedIds = []; // reset deletedIds karena data baru muncul
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
+                }
+
+                const filteredOrders = result.filter(o => !validDeletedIds.includes(String(o.id)));
+                setOrders(filteredOrders);
             } catch (err) {
                 setError(err);
             } finally {
@@ -36,36 +42,24 @@ export const useRiwayatOrderDistributor = () => {
         fetchOrders();
     }, []);
 
-    useEffect(() => {
-        const fetchProductPrices = async () => {
-            try {
-                const res = await fetch(`${API_BASE}/prices?role=pabrik`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        ...authHeader
-                    }
-                });
+    const handleDelete = async (id) => {
+        try {
+            await fetch(`${API_BASE}/orders/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            });
 
-                const data = await res.json();
-                setProductPrices(data || []);
-            } catch (err) {
-                console.error('Gagal fetch harga pabrik:', err);
+            // simpan ke localStorage supaya tetap hilang di UI
+            const deletedIds = getDeletedIds();
+            if (!deletedIds.includes(String(id))) {
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...deletedIds, String(id)]));
             }
-        };
 
-        fetchProductPrices();
-    }, [token]);
-
-    // Hapus hanya di UI dan simpan di localStorage
-    const handleDelete = (id) => {
-        setOrders((prev) => prev.filter((order) => order.id !== String(id)));
-
-        const deletedIds = getDeletedIds();
-        if (!deletedIds.includes(id)) {
-            localStorage.setItem('deletedOrderIds', JSON.stringify([...deletedIds, id]));
+            setOrders(prev => prev.filter(order => String(order.id) !== String(id)));
+        } catch (err) {
+            console.error('Gagal menghapus order:', err);
         }
     };
 
-    return { orders, productPrices, loading, error, handleDelete };
+    return { orders, loading, error, handleDelete };
 };
-

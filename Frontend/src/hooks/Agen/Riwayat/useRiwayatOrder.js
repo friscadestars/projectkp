@@ -23,11 +23,28 @@ const useRiwayatOrder = () => {
             try {
                 setLoading(true);
                 const data = await fetchCompletedOrdersForHistory();
+
                 if (mounted) {
-                    const deletedIds = getDeletedIds();
-                    const filtered = data.filter(
-                        (order) => !deletedIds.includes(order.orderId)
+                    let deletedIds = getDeletedIds();
+
+                    // Hanya simpan deletedIds yang tidak ada di data terbaru
+                    let validDeletedIds = deletedIds.filter(
+                        (id) => !data.some(order => String(order.orderId) === String(id))
                     );
+
+                    // Reset deletedIds jika ada order baru dengan ID sama atau lebih besar
+                    const maxDeletedId = Math.max(...deletedIds.map(Number), 0);
+                    const maxOrderId = Math.max(...data.map(o => Number(o.orderId)), 0);
+                    if (maxOrderId > maxDeletedId) {
+                        validDeletedIds = [];
+                    }
+
+                    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(validDeletedIds));
+
+                    const filtered = data.filter(
+                        (order) => !validDeletedIds.includes(String(order.orderId))
+                    );
+
                     setOrders(filtered);
                 }
             } catch (e) {
@@ -36,9 +53,7 @@ const useRiwayatOrder = () => {
                 if (mounted) setLoading(false);
             }
         })();
-        return () => {
-            mounted = false;
-        };
+        return () => { mounted = false };
     }, []);
 
     const handleDelete = async (id) => {

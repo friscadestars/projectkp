@@ -88,6 +88,32 @@ export const usePriceListByRole = (role, userId) => {
         }
     };
 
+    const handleImport = async (rows) => {
+        try {
+            // rows = array hasil dari Excel
+            for (const r of rows) {
+                if (!r["Nama Produk"] || !r["Kode Produk"] || !r["Harga"]) continue;
+
+                const payload = {
+                    nama_produk: r["Nama Produk"],
+                    kode_produk: r["Kode Produk"],
+                    harga: Number(String(r["Harga"]).replace(/[^\d]/g, "")),
+                };
+
+                if (role === "distributor" && userId) {
+                    payload.distributor_id = userId;
+                }
+
+                await createPrice(payload, role, userId);
+            }
+            await loadData();
+            Swal.fire("Berhasil", "Produk berhasil diimport dari Excel", "success");
+        } catch (e) {
+            console.error("[handleImport] Error:", e);
+            Swal.fire("Gagal", e.message || "Import produk gagal", "error");
+        }
+    };
+
     const handleDelete = async (id) => {
         const confirm = await Swal.fire({
             icon: 'warning',
@@ -123,6 +149,7 @@ export const usePriceListByRole = (role, userId) => {
         handleEdit,
         handleSave,
         handleDelete,
+        handleImport,
         searchTerm,
         setSearchTerm,
         filteredProduk,

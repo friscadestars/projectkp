@@ -1,5 +1,3 @@
-// PABRIK PRICE LIST HOOK
-
 import Swal from 'sweetalert2';
 import { useState, useEffect } from 'react';
 import {
@@ -15,11 +13,19 @@ export function usePabrikPriceListPage() {
   const [form, setForm] = useState({ nama: '', kode: '', harga: '' });
 
   const role = 'pabrik';
-  const userId = null; // Jika butuh ID pabrik bisa disesuaikan
+  const userId = null;
 
   useEffect(() => {
     getHargaProduk();
   }, []);
+
+  const sortByKodeDesc = (list) => {
+    return list.sort((a, b) => {
+      const numA = parseInt(a.kode.replace(/\D/g, ''), 10);
+      const numB = parseInt(b.kode.replace(/\D/g, ''), 10);
+      return numB - numA; // <-- dibalik dari numA - numB
+    });
+  };
 
   const getHargaProduk = async () => {
     try {
@@ -31,7 +37,7 @@ export function usePabrikPriceListPage() {
         harga: item.harga,
         isEditing: false,
       }));
-      setProdukList(list);
+      setProdukList(sortByKodeDesc(list));
     } catch (error) {
       console.error('Gagal ambil data harga:', error.message);
     }
@@ -60,16 +66,14 @@ export function usePabrikPriceListPage() {
         isEditing: false,
       };
 
-      setProdukList((prev) => [...prev, newEntry]);
+      setProdukList(prev => sortByKodeDesc([...prev, newEntry]));
 
       setForm({ nama: '', kode: '', harga: '' });
-
       Swal.fire('Berhasil', 'Produk berhasil ditambahkan', 'success');
     } catch (e) {
       Swal.fire('Gagal', e.message || 'Gagal menambahkan produk', 'error');
     }
   };
-
 
   const handleEdit = (id) => {
     setProdukList((prev) =>
@@ -89,17 +93,13 @@ export function usePabrikPriceListPage() {
 
       await updatePrice(id, payload);
 
-      setProdukList((prev) =>
-        prev.map((item) =>
-          item.id === id
-            ? {
-                ...item,
-                nama: updatedData.nama_produk,
-                kode: updatedData.kode_produk,
-                harga: updatedData.harga,
-                isEditing: false,
-              }
-            : item
+      setProdukList(prev =>
+        sortByKodeDesc(
+          prev.map(item =>
+            item.id === id
+              ? { ...item, nama: updatedData.nama_produk, kode: updatedData.kode_produk, harga: updatedData.harga, isEditing: false }
+              : item
+          )
         )
       );
       Swal.fire('Berhasil', 'Produk berhasil diperbarui', 'success');
@@ -124,9 +124,7 @@ export function usePabrikPriceListPage() {
     if (result.isConfirmed) {
       try {
         await deletePrice(id);
-
-        setProdukList((prev) => prev.filter((item) => item.id !== id));
-
+        setProdukList(prev => prev.filter(item => item.id !== id));
         Swal.fire('Berhasil', 'Produk berhasil dihapus', 'success');
       } catch (error) {
         console.error('Gagal menghapus produk:', error.message);
@@ -135,7 +133,42 @@ export function usePabrikPriceListPage() {
     }
   };
 
-  const filteredProduk = produkList.filter((produk) =>
+  const handleImport = async (data) => {
+    try {
+      if (!data || data.length === 0) return;
+
+      for (const item of data) {
+        const nama = item['Nama Produk'];
+        const kode = item['Kode Produk'];
+        const harga = item['Harga'];
+
+        if (!nama || !kode || !harga) continue;
+
+        const payload = { nama_produk: nama, kode_produk: kode, harga: parseInt(harga, 10) };
+        const newData = await createPrice(payload, role, userId);
+
+        setProdukList(prev =>
+          sortByKodeDesc([
+            ...prev,
+            {
+              id: newData.id,
+              nama: newData.nama_produk ?? nama,
+              kode: newData.kode_produk ?? kode,
+              harga: newData.harga ?? payload.harga,
+              isEditing: false,
+            }
+          ])
+        );
+      }
+
+      Swal.fire('Berhasil', 'Data Excel berhasil diimport', 'success');
+    } catch (error) {
+      console.error('Gagal import Excel:', error);
+      Swal.fire('Gagal', error.message || 'Gagal import data', 'error');
+    }
+  };
+
+  const filteredProduk = produkList.filter(produk =>
     produk.nama.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -147,6 +180,7 @@ export function usePabrikPriceListPage() {
     form,
     setForm,
     handleAdd,
+    handleImport,
     handleEdit,
     handleSave,
     handleDelete,

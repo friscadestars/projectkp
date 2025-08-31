@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import * as XLSX from 'xlsx';
@@ -25,8 +25,9 @@ const TabelRiwayatPengiriman = () => {
     localStorage.setItem(DELETED_ORDER_KEY, JSON.stringify(deletedOrderIds));
   }, [deletedOrderIds]);
 
-  // Filter orders: tampilkan semua kecuali yang dihapus
-  const filteredOrders = initialOrders.filter(o => !deletedOrderIds.includes(o.orderId));
+  const filteredOrders = initialOrders.filter(
+    o => !deletedOrderIds.includes(`${o.orderId}-${o.distributorId}`)
+  );
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
@@ -70,7 +71,7 @@ const TabelRiwayatPengiriman = () => {
     });
 
     if (result.isConfirmed) {
-      setDeletedOrderIds(prev => [...prev, orderId]);
+      setDeletedOrderIds(prev => [...prev, `${orderId}-${row.distributorId}`]);
       Swal.fire({
         title: 'Terhapus!',
         text: 'Riwayat order berhasil dihapus dari tampilan.',
@@ -79,6 +80,32 @@ const TabelRiwayatPengiriman = () => {
       });
     }
   };
+
+  const handleFilterDate = (start, end) => {
+    setDateFilter({ start, end });
+  };
+
+  const [dateFilter, setDateFilter] = useState({ start: null, end: null });
+
+  const displayedOrders = useMemo(() => {
+    let data = filteredOrders;
+
+    if (dateFilter.start || dateFilter.end) {
+      const startDate = dateFilter.start ? new Date(dateFilter.start) : null;
+      const endDate = dateFilter.end ? new Date(dateFilter.end) : null;
+
+      data = data.filter(order => {
+        if (!order.deliveryDate) return true; // tampilkan jika deliveryDate null
+        const orderDate = new Date(order.deliveryDate);
+        if (isNaN(orderDate)) return true; // tampilkan jika invalid date
+        if (startDate && orderDate < startDate) return false;
+        if (endDate && orderDate > endDate) return false;
+        return true;
+      });
+    }
+
+    return data;
+  }, [filteredOrders, dateFilter]);
 
   const columns = [
     { header: 'No', key: 'no', render: (_, __, index) => index + 1 },
@@ -109,7 +136,7 @@ const TabelRiwayatPengiriman = () => {
           </button>
           <button
             className="bg-red-600 text-white font-bold px-3 py-1 rounded"
-            onClick={() => handleDelete(row.orderId)}
+            onClick={() => handleDelete(row.orderId, row.distributorId)}
           >
             Hapus
           </button>
@@ -123,14 +150,15 @@ const TabelRiwayatPengiriman = () => {
       <FilterBarRiwayat
         entries={entries}
         onEntriesChange={setEntries}
+        onFilterDate={handleFilterDate}
         onExportExcel={handleExportExcel}
       />
 
       <div className="mt-4">
         <ReusableTable
           columns={columns}
-          data={[...filteredOrders]
-            .sort((a, b) => new Date(b.receivedDate) - new Date(a.receivedDate))
+          data={[...displayedOrders]
+            .sort((a, b) => new Date(b.receivedDate || 0) - new Date(a.receivedDate || 0))
             .slice(0, entries)
           }
           footer={

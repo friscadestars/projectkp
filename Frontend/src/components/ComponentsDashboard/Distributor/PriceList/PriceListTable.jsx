@@ -102,7 +102,7 @@ const PriceListTable = ({
                         onChange={(e) => handleInputChange(row.id, 'harga', e.target.value)}
                     />
                 ) : (
-                    `Rp. ${Number(value).toLocaleString('id-ID')}`
+                    `Rp ${Number(value).toLocaleString('id-ID')}`
                 )
         }
     ];

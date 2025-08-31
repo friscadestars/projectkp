@@ -87,6 +87,28 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabri
         XLSX.writeFile(workbook, 'riwayat_order.xlsx');
     };
 
+    const handleFilterDate = (start, end) => {
+        if (!start && !end) {
+            setFilteredOrders(orders);
+            return;
+        }
+
+        const startDate = start ? new Date(start) : null;
+        const endDate = end ? new Date(end) : null;
+
+        const filtered = orders.filter(order => {
+            const orderDate = new Date(order.orderDate);
+            if (isNaN(orderDate)) return false;
+
+            if (startDate && orderDate < startDate) return false;
+            if (endDate && orderDate > endDate) return false;
+
+            return true;
+        });
+
+        setFilteredOrders(filtered);
+    };
+
     const columns = [
         {
             header: 'No',
@@ -156,7 +178,7 @@ const RiwayatOrderContent = ({ entries, onEntriesChange, orders, onDelete, pabri
             <FilterBarRiwayat
                 entries={entries}
                 onEntriesChange={onEntriesChange}
-                onFilterDate={() => { }}
+                onFilterDate={handleFilterDate}
                 onExportExcel={handleExportExcel}
             />
 
