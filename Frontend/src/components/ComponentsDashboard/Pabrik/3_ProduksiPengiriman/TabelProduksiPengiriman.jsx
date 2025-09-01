@@ -271,7 +271,15 @@ const TableProduksiPengiriman = () => {
   ];
 
   const dataWithIndex = orders
-    .filter(order => order.statusPengiriman !== 'Diterima')
+    .filter(order => {
+      const invoiceInfo = invoiceExistMap[order.id];
+      const statusPembayaran = (invoiceInfo?.status || '').toLowerCase();
+
+      if (statusPembayaran === 'paid' && order.statusPengiriman === 'Diterima') {
+        return false;
+      }
+      return true;
+    })
     .map((order, idx) => ({
       ...order,
       no: idx + 1,

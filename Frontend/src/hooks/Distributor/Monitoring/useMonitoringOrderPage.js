@@ -29,11 +29,22 @@ export const useMonitoringOrderPage = () => {
                 const allOrders = await fetchOrders();
                 console.log("DEBUG ORDERS dari API ===>", allOrders);
 
-                // filter status, bukan invoice
                 setOrders(
-                    allOrders.filter((o) =>
-                        allowedStatuses.includes((o.status || '').toLowerCase())
-                    )
+                    allOrders.filter((o) => {
+                        const status = (o.status || '').toLowerCase();
+                        const paymentStatus = (o.statusPembayaran || '').toLowerCase();
+                        const invoiceExist = o.invoiceExist === true || o.invoiceId != null;
+
+                        // Order masuk jika masih proses normal
+                        if (allowedStatuses.includes(status)) return true;
+
+                        // Order delivered tetap ditampilkan jika invoice belum dibuat atau pembayaran belum paid
+                        if (['delivered', 'diterima'].includes(status)) {
+                            return !invoiceExist || paymentStatus !== 'paid';
+                        }
+
+                        return false;
+                    })
                 );
             } catch (e) {
                 setErr(e.message || 'Gagal memuat orders');

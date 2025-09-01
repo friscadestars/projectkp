@@ -12,7 +12,7 @@ import { useAuth } from '../../../Context/AuthContext';
 import Swal from 'sweetalert2';
 
 export const useMonitoringAgenPage = () => {
-    const { token: ctxToken, user } = useAuth(); // <-- pastikan user punya id (distributor_id)
+    const { token: ctxToken, user } = useAuth();
     const distributorId = user?.id;
     const [searchTerm, setSearchTerm] = useState('');
     const [agenList, setAgenList] = useState([]);
@@ -152,7 +152,7 @@ export const useMonitoringAgenPage = () => {
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#16a34a',
-            cancelButtonColor: '#d33', // abu-abu
+            cancelButtonColor: '#d33',
             confirmButtonText: 'Ya, Hapus',
             cancelButtonText: 'Batal',
         });

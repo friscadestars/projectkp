@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../Context/AuthContext"; // ✅ PENTING
+import { useAuth } from "../../Context/AuthContext";
 
 export default function MasukForm() {
   const [selectedRole, setSelectedRole] = useState("Agen");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth(); // ✅ Ambil dari context
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,19 +40,19 @@ export default function MasukForm() {
         return;
       }
 
-      // ✅ Simpan ke context (AuthProvider)
+      // Simpan ke context (AuthProvider)
       login(user, token);
 
       // Navigasi
       switch (user.role) {
         case "agen":
-          navigate("/berandaAgen");
+          navigate("/agen/dashboard-agen");
           break;
         case "distributor":
-          navigate("/berandaDistributor");
+          navigate("/distributor/dashboard-distributor");
           break;
         case "pabrik":
-          navigate("/berandaPabrik");
+          navigate("/pabrik/dashboard-pabrik");
           break;
         default:
           alert("Role tidak dikenali!");
