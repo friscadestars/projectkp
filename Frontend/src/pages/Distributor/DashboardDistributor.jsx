@@ -11,15 +11,15 @@ const DashboardDistributor = () => {
 
     return (
         <Layout
-    menuItems={distributorMenuItems}
-    activeLabel="Dashboard"
-    showDropdown={showDropdown}
-    toggleDropdown={() => setShowDropdown(prev => !prev)}
-    onNavigate={handleNavigation}
-    role="distributor" 
->
-    <DashboardDistributorContent />
-</Layout>
+            menuItems={distributorMenuItems}
+            activeLabel="Dashboard"
+            showDropdown={showDropdown}
+            toggleDropdown={() => setShowDropdown(prev => !prev)}
+            onNavigate={handleNavigation}
+            role="distributor"
+        >
+            <DashboardDistributorContent />
+        </Layout>
 
     );
 };
