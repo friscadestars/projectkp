@@ -21,8 +21,6 @@ export const usePabrikPriceListForDistributorPage = () => {
 
     const { handleNavigation } = useNavigation(distributorMenuItems);
     const { user } = useAuth();
-
-    // Nonaktifkan fungsi jika bukan role pabrik
     const isPabrik = user?.role === 'pabrik';
 
     return {

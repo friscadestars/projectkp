@@ -6,7 +6,7 @@ import { fetchOrderById } from '../../../services/ordersApi';
 import Swal from 'sweetalert2';
 
 export const useKirimOrderDetail = () => {
-    const { orderCode } = useParams(); // <== ambil ord-xxx
+    const { orderCode } = useParams();
     const navigate = useNavigate();
     const { handleNavigation } = useNavigation(distributorMenuItems);
 

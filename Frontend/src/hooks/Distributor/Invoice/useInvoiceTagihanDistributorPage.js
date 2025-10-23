@@ -1,4 +1,3 @@
-// src/hooks/Distributor/Invoice/useInvoiceTagihanDistributorPage.js
 import { useNavigation } from '../../../hooks/useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';
 import useInvoiceData from './useInvoiceData';

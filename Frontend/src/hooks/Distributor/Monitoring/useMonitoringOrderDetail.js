@@ -1,11 +1,10 @@
-// src/hooks/Distributor/Monitoring/useMonitoringOrderDetail.js
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { fetchOrderDetailById } from '../../../services/ordersApi';
 
 export const useMonitoringOrderDetail = () => {
-    const { orderId } = useParams(); // ini numeric (id) dari url
+    const { orderId } = useParams();
     const navigate = useNavigate();
 
     const [order, setOrder] = useState(null);

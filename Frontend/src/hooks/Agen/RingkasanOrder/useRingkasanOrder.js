@@ -61,7 +61,7 @@ const useRingkasanOrder = () => {
             } catch (error) {
                 console.error('Gagal mengambil data order:', error);
             } finally {
-                setLoading(false); // selesai fetch
+                setLoading(false);
             }
         };
 

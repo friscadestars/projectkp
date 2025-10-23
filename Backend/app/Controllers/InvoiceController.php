@@ -44,7 +44,6 @@ class InvoiceController extends ResourceController
             return $this->failNotFound('Invoice tidak ditemukan');
         }
 
-        // Ambil user login dari session (misalnya pakai JWT atau session CI4)
         $user = $this->getUserFromToken();
         if (!$user || !isset($user['id'])) {
             return $this->failUnauthorized('User tidak terautentikasi');
@@ -52,7 +51,6 @@ class InvoiceController extends ResourceController
 
         $loggedAgenId = $user['id'];
 
-        // Validasi apakah invoice ini milik agen yang login
         if (
             $invoice['agen_id'] != $loggedAgenId &&
             $invoice['distributor_id'] != $loggedAgenId &&
@@ -63,7 +61,6 @@ class InvoiceController extends ResourceController
 
         $db = \Config\Database::connect();
 
-        // Ambil invoice_items dan join ke order_items
         $items = $db->table('invoice_items')
             ->select('invoice_items.*, order_items.product_name as name, pp.harga as unitPrice')
             ->join('order_items', 'order_items.id = invoice_items.order_item_id')
@@ -72,7 +69,6 @@ class InvoiceController extends ResourceController
             ->get()
             ->getResultArray();
 
-        // Ambil order
         $order = $db->table('orders o')
             ->select('o.*, u.name as agen_name')
             ->join('users u', 'u.id = o.agen_id', 'left')
@@ -92,7 +88,6 @@ class InvoiceController extends ResourceController
                 ->getRowArray();
         }
 
-        // Masukkan ke invoice agar bisa dibaca frontend
         $invoice['pengirim_bank'] = $pengirim;
 
         return $this->respond([
@@ -114,7 +109,7 @@ class InvoiceController extends ResourceController
         $db = \Config\Database::connect();
         $builder = $db->table('users');
         $builder->where('id', $data['agen_id']);
-        $builder->where('created_by', $data['distributor_id']); // agen milik distributor
+        $builder->where('created_by', $data['distributor_id']);
 
         $agent = $builder->get()->getRow();
 
@@ -122,11 +117,9 @@ class InvoiceController extends ResourceController
             return $this->fail('Agen tidak valid atau bukan milik distributor ini');
         }
 
-        // Simpan invoice (jangan hapus order_id, hanya order_item_ids saja yang dihapus)
         $invoiceData = $data;
-        unset($invoiceData['order_item_ids']); // hanya hilangkan order_item_ids
+        unset($invoiceData['order_item_ids']);
 
-        // Validasi jika order_id tidak disertakan
         if (!isset($invoiceData['order_id'])) {
             return $this->failValidationErrors('Order ID wajib disertakan');
         }
@@ -170,7 +163,6 @@ class InvoiceController extends ResourceController
             ]);
         }
 
-        // Simpan ke invoice_items
         if (!empty($data['order_item_ids'])) {
             $invoiceItems = [];
             $orderItemsTable = $db->table('order_items');
@@ -185,7 +177,6 @@ class InvoiceController extends ResourceController
                     'order_item_id' => $item['id'],
                     'quantity'      => $item['quantity'],
                     'unit_price'    => $item['unit_price'],
-                    // 'unit_price'    => $hargaPabrik,
                 ];
             }
 
@@ -257,26 +248,22 @@ class InvoiceController extends ResourceController
 
     public function confirmPayment($id = null)
     {
-        // Pastikan ID invoice ada
         if (!$id) {
             return $this->fail('ID invoice tidak ditemukan');
         }
 
-        // Cari invoice berdasarkan ID
         $invoice = $this->model->find($id);
         if (!$invoice) {
             return $this->failNotFound('Invoice tidak ditemukan');
         }
 
-        // Perbarui status invoice di database menjadi 'paid'
         $data = [
             'status' => 'waiting_confirmation',
-            'payment_date' => date('Y-m-d H:i:s'), // Opsional: catat waktu pembayaran
+            'payment_date' => date('Y-m-d H:i:s'),
         ];
 
         $this->model->update($id, $data);
 
-        // Ambil data invoice dan order setelah update
         $invoice = $this->model->find($id);
 
         $orderModel = new \App\Models\OrderModel();
@@ -287,7 +274,6 @@ class InvoiceController extends ResourceController
 
         $agenId = $invoice['agen_id'] ?? $order['agen_id'] ?? null;
 
-        // Notifikasi ke agen bahwa pembayaran diterima
         if ($agenId) {
             $notifModel->insert([
                 'user_id'    => $agenId,
@@ -525,7 +511,7 @@ class InvoiceController extends ResourceController
             case 'distributor':
                 $prefix = "INV/" . date('Ymd') . "/";
                 $filterField = 'distributor_id';
-                $extraWhere = ['agen_id IS NOT NULL']; // tetap pakai filter untuk distributor
+                $extraWhere = ['agen_id IS NOT NULL'];
                 break;
             case 'pabrik':
                 $prefix = "INVPBR/" . date('Ymd') . "/";

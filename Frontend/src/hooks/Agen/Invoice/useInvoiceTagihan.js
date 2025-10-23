@@ -1,5 +1,3 @@
-// src/hooks/useInvoiceTagihan.js
-
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Swal from 'sweetalert2';
@@ -15,7 +13,6 @@ const useInvoiceTagihan = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
-    // 🔹 Helper: mapping status backend ke label UI
     const mapStatusToLabel = (status) => {
         switch (status?.toLowerCase()) {
             case 'paid':
@@ -41,7 +38,6 @@ const useInvoiceTagihan = () => {
                 const tagihan = location.state.tagihan;
                 const statusPembayaran = mapStatusToLabel(tagihan.status);
 
-                // Ambil user pengirim (dari distributor_id atau pabrik_id)
                 const senderId = tagihan.distributorId || tagihan.distributor_id;
                 let pengirim = null;
 
@@ -92,7 +88,6 @@ const useInvoiceTagihan = () => {
 
                     const statusPembayaran = mapStatusToLabel(invoice.status);
 
-                    // Ambil user pengirim
                     const senderId = invoice.distributorId || invoice.distributor_id || invoice.pabrikId || invoice.pabrik_id;
                     let pengirim = null;
 
@@ -174,7 +169,6 @@ const useInvoiceTagihan = () => {
 
             const result = await response.json();
 
-            // 🔥 Update objek invoiceData sesuai respon backend
             setInvoiceData(prevData => {
                 if (!prevData) return null;
 

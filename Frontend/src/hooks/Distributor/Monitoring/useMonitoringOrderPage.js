@@ -1,8 +1,6 @@
-// src/hooks/Distributor/Monitoring/useMonitoringOrderPage.js
 import { useEffect, useMemo, useState } from 'react';
 import { fetchOrders } from '../../../services/ordersApi';
 
-// Hanya status tertentu yang ditampilkan
 const allowedStatuses = ['approved', 'processing', 'shipped', 'produced'];
 
 export const toLabel = (status) => {
@@ -35,10 +33,8 @@ export const useMonitoringOrderPage = () => {
                         const paymentStatus = (o.statusPembayaran || '').toLowerCase();
                         const invoiceExist = o.invoiceExist === true || o.invoiceId != null;
 
-                        // Order masuk jika masih proses normal
                         if (allowedStatuses.includes(status)) return true;
 
-                        // Order delivered tetap ditampilkan jika invoice belum dibuat atau pembayaran belum paid
                         if (['delivered', 'diterima'].includes(status)) {
                             return !invoiceExist || paymentStatus !== 'paid';
                         }

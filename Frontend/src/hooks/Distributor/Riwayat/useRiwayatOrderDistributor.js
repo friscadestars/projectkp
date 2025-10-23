@@ -2,14 +2,13 @@ import { useEffect, useState } from 'react';
 import { fetchCompletedOrdersForHistory } from '../../../services/ordersApi';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
-const LOCAL_STORAGE_KEY = 'deletedDistributorOrderIds'; // gunakan key berbeda dari pabrik
+const LOCAL_STORAGE_KEY = 'deletedDistributorOrderIds';
 
 export const useRiwayatOrderDistributor = () => {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Ambil deleted order ids dari localStorage
     const getDeletedIds = () => {
         return JSON.parse(localStorage.getItem(LOCAL_STORAGE_KEY) || '[]');
     };
@@ -19,14 +18,13 @@ export const useRiwayatOrderDistributor = () => {
             try {
                 const result = await fetchCompletedOrdersForHistory('distributor');
 
-                // Jika jumlah order baru lebih besar dari sebelumnya, reset deletedIds
                 const deletedIds = getDeletedIds();
                 const maxDeletedId = Math.max(...deletedIds.map(Number), 0);
                 const maxOrderId = Math.max(...result.map(o => Number(o.id)), 0);
 
                 let validDeletedIds = deletedIds;
                 if (maxOrderId > maxDeletedId) {
-                    validDeletedIds = []; // reset deletedIds karena data baru muncul
+                    validDeletedIds = [];
                     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([]));
                 }
 
@@ -49,7 +47,6 @@ export const useRiwayatOrderDistributor = () => {
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            // simpan ke localStorage supaya tetap hilang di UI
             const deletedIds = getDeletedIds();
             if (!deletedIds.includes(String(id))) {
                 localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify([...deletedIds, String(id)]));

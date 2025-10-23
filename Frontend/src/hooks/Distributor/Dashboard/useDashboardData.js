@@ -20,19 +20,16 @@ export const useDashboardData = () => {
         return new Date(parts[2], parts[1] - 1, parts[0]);
     };
 
-    // Standarisasi status
     const normalize = (status) => (status || '').toLowerCase();
 
     const orderMasuk = distributorOrders.filter((o) =>
         normalize(o.status) === 'pending'
     );
 
-    // Pengiriman: hanya shipped
     const orderDikirim = distributorOrders.filter(
         (o) => normalize(o.status) === 'shipped'
     );
 
-    // Order Selesai: delivered atau diterima
     const orderSelesai = distributorOrders.filter((o) =>
         ['delivered', 'diterima'].includes(normalize(o.status))
     );

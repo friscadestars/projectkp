@@ -1,4 +1,3 @@
-// src/hooks/Distributor/Monitoring/useMonitoringAgenPage.js
 import { useEffect, useState } from 'react';
 import {
     fetchAgentsByDistributor,
@@ -181,7 +180,6 @@ export const useMonitoringAgenPage = () => {
                 icon: 'error',
             });
 
-            // rollback
             setAgenList(prevState);
         }
     };

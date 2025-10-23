@@ -5,14 +5,12 @@ import { useAuth } from './AuthContext';
 const OrderContext = createContext();
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
-/* Ubah format backend jadi DD/MM/YYYY */
 const toUiDate = (str) => {
     if (!str) return '';
     const d = new Date(str.replace(' ', 'T'));
     return isNaN(d) ? '' : d.toLocaleDateString('id-ID');
 };
 
-/* Normalisasi status dari backend */
 const normalizeStatus = (status) => {
     const map = {
         'Menunggu Validasi': 'pending',
@@ -27,7 +25,6 @@ const normalizeStatus = (status) => {
     return map[status] || status?.toLowerCase();
 };
 
-/* Sorting orders terbaru */
 const sortOrders = (orders) => {
     return [...orders].sort((a, b) => {
         const dateA = a.orderDate ? new Date(a.orderDate.split('/').reverse().join('-')) : new Date(0);
@@ -88,8 +85,7 @@ export const OrderProvider = ({ children }) => {
                     quantity: p.quantity ?? p.jumlah ?? 0,
                 })),
             }))
-            // Filter hanya milik distributor yang login
-            // .filter(order => String(order.distributorId) === String(userId));
+
             const filtered = normalized.filter(order => {
                 const role = (user.role || '').toLowerCase();
                 const idStr = String(userId);
@@ -98,7 +94,7 @@ export const OrderProvider = ({ children }) => {
                 if (role === 'distributor') return String(order.distributorId) === idStr;
                 if (role === 'pabrik') return String(order.pabrikId) === idStr;
 
-                return true; // admin/unknown role, lihat semua
+                return true;
             });
 
             const sorted = sortOrders(filtered);
@@ -114,7 +110,6 @@ export const OrderProvider = ({ children }) => {
 
             setOrdersMasukPabrik(sorted.filter(order =>
                 ['approved'].includes(order.status)
-                //order.status === 'approved' && (order.pabrikId === null || order.pabrikId === undefined)
             ));
 
         } catch (error) {
@@ -293,15 +288,6 @@ export const OrderProvider = ({ children }) => {
             throw error;
         }
     };
-
-    // const updateOrderStatusInContext = (orderId, newStatus) => {
-    //     updateOrder(orderId, (order) => ({
-    //         ...order,
-    //         status: newStatus,
-    //     }));
-    // };
-
-    // Rabu 
 
     const updateOrderStatusInContext = (orderId, newStatus, extraFields = {}) => {
         setOrders((prevOrders) =>

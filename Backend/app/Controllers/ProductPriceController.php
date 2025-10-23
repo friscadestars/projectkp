@@ -10,11 +10,10 @@ class ProductPriceController extends ResourceController
     protected $modelName = ProductPriceModel::class;
     protected $format    = 'json';
 
-    // GET /api/prices
     public function index()
     {
-        $role = $this->request->getGet('role'); // contoh: distributor
-        $distributorId = $this->request->getGet('distributor_id'); // contoh: 5
+        $role = $this->request->getGet('role');
+        $distributorId = $this->request->getGet('distributor_id');
 
         $query = $this->model->orderBy('id', 'DESC');
 
@@ -30,12 +29,10 @@ class ProductPriceController extends ResourceController
         return $this->respond($data);
     }
 
-    // POST /api/prices
     public function create()
     {
         $data = $this->request->getJSON(true);
 
-        // Map field nama dan kode
         if (isset($data['nama'])) {
             $data['nama_produk'] = $data['nama'];
             unset($data['nama']);
@@ -45,12 +42,10 @@ class ProductPriceController extends ResourceController
             unset($data['kode']);
         }
 
-        // Default role
         if (!isset($data['role'])) {
             $data['role'] = 'distributor';
         }
 
-        // Pastikan distributor_id ikut disimpan jika role-nya distributor
         if ($data['role'] === 'distributor') {
             if (!isset($data['distributor_id'])) {
                 return $this->failValidationErrors('distributor_id wajib diisi untuk role distributor');
@@ -64,14 +59,12 @@ class ProductPriceController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // GET /api/prices/{id}
     public function show($id = null)
     {
         $data = $this->model->find($id);
         return $data ? $this->respond($data) : $this->failNotFound('Data tidak ditemukan');
     }
 
-    // PUT /api/prices/{id}
     public function update($id = null)
     {
         $data = $this->request->getJSON(true);
@@ -92,7 +85,6 @@ class ProductPriceController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // DELETE /api/prices/{id}
     public function delete($id = null)
     {
         if ($this->model->delete($id)) {

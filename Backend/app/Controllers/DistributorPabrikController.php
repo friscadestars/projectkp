@@ -49,12 +49,11 @@ class DistributorPabrikController extends ResourceController
         $rows    = $adModel->where('pabrik_id', (int) $pabrikId)->findAll();
 
         if (!$rows) {
-            return $this->respond([]); // tidak ada distributor untuk pabrik ini
+            return $this->respond([]);
         }
 
         $distributorIds = array_map('intval', array_column($rows, 'distributor_id'));
 
-        // Ambil data distributor dari tabel users
         $userModel = new UserModel();
         $distributors = $userModel
             ->select('id, name, email, no_telp, rekening, nama_rekening, nama_bank, alamat, is_active')
@@ -62,7 +61,6 @@ class DistributorPabrikController extends ResourceController
             ->where('role', 'distributor')
             ->findAll();
 
-        // Ambil tanggal order terakhir per distributor dari tabel orders
         $db        = \Config\Database::connect();
         $lastRows  = $db->table('orders')
             ->select('distributor_id, MAX(order_date) AS last_order_date')
@@ -71,13 +69,11 @@ class DistributorPabrikController extends ResourceController
             ->get()
             ->getResultArray();
 
-        // Map: distributor_id -> last_order_date
         $lastOrderMap = [];
         foreach ($lastRows as $r) {
             $lastOrderMap[(int) $r['distributor_id']] = $r['last_order_date'];
         }
 
-        // Sisipkan last_order_date ke tiap distributor
         foreach ($distributors as &$a) {
             $a['last_order_date'] = $lastOrderMap[(int) $a['id']] ?? null;
         }

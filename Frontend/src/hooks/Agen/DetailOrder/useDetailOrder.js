@@ -6,7 +6,7 @@ import { getOrderPageInfo } from '../../../utils/Agen/InfoDetailOrder';
 import { fetchOrderDetailById } from '../../../services/ordersApi';
 
 export const useDetailOrderPage = () => {
-    const { id } = useParams(); // ✅ Ganti dari orderId ke id
+    const { id } = useParams();
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [err, setErr] = useState(null);
@@ -21,7 +21,7 @@ export const useDetailOrderPage = () => {
             try {
                 setLoading(true);
 
-                const result = await fetchOrderDetailById(id); // ✅ ambil dari ID global
+                const result = await fetchOrderDetailById(id);
 
                 const user = JSON.parse(localStorage.getItem('user') || '{}');
                 const agenId = user?.id;
@@ -30,7 +30,6 @@ export const useDetailOrderPage = () => {
                 console.log('DEBUG: agenId dari localStorage:', agenId);
                 console.log('🎯 result dari fetchOrderDetailById:', result);
 
-                // ✅ Validasi: hanya agen yang memiliki ID sesuai yang bisa akses
                 if (Number(result.agentId) !== Number(agenId)) {
                     throw new Error('Anda tidak memiliki akses ke order ini.');
                 }

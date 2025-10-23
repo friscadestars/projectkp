@@ -16,7 +16,6 @@ const useOrderFormState = ({ agentId, distributorInfo, orders, onSuccess }) => {
   const [alamat, setAlamat] = useState("");
   const [lastOrderId, setLastOrderId] = useState(null);
 
-  // Set alamat otomatis dari user login
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('user')) || {};
     if (user.alamat) {

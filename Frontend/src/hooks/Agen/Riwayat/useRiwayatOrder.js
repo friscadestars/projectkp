@@ -27,12 +27,10 @@ const useRiwayatOrder = () => {
                 if (mounted) {
                     let deletedIds = getDeletedIds();
 
-                    // Hanya simpan deletedIds yang tidak ada di data terbaru
                     let validDeletedIds = deletedIds.filter(
                         (id) => !data.some(order => String(order.orderId) === String(id))
                     );
-
-                    // Reset deletedIds jika ada order baru dengan ID sama atau lebih besar
+                    ar
                     const maxDeletedId = Math.max(...deletedIds.map(Number), 0);
                     const maxOrderId = Math.max(...data.map(o => Number(o.orderId)), 0);
                     if (maxOrderId > maxDeletedId) {
@@ -69,7 +67,6 @@ const useRiwayatOrder = () => {
         });
 
         if (result.isConfirmed) {
-            // Simpan ID yang dihapus ke localStorage
             const deletedIds = getDeletedIds();
             if (!deletedIds.includes(id)) {
                 localStorage.setItem(
@@ -78,7 +75,6 @@ const useRiwayatOrder = () => {
                 );
             }
 
-            // Hapus dari state (UI)
             setOrders((prev) => prev.filter((o) => o.orderId !== id));
 
             await Swal.fire({

@@ -49,7 +49,6 @@ const useInvoiceData = (url, fallbackPath = '/') => {
                     rekening: '-',
                 };
 
-                // Ambil data order
                 let fullOrder = null;
                 const orderId = invoice.order_id;
                 if (orderId) {
@@ -64,7 +63,6 @@ const useInvoiceData = (url, fallbackPath = '/') => {
                     }
                 }
 
-                // Ambil data agen
                 let agen = null;
                 if (fullOrder?.agen_id) {
                     const resAgen = await fetch(`${BASE_URL}/users/${fullOrder.agen_id}`, {
@@ -79,7 +77,6 @@ const useInvoiceData = (url, fallbackPath = '/') => {
                     }
                 }
 
-                // Ambil data distributor
                 let distributor = null;
                 if (fullOrder?.distributor_id) {
                     const resDistributor = await fetch(`${BASE_URL}/users/${fullOrder.distributor_id}`, {

@@ -13,17 +13,14 @@ export const checkInvoiceExist = async (orderId) => {
 
         if (!res.ok) return false;
 
-        // Case 1: API balikin { exists: true/false }
         if (typeof json.exists !== "undefined") {
             return Boolean(json.exists);
         }
 
-        // Case 2: Array invoice
         if (Array.isArray(json)) {
             return json.length > 0;
         }
 
-        // Case 3: Object invoice tunggal
         if (json && typeof json === "object") {
             return Boolean(json.id || json.invoice_id);
         }
@@ -219,7 +216,6 @@ export async function updateOrderStatus(
     return res.json();
 }
 
-// Update harga produk dalam order (by ID)
 export async function updateOrderItemPrice(id, productName, price) {
     const response = await fetch(`${API_BASE}/orders/${id}/update-item-price`, {
         method: 'PUT',
@@ -254,10 +250,8 @@ export async function fetchPabrikPrices() {
         const json = await res.json();
         const data = json.data || json;
 
-        // Filter hanya data dengan role 'pabrik'
         const pabrikOnly = data.filter((item) => item.role === 'pabrik');
 
-        // Ubah menjadi format { 'produk a': harga }
         return pabrikOnly.reduce((acc, item) => {
             acc[item.nama_produk.toLowerCase().trim()] = item.harga;
             return acc;
@@ -302,7 +296,6 @@ export async function fetchOrdersForDashboard() {
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     const agenId = user?.id;
 
-    // Pastikan array & filter hanya milik agen yang login
     const arr = Array.isArray(raw) ? raw : [];
 
     return arr
@@ -328,7 +321,6 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
 
     const DONE = new Set(['delivered', 'selesai', 'rejected', 'cancelled']);
 
-    // Fungsi normalisasi status
     const normalizeStatus = (status) => {
         const map = {
             'Menunggu Validasi': 'pending',
@@ -343,7 +335,6 @@ export async function fetchCompletedOrdersForHistory(role = 'agen') {
         return map[status] || status?.toLowerCase();
     };
 
-    // Debug log isi data
     console.log({ raw, userId, role, DONE });
     raw.forEach(o => {
         console.log("Order Debug:", {
@@ -449,8 +440,6 @@ export const fetchAgentIdByName = async (agenName, distributorId) => {
     return data?.id ?? null;
 };
 
-// Disini
-// Ambil data monitoring orders (pabrik lihat approved, processing, shipped)
 export async function fetchMonitoringOrders() {
     const res = await fetch(`${API_BASE}/orders/monitoring`, {
         headers: {
@@ -462,10 +451,9 @@ export async function fetchMonitoringOrders() {
     return res.json();
 }
 
-// Update status order
 export async function updateMonitoringOrderStatus(orderId, status) {
     const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
-        method: 'PATCH', // bisa PATCH atau PUT
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
             ...getAuthHeader(),
@@ -476,7 +464,6 @@ export async function updateMonitoringOrderStatus(orderId, status) {
     return res.json();
 }
 
-// Agen konfirmasi pembayaran -> status jadi waiting_confirmation
 export async function confirmPaymentByAgent(invoiceId) {
     const res = await fetch(`${API_BASE}/invoices/${invoiceId}/confirm-payment`, {
         method: 'POST',

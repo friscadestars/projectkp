@@ -29,7 +29,6 @@ class OrderController extends ResourceController
 
     public function index()
     {
-        //Ambil user dari token
         $authHeader = $this->request->getHeaderLine('Authorization');
         if (!$authHeader || !preg_match('/Bearer\s(\S+)/', $authHeader, $matches)) {
             return $this->failUnauthorized('Token tidak ditemukan.');
@@ -62,7 +61,6 @@ class OrderController extends ResourceController
             return $this->respond([]);
         }
 
-        // Ambil semua item untuk order yang ada
         $orderIds = array_column($orders, 'id');
         $items = $this->orderItemModel
             ->whereIn('order_id', $orderIds)
@@ -73,7 +71,6 @@ class OrderController extends ResourceController
             $grouped[$item['order_id']][] = $item;
         }
 
-        // Ambil semua user id dari list order
         $userIds = [];
         foreach ($orders as $order) {
             if (!empty($order['agen_id'])) $userIds[] = (int) $order['agen_id'];
@@ -107,12 +104,11 @@ class OrderController extends ResourceController
         $invoiceModel = new \App\Models\InvoiceModel();
         $invoices = $invoiceModel
             ->whereIn('order_id', $orderIds)
-            ->where('pabrik_id', null)             // exclude pabrik
-            ->where('agen_id !=', null)            // agen wajib ada
-            ->where('distributor_id !=', null)     // distributor wajib ada
+            ->where('pabrik_id', null)
+            ->where('agen_id !=', null)
+            ->where('distributor_id !=', null)
             ->findAll();
 
-        // Petakan invoice berdasarkan order_id
         $invoiceMap = [];
         foreach ($invoices as $inv) {
             if (!empty($inv['agen_id']) && !empty($inv['distributor_id']) && empty($inv['pabrik_id'])) {
@@ -126,7 +122,6 @@ class OrderController extends ResourceController
         foreach ($orders as &$order) {
             unset($order['invoiceExist'], $order['invoiceId'], $order['statusPembayaran']);
 
-            // set default baru
             $order['invoiceId'] = null;
             $order['statusPembayaran'] = null;
             $order['invoiceExist'] = false;
@@ -215,7 +210,6 @@ class OrderController extends ResourceController
             $agen = $userModel->find($order['agen_id']);
             $distributor = $userModel->find($order['distributor_id']);
 
-            // kembalikan nama, dan hapus id jika tidak ingin ditampilkan
             $order['agen'] = $agen['name'] ?? 'Agen tidak dikenal';
             $order['distributor'] = $distributor['name'] ?? 'Distributor tidak dikenal';
             $order['agen_id'] = $order['agen_id'];
@@ -224,7 +218,6 @@ class OrderController extends ResourceController
 
             $notifModel = new NotificationModel();
 
-            // Notifikasi untuk Distributor
             if (!empty($order['distributor_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['distributor_id'],
@@ -236,7 +229,6 @@ class OrderController extends ResourceController
                 ]);
             }
 
-            // Notifikasi untuk Agen (konfirmasi bahwa pesanan berhasil dibuat)
             if (!empty($order['agen_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['agen_id'],
@@ -248,7 +240,6 @@ class OrderController extends ResourceController
                 ]);
             }
 
-            // Notifikasi untuk Pabrik (jika sudah ditentukan sejak awal)
             if (!empty($order['pabrik_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['pabrik_id'],
@@ -269,12 +260,11 @@ class OrderController extends ResourceController
             return $this->failServerError($e->getMessage());
         }
 
-        $productPriceModel = new ProductPriceModel(); // buat instansiasi model
+        $productPriceModel = new ProductPriceModel();
 
         foreach ($products as $p) {
             $harga = $p['harga'] ?? $p['unit_price'] ?? 0;
 
-            // cek jika role adalah pabrik → ambil harga dari tabel product_prices
             if (isset($orderData['pabrik_id'])) {
                 $kodeProduk = $p['kode'] ?? $p['kode_produk'] ?? null;
 
@@ -286,7 +276,7 @@ class OrderController extends ResourceController
                         ->first();
 
                     if ($hargaData) {
-                        $harga = $hargaData['harga']; // override harga
+                        $harga = $hargaData['harga'];
                     }
                 }
             }
@@ -404,11 +394,9 @@ class OrderController extends ResourceController
                 'diterima'          => 'Diterima',
             ];
 
-            // Normalisasi & ambil terjemahan
             $statusKey = strtolower(trim($payload['status']));
             $statusIndo = $statusMap[$statusKey] ?? $payload['status'];
 
-            // Notif ke agen
             if (!empty($order['agen_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['agen_id'],
@@ -420,7 +408,6 @@ class OrderController extends ResourceController
                 ]);
             }
 
-            // Notif ke distributor
             if (!empty($order['distributor_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['distributor_id'],
@@ -432,7 +419,6 @@ class OrderController extends ResourceController
                 ]);
             }
 
-            // Notif ke pabrik
             if (!empty($order['pabrik_id'])) {
                 $notifModel->insert([
                     'user_id'    => $order['pabrik_id'],
@@ -609,7 +595,6 @@ class OrderController extends ResourceController
             $hargaMapJual[$orderId] += $hargaJual * $qty;
         }
 
-        // Gabungkan semua ke dalam data order
         foreach ($orders as &$order) {
             $items = $groupedItems[$order['id']] ?? [];
 
@@ -630,7 +615,7 @@ class OrderController extends ResourceController
     {
         $db = \Config\Database::connect();
 
-        // Ambil detail order
+        // Detail order
         $order = $db->table('orders o')
             ->select('o.*, 
               i.status AS invoice_status, 
@@ -647,13 +632,13 @@ class OrderController extends ResourceController
             return $this->failNotFound("Order dengan ID $id tidak ditemukan.");
         }
 
-        // Ambil items
+        // items
         $items = $db->table('order_items')
             ->where('order_id', $id)
             ->get()
             ->getResultArray();
 
-        // Ambil harga pabrik terbaru
+        // harga pabrik
         $kodeProdukUnik = array_unique(array_column($items, 'kode_produk'));
         $hargaProdukMap = [];
         foreach ($kodeProdukUnik as $kode) {
@@ -672,7 +657,6 @@ class OrderController extends ResourceController
             }
         }
 
-        // Hitung total harga pabrik dan jual
         $totalHargaPabrik = 0;
         $totalHargaJual = 0;
 
@@ -688,7 +672,6 @@ class OrderController extends ResourceController
             $totalHargaJual += $hargaJual * $qty;
         }
 
-        // Masukkan data tambahan seperti di getRiwayatOrders
         $order['items'] = $items;
         $order['totalHargaPabrik'] = $totalHargaPabrik;
         $order['hargaJual'] = $totalHargaJual;
@@ -735,9 +718,9 @@ class OrderController extends ResourceController
         $invoiceModel = new \App\Models\InvoiceModel();
         $invoices = $invoiceModel
             ->whereIn('order_id', array_column($orders, 'order_id'))
-            ->where('pabrik_id', null)             // exclude pabrik
-            ->where('agen_id !=', null)            // agen wajib ada
-            ->where('distributor_id !=', null)     // distributor wajib ada
+            ->where('pabrik_id', null)
+            ->where('agen_id !=', null)
+            ->where('distributor_id !=', null)
             ->findAll();
 
         $invoiceMap = [];
@@ -766,7 +749,6 @@ class OrderController extends ResourceController
         return $this->respond($orders);
     }
 
-    // Tambahan untuk update status order dari pabrik
     public function updateOrderStatus($orderId)
     {
         $db = \Config\Database::connect();

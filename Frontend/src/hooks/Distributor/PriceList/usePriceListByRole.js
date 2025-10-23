@@ -90,7 +90,6 @@ export const usePriceListByRole = (role, userId) => {
 
     const handleImport = async (rows) => {
         try {
-            // rows = array hasil dari Excel
             for (const r of rows) {
                 if (!r["Nama Produk"] || !r["Kode Produk"] || !r["Harga"]) continue;
 

@@ -6,7 +6,7 @@ class DashboardController extends BaseController
 {
     public function index()
     {
-        $role = session('role'); // atau bisa dari token jika pakai auth
+        $role = session('role');
 
         switch ($role) {
             case 'agen':

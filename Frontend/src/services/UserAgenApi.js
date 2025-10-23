@@ -5,7 +5,6 @@ const withAuth = (token) => ({
     Authorization: `Bearer ${token}`
 });
 
-// helper tambahan agar aman saat res tidak memiliki body JSON
 const safeJson = async (res) => {
     const text = await res.text();
     if (!text) return {};
@@ -51,7 +50,6 @@ export const updateAgent = async (id, data, token) => {
         throw new Error(err.message || 'Gagal update agen');
     }
 
-    // bisa saja controller hanya mengembalikan message, maka kita amankan
     const json = await safeJson(res);
     return json;
 };
@@ -72,11 +70,9 @@ export const deleteAgent = async (id, token) => {
         throw new Error(err.message || 'Gagal menghapus agen');
     }
 
-    // DELETE kadang tidak mengembalikan JSON
     return await safeJson(res);
 };
 
-// src/services/distributor/UserAgenApi.js
 export const setActiveAgent = async (id, isActive, token) => {
     if (!token) throw new Error('Token tidak ditemukan');
 

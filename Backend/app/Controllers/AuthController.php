@@ -43,7 +43,6 @@ class AuthController extends ResourceController
             'distributor' => 'agen'
         ];
 
-        // Cek apakah creator berhak membuat user
         if (!isset($roleHierarchy[$creatorRole])) {
             return $this->failForbidden('Role Anda tidak memiliki izin untuk mendaftarkan user.');
         }
@@ -83,15 +82,13 @@ class AuthController extends ResourceController
             'rekening'       => $data['noRekening'],
             'nama_bank'      => $data['namaBank'] ?? null,
             'alamat'         => $data['alamat'] ?? null,
-            'created_by'     => $creatorId // <- inilah yang menghubungkan siapa yang buat user ini
+            'created_by'     => $creatorId
         ];
 
         $this->userModel->insert($userData);
 
-        // >>> TAMBAHAN: ambil ID user yang baru dibuat
         $newUserId = $this->userModel->getInsertID();
 
-        // >>> TAMBAHAN: auto-insert ke distributor_pabrik jika pabrik mendaftarkan distributor
         if ($creatorRole === 'pabrik' && $allowedRole === 'distributor') {
             $distributorPabrikModel = new \App\Models\DistributorPabrikModel();
             $distributorPabrikModel->insert([
@@ -101,11 +98,7 @@ class AuthController extends ResourceController
             ]);
         }
 
-
-        // >>> TAMBAHAN: auto-insert ke agent_distributor jika
-        // distributor mendaftarkan agen (sesuai roleHierarchy yang ada sekarang)
         if ($creatorRole === 'distributor' && $allowedRole === 'agen') {
-            // gunakan FQCN agar tidak perlu menambah "use" di atas
             $agentDistributorModel = new \App\Models\AgentDistributorModel();
             $agentDistributorModel->insert([
                 'agent_id'       => (int) $newUserId,
@@ -125,7 +118,6 @@ class AuthController extends ResourceController
     {
         $data = $this->request->getJSON(true);
 
-        // Validasi input
         if (!$data || !isset($data['email'], $data['password'])) {
             return $this->failValidationErrors('Email dan password wajib diisi');
         }
@@ -140,17 +132,14 @@ class AuthController extends ResourceController
             return $this->failUnauthorized('Akun Anda sedang tidak aktif. Silakan hubungi admin.');
         }
 
-        // Verifikasi password
         if (!password_verify($data['password'], $user['password'])) {
             return $this->failUnauthorized('Password salah');
         }
 
-        // Ambil secret key dari .env
         $secretKey = getenv('JWT_SECRET') ?: 'default_key';
         $issuedAt  = time();
-        $expire    = $issuedAt + 3600; // Token berlaku 1 jam
+        $expire    = $issuedAt + 3600;
 
-        // Payload token
         $payload = [
             'iss' => 'ci4',
             'aud' => 'reactjs',
@@ -163,10 +152,8 @@ class AuthController extends ResourceController
             ]
         ];
 
-        // Encode token
         $token = JWT::encode($payload, $secretKey, 'HS256');
 
-        // Response
         return $this->respond([
             'message' => 'Login berhasil',
             'token'   => $token,

@@ -1,5 +1,4 @@
-// src/hooks/Distributor/PriceList/useDistributorPriceListPage.js
-import { usePriceListByRole } from './usePriceListByRole'; // path disesuaikan
+import { usePriceListByRole } from './usePriceListByRole';
 import iconHarga from '../../../assets/IconHeader/HargaIcon.png';
 import { useNavigation } from '../../useNavigation';
 import { distributorMenuItems } from '../../../components/ComponentsDashboard/Constants/menuItems';

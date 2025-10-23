@@ -10,14 +10,12 @@ class RiwayatOrderController extends ResourceController
     protected $modelName = RiwayatOrderModel::class;
     protected $format = 'json';
 
-    // GET: /api/riwayat
     public function index()
     {
         $data = $this->model->findAll();
         return $this->respond($data);
     }
 
-    // POST: /api/riwayat
     public function create()
     {
         $data = $this->request->getJSON(true);
@@ -27,14 +25,12 @@ class RiwayatOrderController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // GET: /api/riwayat/{id}
     public function show($id = null)
     {
         $data = $this->model->find($id);
         return $data ? $this->respond($data) : $this->failNotFound('Data tidak ditemukan');
     }
 
-    // PUT: /api/riwayat/{id}
     public function update($id = null)
     {
         $data = $this->request->getJSON(true);
@@ -44,7 +40,6 @@ class RiwayatOrderController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // DELETE: /api/riwayat/{id}
     public function delete($id = null)
     {
         if ($this->model->delete($id)) {

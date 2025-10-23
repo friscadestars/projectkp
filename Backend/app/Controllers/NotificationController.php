@@ -10,7 +10,6 @@ class NotificationController extends ResourceController
     protected $modelName = NotificationModel::class;
     protected $format    = 'json';
 
-    // GET all notifications or by user_id
     public function index()
     {
         $userId = $this->request->getGet('user_id');
@@ -24,7 +23,6 @@ class NotificationController extends ResourceController
         return $this->respond($this->model->findAll());
     }
 
-    // POST new notification
     public function create()
     {
         $data = $this->request->getJSON(true);
@@ -36,7 +34,6 @@ class NotificationController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // PUT/PATCH mark as read
     public function update($id = null)
     {
         $data = $this->request->getJSON(true);
@@ -57,7 +54,6 @@ class NotificationController extends ResourceController
         return $this->failValidationErrors($this->model->errors());
     }
 
-    // DELETE
     public function delete($id = null)
     {
         if ($this->model->delete($id)) {
